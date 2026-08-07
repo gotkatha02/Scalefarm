@@ -243,11 +243,18 @@ body{font-family:var(--body);font-size:15px;line-height:1.55;color:var(--ink);
 
 /* ---------- แผงตัวที่เลือก (ซ้ายล่าง) ---------- */
 #selBox{position:fixed;left:calc(14px + var(--pad));bottom:14px;z-index:70;
-  width:min(430px, calc(100vw - 96px))}
+  width:min(430px, calc(100vw - 96px));
+  max-height:calc(100dvh - 96px);max-height:calc(100vh - 96px)}
+/* การ์ดยาวเกินจอเมื่อไหร่ ให้เลื่อนในตัวเอง ไม่ให้ล้นออกนอกจอจนกดปิดไม่ได้ */
+.selscroll{max-height:calc(100dvh - 128px);max-height:calc(100vh - 128px);
+  overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin}
+.selscroll::-webkit-scrollbar{width:5px}
+.selscroll::-webkit-scrollbar-thumb{background:#CFE3D4;border-radius:99px}
 .sel{padding:13px 15px;background:#FFFFFFEE;border:2px solid #fff;border-radius:18px;
   box-shadow:0 6px 20px #2E4A3D2E;backdrop-filter:blur(8px)}
 .hintcard{background:#FFFFFFE0;border:2px solid #fff;border-radius:18px;box-shadow:0 6px 20px #2E4A3D26}
-.sel h3{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 2px}
+.sel h3{font-family:var(--display);font-weight:600;font-size:17px;margin:0 0 2px;padding-right:34px}
 .sel .sub{font-size:12.5px;color:var(--dim);margin:0 0 9px}
 .xpbig{height:13px;border-radius:99px;background:#EDF4ED;overflow:hidden;margin-bottom:5px}
 .xpbig i{display:block;height:100%;background:linear-gradient(90deg,#F6C445,#F0A93C);transition:width .4s}
@@ -275,9 +282,10 @@ body{font-family:var(--body);font-size:15px;line-height:1.55;color:var(--ink);
 .nt{flex:1;height:6px;border-radius:99px;background:#EFE6CC;overflow:hidden}
 .nt i{display:block;height:100%;background:linear-gradient(90deg,#F6C445,#E8944A);transition:width .3s}
 .food.fine{border-color:#E7C05A;background:#FFFCF2}
-.food .fn{display:block;font-size:9.5px;color:#8A6A1C;line-height:1.35;margin-top:2px;max-width:190px;white-space:normal}
+.food .fn{display:block;font-size:9.5px;color:#8A6A1C;line-height:1.3;margin-top:2px;white-space:normal}
 .nurchip{color:#8A4A1C;background:#FFF3E8;border-color:#F0C9A4}
-.foods{display:flex;gap:7px;flex-wrap:wrap}
+.foods{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;align-items:stretch}
+.foods .food{width:100%;text-align:left}
 .food{font-family:var(--body);font-size:12.5px;background:#F7FBF7;border:2px solid var(--line);
   color:var(--ink);border-radius:13px;padding:7px 12px;cursor:pointer;text-align:left;transition:transform .1s}
 .food:hover:not(:disabled){transform:translateY(-2px);border-color:var(--grass)}
@@ -422,7 +430,8 @@ h2 + h2{margin-top:20px}
 @keyframes wiggle{0%,72%,100%{transform:rotate(0)}80%{transform:rotate(-7deg)}88%{transform:rotate(7deg)}}
 .rail .badge.rdy{background:#7FD3A6;color:#14432E}
 .sel{position:relative}
-.xbtn{position:absolute;top:6px;right:6px;z-index:3;width:30px;height:30px;border-radius:11px;
+.xbtn{position:absolute;top:6px;right:6px;z-index:6;width:34px;height:34px;border-radius:12px;
+  box-shadow:0 2px 8px #2E4A3D22;
   border:2px solid var(--line);background:#FFFFFFEE;color:var(--dim);font-size:14px;line-height:1;
   display:grid;place-items:center;cursor:pointer;font-family:var(--display)}
 .xbtn:active{transform:scale(.92)}
@@ -2727,7 +2736,8 @@ function renderSel(){
   const sp = SP[c.sid], n = NT[c.nature];
   const pct = clamp(c.exp / EXP_NEED * 100, 0, 100);
   const avgQ = c.expTotal > 0 ? (c.qSum / c.expTotal) : 0;
-  box.innerHTML = `<div class="sel"><button class="xbtn" id="selClose" aria-label="ปิด">✕</button><div class="row">
+  box.innerHTML = `<div class="sel"><button class="xbtn" id="selClose" aria-label="ปิด">✕</button>
+    <div class="selscroll"><div class="row">
     <div class="who">
       <h3>${sp.name}${c.shiny ? ` ✨ <span style="font-size:12px;color:var(--plum)">${shinyName(c)} ${shinyOf(c).h}°</span>` : ''}</h3>
       <p class="sub">${sp.el}${c.el2 ? ` / ${c.el2}` : ''} · ${n.emoji} ${n.name} · ${c.stage === 'baby' ? 'ลูกเกล็ด' : 'โตเต็มวัย'}${
@@ -2793,7 +2803,7 @@ function renderSel(){
           ${canAwake(c) ? "" : "disabled"}>✦ ปลุกพลังเป็นระดับ ${lv + 1}</button></div>`;
       })() : ''}
     </div>
-  </div></div>`;
+  </div></div></div>`;
   const ab = $('#btnAwake'); if(ab) ab.onclick = awake;
   const fb2 = $('#btnFuse'); if(fb2) fb2.onclick = fuse;
   $('#selClose').onclick = () => {                    // ปิดการ์ด กลับไปดูเกล็ดเดินเล่น

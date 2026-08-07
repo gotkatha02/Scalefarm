@@ -247,18 +247,29 @@ body{font-family:var(--body);font-size:15px;line-height:1.55;color:var(--ink);
 .pill{background:#FFFFFFE8;border:2px solid #fff;border-radius:999px;padding:3px 13px;box-shadow:0 4px 14px #2E4A3D1F}
 .pill.coin{border-color:var(--sun);color:#A97C05;background:#FFF7E2F2}
 .pens{display:flex;gap:6px;flex-wrap:wrap;max-width:min(62vw,520px)}
+.pens button{white-space:nowrap}
 .pens button{font-family:var(--display);font-weight:600;font-size:13px;background:#FFFFFFE8;
   border:2px solid #fff;color:var(--dim);border-radius:999px;padding:4px 13px;cursor:pointer;box-shadow:0 4px 14px #2E4A3D1F}
 .pens button[aria-pressed=true]{background:#FFF7E2;border-color:var(--sun);color:#A97C05}
 
 /* ---------- แถบเมนูขอบขวา ---------- */
 .rail{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:80;
-  display:flex;flex-direction:column;gap:9px}
-.rail button{width:56px;height:56px;border-radius:19px;background:#FFFFFFE8;border:2px solid #fff;
+  display:flex;flex-direction:column;gap:7px}
+.rail button{width:52px;height:52px;border-radius:17px;background:#FFFFFFE8;border:2px solid #fff;
   box-shadow:0 6px 18px #2E4A3D2B;cursor:pointer;display:grid;place-items:center;gap:0;
   font-family:var(--display);font-weight:600;font-size:10px;color:var(--dim);line-height:1.1;transition:transform .12s}
 .rail button:hover{transform:translateX(-3px)}
-.rail button em{font-style:normal;font-size:21px;display:block}
+.rail button em{font-style:normal;font-size:19px;display:block}
+@media (max-height:760px){
+  .rail button{width:46px;height:46px;border-radius:15px;font-size:9px}
+  .rail button em{font-size:17px}
+  .rail{gap:5px}
+}
+@media (max-height:640px){
+  .rail button{width:42px;height:42px;border-radius:13px;font-size:8px}
+  .rail button em{font-size:15px}
+  .rail{gap:4px}
+}
 .rail button[aria-selected=true]{background:var(--grass);border-color:var(--grass2);color:#fff}
 .rail .badge{position:absolute;margin:-34px 0 0 32px;background:var(--sun);color:#4A3A08;
   border-radius:999px;font-size:10px;padding:0 5px;font-weight:700}
@@ -518,6 +529,19 @@ h2 + h2{margin-top:20px}
 @keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
 .dexbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .pill.fest{border-color:#F0B5A6;color:#A34C4C;background:#FFF4F0F2}
+.penrow{display:flex;gap:8px;align-items:stretch;background:#F7FBF7;border:2px solid var(--line);
+  border-radius:15px;padding:8px 10px;margin-bottom:7px}
+.penrow.on{border-color:var(--grass);background:#EBF7EF;box-shadow:0 0 0 2px #5FB57C33}
+.pengo{flex:1;min-width:0;text-align:left;background:none;border:none;cursor:pointer;
+  font-family:var(--display);color:inherit;padding:0;display:flex;flex-direction:column;gap:1px}
+.pengo b{font-size:13.5px}
+.pengo .pl2{font-size:10.5px;color:var(--dim);line-height:1.45}
+.pengo .pdec{font-size:13px;margin-top:2px}
+.penact{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.penact .ic{width:34px;height:30px;border-radius:9px;border:2px solid var(--line);background:#fff;
+  cursor:pointer;font-size:13px;line-height:1;display:grid;place-items:center}
+.penact .ic.off{opacity:.35}
+.penact small{font-size:9px;color:var(--grass2)}
 .matbar{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-bottom:11px}
 .mat{background:#F7FBF7;border:2px solid var(--line);border-radius:12px;padding:6px 8px;text-align:center}
 .mat.ok{border-color:var(--grass2);background:#EFF9F2}
@@ -726,6 +750,8 @@ h2 + h2{margin-top:20px}
 <nav class="rail" role="tablist">
   <button role="tab" aria-selected="true" data-tab="field"><em>🌿</em>ทุ่ง</button>
   <button role="tab" aria-selected="false" data-tab="shop"><em>🥚</em>ร้านค้า<span class="badge hide" id="nestBadge">0</span></button>
+  <button role="tab" aria-selected="false" data-tab="pen"><em>🏡</em>ทุ่ง</button>
+  <button role="tab" aria-selected="false" data-tab="nest"><em>🥚</em>ฟักไข่<span class="badge hide" id="nestBadge2">0</span></button>
   <button role="tab" aria-selected="false" data-tab="boss"><em>⚔️</em>บอส<span class="badge hide" id="bossBadge">!</span></button>
   <button role="tab" aria-selected="false" data-tab="breed"><em>💞</em>ผสมพันธุ์<span class="badge hide" id="breedBadge">!</span></button>
   <button role="tab" aria-selected="false" data-tab="trip"><em>🧭</em>ลาดตระเวน<span class="badge hide" id="tripBadge">!</span></button>
@@ -734,41 +760,80 @@ h2 + h2{margin-top:20px}
 </nav>
 
 <aside class="drawer" id="tab-shop">
-  <h2>ร้านตุ้ยนุ้ย</h2>
-  <p class="note" style="margin:0 0 10px">ซื้อแล้วได้ลูกตุ้ยนุ้ยลงทุ่งทันที ไม่ต้องอุ่นไข่
-    ตัวยิ่งแพงยิ่งได้สายพันธุ์หายากและแนวโน้มดาวสูง · อยากได้ดาวสูงกว่านี้ต้องผสมพันธุ์เอา</p>
-  <div class="shop" id="shopList"></div>
-  <p class="pity" id="pityLine"></p>
-  <p class="note" id="workNote"></p>
-  <h2>🛒 ตลาดเร่</h2>
-  <div class="shop" id="mktList"></div>
-  <div class="foot" style="margin:8px 0 0"><button class="btn ghost sm" id="btnMktRoll">🔄</button></div>
-  <p class="note" id="mktNote"></p>
-  <h2>ร้านผงตุ้ยนุ้ย <span style="color:var(--dim);font-weight:400">💠 <span id="dustCount">0</span></span></h2>
-  <p class="note" style="margin:0 0 10px" id="wxNote"></p>
-  <p class="note" style="margin:0 0 10px">ผงตุ้ยนุ้ยได้จากการปล่อยตุ้ยนุ้ยกลับป่า ยิ่งดาวสูงยิ่งได้เยอะ ตัวไชนี่ได้สามเท่า
-    · <span id="workerLine"></span></p>
-  <div class="foot" style="margin:0 0 10px"><button class="btn ghost sm" id="btnDupes">ปล่อยตัวซ้ำดาวต่ำทั้งหมด</button></div>
-  <div class="shop" id="dustList"></div>
-  <h2>🏞 ฉากทุ่ง</h2>
-  <p class="note" id="sceneNote" style="margin:0 0 10px"></p>
-  <div class="shop" id="sceneList"></div>
-  <h2>🎁 กล่องของตกแต่ง</h2>
-  <p class="note" id="decNote" style="margin:0 0 10px"></p>
-  <div class="foot" style="margin:0 0 10px">
-    <button class="btn sun sm" id="decDraw1">หมุน 1</button>
-    <button class="btn sm" id="decDraw10">หมุน 10</button>
+  <div class="dexbar" id="shopMode">
+    <button class="dtab big" data-shop="mon">🐣 ตุ้ยนุ้ย</button>
+    <button class="dtab big" data-shop="mkt">🛒 ตลาดเร่</button>
+    <button class="dtab big" data-shop="dust">💠 ผงตุ้ยนุ้ย</button>
+    <button class="dtab big" data-shop="scene">🏞 ฉากทุ่ง</button>
+    <button class="dtab big" data-shop="dec">🎁 ของตกแต่ง</button>
   </div>
-  <h3 class="dsub" id="decSlots"></h3>
-  <div class="dchips" id="decPlaced"></div>
-  <div class="dexbar" id="decFilter"></div>
-  <div class="dgrid" id="decBag"></div>
-  <h2>🏠 โรงฟักไข่</h2>
-  <p class="note" id="nurseryNote" style="margin:0 0 10px"></p>
-  <div class="shop" id="nurseryList"></div>
-  <h2>รังฟักไข่ — จากผสมพันธุ์ บอส ลาดตระเวน และกล่องสมบัติ <span id="nestCount" style="color:var(--dim);font-weight:400"></span></h2>
+
+  <div id="shopMon">
+    <h2>ร้านตุ้ยนุ้ย</h2>
+    <p class="note" style="margin:0 0 10px">ซื้อแล้วได้ลูกตุ้ยนุ้ยลงทุ่งทันที ไม่ต้องอุ่นไข่
+      ตัวยิ่งแพงยิ่งได้สายพันธุ์หายากและแนวโน้มดาวสูง · อยากได้ดาวสูงกว่านี้ต้องผสมพันธุ์เอา</p>
+    <div class="shop" id="shopList"></div>
+    <p class="pity" id="pityLine"></p>
+    <p class="note" id="workNote"></p>
+  </div>
+
+  <div id="shopMkt">
+    <h2>🛒 ตลาดเร่</h2>
+    <div class="shop" id="mktList"></div>
+    <div class="foot" style="margin:8px 0 0"><button class="btn ghost sm" id="btnMktRoll">🔄</button></div>
+    <p class="note" id="mktNote"></p>
+  </div>
+
+  <div id="shopDust">
+    <h2>ร้านผงตุ้ยนุ้ย <span style="color:var(--dim);font-weight:400">💠 <span id="dustCount">0</span></span></h2>
+    <p class="note" style="margin:0 0 10px" id="wxNote"></p>
+    <p class="note" style="margin:0 0 10px">ผงตุ้ยนุ้ยได้จากการปล่อยตุ้ยนุ้ยกลับป่า ยิ่งดาวสูงยิ่งได้เยอะ ตัวไชนี่ได้สามเท่า
+      · <span id="workerLine"></span></p>
+    <div class="foot" style="margin:0 0 10px"><button class="btn ghost sm" id="btnDupes">ปล่อยตัวซ้ำดาวต่ำทั้งหมด</button></div>
+    <div class="shop" id="dustList"></div>
+  </div>
+
+  <div id="shopScene">
+    <h2>🏞 ฉากทุ่ง</h2>
+    <p class="note" id="sceneNote" style="margin:0 0 10px"></p>
+    <div class="shop" id="sceneList"></div>
+  </div>
+
+  <div id="shopDec">
+    <h2>🎁 กล่องของตกแต่ง</h2>
+    <p class="note" id="decNote" style="margin:0 0 10px"></p>
+    <div class="foot" style="margin:0 0 10px">
+      <button class="btn sun sm" id="decDraw1">หมุน 1</button>
+      <button class="btn sm" id="decDraw10">หมุน 10</button>
+    </div>
+    <h3 class="dsub" id="decSlots"></h3>
+    <div class="dchips" id="decPlaced"></div>
+    <div class="dexbar" id="decFilter"></div>
+    <div class="dgrid" id="decBag"></div>
+  </div>
+</aside>
+
+<aside class="drawer" id="tab-pen">
+  <h2>ทุ่งของฟาร์ม <span id="penSum" style="color:var(--dim);font-weight:400"></span></h2>
+  <p class="note" style="margin:0 0 10px">แตะที่ทุ่งเพื่อไปดู · ทุ่งแต่ละผืนตั้งฉากและวางของตกแต่งแยกกันได้
+    · ถ้าวาง 🪧 ป้ายชื่อฟาร์มไว้ในทุ่งไหน จะตั้งชื่อทุ่งนั้นเองได้</p>
+  <div id="penList"></div>
+  <div class="foot" style="margin:10px 0 0">
+    <button class="btn sun sm" id="btnNewPen"></button>
+    <button class="btn sm" id="btnCapUp"></button>
+  </div>
+  <p class="note" id="penNote"></p>
+</aside>
+
+<aside class="drawer" id="tab-nest">
+  <h2>รังฟักไข่ <span id="nestCount" style="color:var(--dim);font-weight:400"></span></h2>
+  <p class="note" style="margin:0 0 10px">ไข่มาจากผสมพันธุ์ · ไข่บอส · ลาดตระเวน · กล่องสมบัติ
+    (ตุ้ยนุ้ยจากร้านค้าได้ตัวเลย ไม่ผ่านรัง) · ไข่ต้องเข้าช่องอุ่นถึงจะเริ่มนับเวลา</p>
   <div class="foot" style="margin:0 0 10px"><button class="btn sm" id="btnAutoHatch">ฟักลงทุ่งให้เต็ม</button></div>
   <div class="shop" id="eggList"></div>
+  <h2 style="margin-top:18px">🏠 โรงฟักไข่</h2>
+  <p class="note" id="nurseryNote" style="margin:0 0 10px"></p>
+  <div class="shop" id="nurseryList"></div>
 </aside>
 
 <aside class="drawer" id="tab-boss">
@@ -1080,7 +1145,8 @@ const blank = () => ({ coins:150, lastTick:Date.now(), hatched:0, shinies:0,
   bag:{grass:0,fruit:0,cake:0}, team:[], diff:0, lastBoss:null, bossWins:0,
   trips:[], tripSel:[], tripRoute:null, bossTier:0, mktDay:null, mktBought:[], mktRoll:0,
   capBonus:0, decayCut:0, incLv:0, twinLv:0, farmName:null, born:null, bought:0,
-  mats:{core:0,star:0,pollen:0,shard:0}, myths:0, myA:null, myB:null, myPick:"A",
+  mats:{core:0,star:0,pollen:0,shard:0}, myths:0, myA:null, myB:null, myPick:"A", mythSeen:{},
+  penName:{},
   mgSel:[], mgFilter:"all", mgSort:"star", bookMode:"dex",
   dec:{}, penDec:{}, decTab:0,
   scenes:[], penScene:{},
@@ -1172,6 +1238,8 @@ function packSave(){
                 bag.grass, bag.fruit, bag.cake, S.slotBonus || 0].map(c36).join(",") + "," + (S.lastBoss || "") + "," +
     encodeURIComponent(S.farmName || "") + "," + c36(Math.round((S.born || Date.now())/60000)) + "," +
     MATS.map(m => c36(matOf(m.id))).join(".") + "," + c36(S.myths || 0) + "," +
+    LEGEND_LIST.map(s => (S.mythSeen || {})[s.id] ? "1" : "0").join("") + "," +
+    Object.keys(S.penName || {}).map(k => k + ":" + encodeURIComponent(S.penName[k])).join("~") + "," +
     [S.bossTier || 0, S.capBonus || 0, S.decayCut || 0,
      S.incLv || 0, S.twinLv || 0].map(c36).join(".");
 
@@ -1206,7 +1274,8 @@ function packSave(){
     e.inc ? c36(Math.max(1, Math.round((Date.now() - e.inc)/60000))) : "",
     e.bossId ? c36(BOSS_POOL.findIndex(b => b.id === e.bossId) + 1) : "",
     e.tal ? c36(TALENTS.findIndex(t => t.id === e.tal) + 1) : "",
-    e.el2 ? c36(ELEMENTS.indexOf(e.el2) + 1) : ""
+    e.el2 ? c36(ELEMENTS.indexOf(e.el2) + 1) : "",
+    e.lgEgg ? 1 : ""
   ].join(",")).join(";");
 
   const IDX = {}; (S.creatures || []).forEach((c, i) => IDX[c.id] = i);
@@ -1248,7 +1317,12 @@ function unpackSave(txt){
   if(m[16]){ const v = m[16].split("."); S2.mats = {};
     MATS.forEach((mm, i) => S2.mats[mm.id] = p36(v[i] || "0")); }
   S2.myths = m[17] ? p36(m[17]) : 0;
-  if(m[18]){ const x = m[18].split(".");
+  S2.mythSeen = {};
+  if(m[18]) LEGEND_LIST.forEach((s, i) => { if(m[18][i] === "1") S2.mythSeen[s.id] = true; });
+  S2.penName = {};
+  if(m[19]) m[19].split("~").filter(Boolean).forEach(x => {
+    const i = x.indexOf(":"); if(i > 0) S2.penName[x.slice(0, i)] = decodeURIComponent(x.slice(i+1)); });
+  if(m[20]){ const x = m[20].split(".");
     S2.bossTier = p36(x[0]); S2.capBonus = p36(x[1] || "0"); S2.decayCut = p36(x[2] || "0");
     S2.incLv = Math.min(INC_LV_MAX, p36(x[3] || "0"));
     S2.twinLv = Math.min(TWIN_LV_MAX, p36(x[4] || "0")); }
@@ -1300,6 +1374,7 @@ function unpackSave(txt){
     if(f[8]){ const bp = BOSS_POOL[p36(f[8]) - 1]; if(bp) e.bossId = bp.id; }
     if(f[9]){ const t = TALENTS[p36(f[9]) - 1]; if(t) e.tal = t.id; }
     if(f[10]){ const e2 = ELEMENTS[p36(f[10]) - 1]; if(e2) e.el2 = e2; }
+    if(f[11] === "1") e.lgEgg = true;
     return e;
   });
   S2.trips = (trips ? trips.split(";") : []).filter(Boolean).map(row => {
@@ -2035,10 +2110,27 @@ function moveTo(pen){
 }
 /* ---- เรือนผสมพันธุ์: ทางเดียวที่จะดันสายเลือดให้ดาวสูงขึ้น ---- */
 const BREED_COST = 400, BREED_CD = 3*3600*1000;      // พักหลังผสม 3 ชั่วโมง
+/* ผสมตำนานได้ แต่แพงกว่ามาก พักนานกว่า และต้องมีวัสดุ */
+const LG_BREED_COIN = 8000, LG_BREED_DUST = 800;
+const LG_BREED_MAT  = { core:3, shard:2 };
+const LG_BREED_CD   = 12*3600*1000;
+const LG_EGG_HRS    = 12;
+const isLegendPair = (a, b) => !!(a && b && SP[a.sid].legend && SP[b.sid].legend);
+function lgBreedLack(){
+  const out = [];
+  if(S.coins < LG_BREED_COIN) out.push(`🪙 ขาด ${LG_BREED_COIN - Math.floor(S.coins)}`);
+  if((S.dust || 0) < LG_BREED_DUST) out.push(`💠 ขาด ${LG_BREED_DUST - Math.floor(S.dust || 0)}`);
+  for(const k in LG_BREED_MAT)
+    if(matOf(k) < LG_BREED_MAT[k])
+      out.push(`${MAT[k].emoji} ${MAT[k].name} ขาด ${LG_BREED_MAT[k] - matOf(k)}`);
+  return out;
+}
 const MOM_CHANCE = 0.7;        // ลูกเหมือนแม่ 70% ที่เหลือเหมือนพ่อ
-const breedLeft = c => Math.max(0, BREED_CD * talG(c, "cd", 1)
+const breedLeft = c => Math.max(0,
+  (SP[c.sid] && SP[c.sid].legend ? LG_BREED_CD : BREED_CD) * talG(c, "cd", 1)
   * (c.pen != null ? decMul(c.pen, "breedCd") : 1) - (Date.now() - (c.bredAt || 0)));
-const breedReady = c => breedLeft(c) === 0 && !isLegend(c.sid);   // ตัวตำนานผสมพันธุ์ไม่ได้
+/* ตำนานผสมได้ อมตะผสมไม่ได้ (เป็นปลายทางของสายเลือด) */
+const breedReady = c => breedLeft(c) === 0 && !c.myth;
 function hhmm(ms){
   const m = Math.ceil(ms/60000);
   return m >= 60 ? `${Math.floor(m/60)} ชม. ${m%60} น.` : `${m} นาที`;
@@ -2049,12 +2141,26 @@ function breed(){
   if(!a || !b || a.id === b.id){ alert("เลือกพ่อพันธุ์กับแม่พันธุ์คนละตัว"); return; }
   if(!breedReady(a) || !breedReady(b)){ alert("ยังมีตัวที่พักอยู่ รอให้ครบเวลาก่อน"); return; }
   if(S.eggs.length >= NEST_MAX){ alert("รังเต็มแล้ว ฟักไข่ในรังก่อน"); return; }
-  if(S.coins < BREED_COST){ alert("เหรียญไม่พอ"); return; }
-  S.coins -= BREED_COST;
+  const lgPair = isLegendPair(a, b);
+  const oneLegend = !lgPair && (SP[a.sid].legend || SP[b.sid].legend);
+  if(oneLegend){ alert("ตำนานผสมได้กับตำนานด้วยกันเท่านั้น"); return; }
+  if(lgPair){
+    const lack = lgBreedLack();
+    if(lack.length){ alert("ยังขาด " + lack.join(" · ")); return; }
+    S.coins -= LG_BREED_COIN; S.dust -= LG_BREED_DUST;
+    for(const k in LG_BREED_MAT) S.mats[k] = matOf(k) - LG_BREED_MAT[k];
+  } else {
+    if(S.coins < BREED_COST){ alert("เหรียญไม่พอ"); return; }
+    S.coins -= BREED_COST;
+  }
   a.bredAt = b.bredAt = Date.now();
   const momSide = Math.random() < MOM_CHANCE;         // a = พ่อ · b = แม่
   let sid = momSide ? b.sid : a.sid, mut = false;
-  if(Math.random() < .12){ sid = pickByRarity(SP[sid].rarity); mut = true; }   // กลายพันธุ์
+  if(!lgPair && Math.random() < .12){ sid = pickByRarity(SP[sid].rarity); mut = true; }   // กลายพันธุ์
+  else if(lgPair && Math.random() < .10){                       // ตำนานก็กลายพันธุ์ได้ แต่อยู่ในบอสเดียวกัน
+    const pool = LEGEND_BY_BOSS[SP[sid].boss] || [];
+    if(pool.length){ sid = pick(pool).id; mut = true; }
+  }
   const avg = (a.stars + b.stars) / 2;
   const bonus = talG(a, "pull", 0) + talG(b, "pull", 0);                       // 🩸 สายเลือดดี
   const pull = Math.max(0, +(avg - STAR_BASE + bonus + rnd(-0.4, 0.4)).toFixed(2));
@@ -2079,6 +2185,7 @@ function breed(){
   }
 
   const egg = { sid, tier:2, rar:SP[sid].rarity, starPull:pull, nature, bred:true };
+  if(lgPair) egg.lgEgg = true;
   if(tal) egg.tal = tal;
   if(el2) egg.el2 = el2;
   S.eggs.push(egg);
@@ -2086,6 +2193,7 @@ function breed(){
        `${mut ? " (กลายพันธุ์!)" : momSide ? " (ข้างแม่)" : " (ข้างพ่อ)"}` +
        ` · แนวโน้มดาว ${(STAR_BASE + pull).toFixed(1)}` +
        `${tal ? ` · สืบพรสวรรค์ ${TAL[tal].emoji} ${TAL[tal].name}` : ""}`, "good");
+  if(lgPair) logf(`ไข่ตำนานต้องอุ่นถึง ${LG_EGG_HRS} ชั่วโมง และพ่อแม่พักอีก 12 ชั่วโมง`, "");
   sfx("egg"); S.brPick = "A";
   save(); render();
 }
@@ -2094,7 +2202,8 @@ const BR_TABS = [
   { id:"ready", name:"พร้อมผสม",    f: c => breedReady(c) },
   { id:"star",  name:"ดาว 4 ขึ้นไป", f: c => c.stars >= 4 },
   { id:"tal",   name:"มีพรสวรรค์",  f: c => !!c.tal },
-  { id:"shiny", name:"✨ ไชนี่",     f: c => !!c.shiny }
+  { id:"shiny", name:"✨ ไชนี่",     f: c => !!c.shiny },
+  { id:"lg",    name:"✦ ตำนาน",     f: c => !!SP[c.sid].legend }
 ];
 
 /* การ์ดพ่อแม่หนึ่งใบ */
@@ -2115,8 +2224,8 @@ function brSlot(c, side, active){
 function renderBreed(){
   const gone = awaySet();
   const all = S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id));
-  const adults = all.filter(c => !SP[c.sid].legend);      // ตำนานผสมไม่ได้ ไม่ต้องโชว์ให้สับสน
-  const nLegend = all.length - adults.length;
+  const adults = all.filter(c => !c.myth);                // อมตะเป็นปลายทาง ผสมต่อไม่ได้
+  const nMyth = all.length - adults.length;
   const box = $('#breedBox');
   const badge = $('#breedBadge');
   if(adults.length < 2){
@@ -2133,8 +2242,12 @@ function renderBreed(){
   const nReady = adults.filter(breedReady).length;
   badge.classList.toggle('hide', !(nReady >= 2 && S.coins >= BREED_COST && S.eggs.length < NEST_MAX));
 
-  const ok = a && b && a.id !== b.id && breedReady(a) && breedReady(b)
-             && S.coins >= BREED_COST && S.eggs.length < NEST_MAX;
+  const lgPair = isLegendPair(a, b);
+  const mixed  = a && b && !lgPair && (SP[a.sid].legend || SP[b.sid].legend);
+  const lgLack = lgPair ? lgBreedLack() : [];
+  const ok = a && b && a.id !== b.id && breedReady(a) && breedReady(b) && !mixed
+             && S.eggs.length < NEST_MAX
+             && (lgPair ? !lgLack.length : S.coins >= BREED_COST);
   const avg  = a && b ? (a.stars + b.stars) / 2 : 0;
   const bonus = (a ? talG(a, "pull", 0) : 0) + (b ? talG(b, "pull", 0) : 0);
   const pull = a && b ? Math.max(0, avg - STAR_BASE + bonus) : 0;
@@ -2167,6 +2280,9 @@ function renderBreed(){
       <div class="pl"><span>สายพันธุ์</span><b>${SP[b.sid].name} ${Math.round(MOM_CHANCE*88)}%
         · ${SP[a.sid].name} ${Math.round((1-MOM_CHANCE)*88)}% · กลายพันธุ์ 12%</b></div>
       <div class="pl"><span>พรสวรรค์</span><b>${talLine}</b></div>
+      ${lgPair ? `<div class="pl"><span>✦ ไข่ตำนาน</span><b>ลูกเป็นตำนานแน่นอน · กลายพันธุ์ 10% ในบอสเดียวกัน
+        · ใช้ 🪙${LG_BREED_COIN} 💠${LG_BREED_DUST} ${Object.keys(LG_BREED_MAT).map(k => MAT[k].emoji + LG_BREED_MAT[k]).join(" ")}</b></div>` : ''}
+      ${mixed ? `<div class="pl"><span>⚠️</span><b>ตำนานผสมได้กับตำนานด้วยกันเท่านั้น</b></div>` : ''}
       ${SP[a.sid].el !== SP[b.sid].el
         ? `<div class="pl"><span>ข้ามธาตุ</span><b>ลุ้น 🌗 สองธาตุ ${Math.round(TAL_DUAL_CHANCE*100)}%</b></div>` : ''}
       <div class="pl"><span>แนวโน้มดาว</span><b>${(STAR_BASE + pull).toFixed(2)}
@@ -2182,8 +2298,10 @@ function renderBreed(){
       <button class="btn sun" id="btnBreed" ${ok ? "" : "disabled"}>
         ${!a || !b ? "ยังเลือกไม่ครบ"
           : a.id === b.id ? "ต้องเป็นคนละตัว"
+          : mixed ? "ตำนานต้องคู่กับตำนาน"
           : !breedReady(a) || !breedReady(b) ? "ยังมีตัวพักอยู่"
           : S.eggs.length >= NEST_MAX ? "รังเต็มแล้ว"
+          : lgPair ? (lgLack.length ? "ยังขาด " + lgLack.join(" · ") : `✦ ผสมตำนาน · 🪙 ${LG_BREED_COIN}`)
           : S.coins < BREED_COST ? `เหรียญไม่พอ (ต้อง ${BREED_COST})`
           : `💞 ผสมพันธุ์ · 🪙 ${BREED_COST}`}</button>
       <button class="btn ghost sm" id="btnBrSwap">⇄ สลับพ่อแม่</button>
@@ -2203,9 +2321,10 @@ function renderBreed(){
           ${rest ? `<br>พัก ${hhmm(rest)}` : ""}</small></button>`;
     }).join('') : `<p class="empty" style="grid-column:1/-1">ไม่มีตัวไหนตรงเงื่อนไขนี้</p>`}</div>
 
-    <p class="note">พักหลังผสม 3 ชั่วโมง (💞 ไข่ดกเหลือครึ่งเดียว) · ตัวที่ออกลาดตระเวนอยู่ผสมไม่ได้
-      · ไข่สายเลือดใช้เวลาฟัก 3 ชม.${
-      nLegend ? `<br>✦ ตัวตำนาน ${nLegend} ตัวไม่ได้อยู่ในรายการนี้ เพราะผสมพันธุ์ไม่ได้ ใช้ปลุกพลังแทน` : ""}</p>`;
+    <p class="note">พักหลังผสม 3 ชั่วโมง · ✦ ตำนานพัก ${LG_EGG_HRS} ชั่วโมง (💞 ไข่ดกลดครึ่ง)
+      · ไข่สายเลือดฟัก 3 ชม. · ✦ ไข่ตำนานฟัก ${LG_EGG_HRS} ชม.
+      · ตำนานผสมได้เฉพาะกับตำนานด้วยกัน และต้องมีวัสดุ${
+      nMyth ? `<br>✧ อมตะ ${nMyth} ตัวไม่อยู่ในรายการ เพราะเป็นปลายทางของสายเลือดแล้ว` : ""}</p>`;
 
   box.querySelectorAll('[data-slot]').forEach(el =>
     el.onclick = () => { S.brPick = el.dataset.slot; sfx("tap"); renderBreed(); });
@@ -2484,7 +2603,7 @@ function renderNursery(){
 const slotsOf = () => Math.min(SLOT_MAX, SLOT_BASE + (S.slotBonus || 0));
 const hatchMs = e => {
   const it = SHOP.find(s => s.tier === e.tier);
-  const hrs = e.bred ? 3 : it ? it.hrs : (e.rar === 3 ? 2 : 0.35);
+  const hrs = e.lgEgg ? LG_EGG_HRS : e.bred ? 3 : it ? it.hrs : (e.rar === 3 ? 2 : 0.35);
   return Math.max(60000, hrs * 3600000 * incSpeed() * festFx("hatch", 1) * decGlobal("hatch", "mul"));     // อย่างน้อยหนึ่งนาที
 };
 const incProg = e => e.inc ? clamp((Date.now() - e.inc) / hatchMs(e), 0, 1) : 0;
@@ -2964,6 +3083,8 @@ function synthMyth(){
   S.creatures.push(c);
   S.seen[c.sid] = true;
   S.myths = (S.myths || 0) + 1;
+  S.mythSeen = S.mythSeen || {};
+  S.mythSeen[c.sid] = true;
   S.myA = null; S.myB = null;
   S.curPen = room; S.selId = c.id;
   logf(`✧ สังเคราะห์สำเร็จ — อมตะ${SP[c.sid].name} ${starStr(c.stars)} · พลังรวม ${c.bs.total}`, "good");
@@ -3113,7 +3234,8 @@ function statBlocks(){
       ["✨ ไชนี่ที่เจอ", `${S.shinies || 0} ตัว` +
         (S.hatched ? ` (${((S.shinies||0)/S.hatched*100).toFixed(2)}%)` : "")],
       ["✦ ตำนานที่ได้", `${S.legends || 0} ตัว`],
-      ["✧ อมตะที่สังเคราะห์", `${S.myths || 0} ตัว`],
+      ["✧ อมตะที่สังเคราะห์", `${S.myths || 0} ตัว` +
+        ` (${Object.keys(S.mythSeen || {}).length} สายพันธุ์)`],
       ["วัสดุในคลัง", MATS.map(m => `${m.emoji}${matOf(m.id)}`).join(" ")],
       ["มีพรสวรรค์", `${cre.filter(c => c.tal).length} ตัว`],
       ["ดาวที่ครอบครอง", stars.map((n,i) => n ? `${i+1}★×${n}` : "").filter(Boolean).join(" · ") || "—"],
@@ -3748,25 +3870,88 @@ function renderBoss(){
 /* ---- แสดงผล ---- */
 function switchTab(name){
   document.querySelectorAll('.rail button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
-  ['shop','boss','breed','trip','book','log'].forEach(t => document.getElementById('tab-'+t).classList.toggle('open', t === name));
+  ['pen','shop','nest','boss','breed','trip','book','log'].forEach(t => document.getElementById('tab-'+t).classList.toggle('open', t === name));
 }
 document.querySelector('.rail').onclick = e => {
   const b = e.target.closest('button'); if(b){ sfx("tap"); switchTab(b.dataset.tab); } };
 
+/* ชื่อทุ่ง ตั้งได้เมื่อวาง 🪧 ป้ายชื่อฟาร์มไว้ในทุ่งนั้น */
+const penNamed = p => decPlaced(p).indexOf("sign") >= 0;
+const penName  = p => (S.penName && S.penName[p]) || `ทุ่งที่ ${p+1}`;
+function setPenName(p){
+  if(!penNamed(p)){ alert("ต้องวาง 🪧 ป้ายชื่อฟาร์มในทุ่งนี้ก่อนถึงจะตั้งชื่อได้"); return; }
+  const v = prompt("ตั้งชื่อทุ่งนี้ (ไม่เกิน 20 ตัวอักษร)", penName(p));
+  if(v == null) return;
+  S.penName = S.penName || {};
+  const t = v.trim().slice(0, 20);
+  if(t) S.penName[p] = t; else delete S.penName[p];
+  sfx("buy"); save(); render();
+}
+
+/* แถบบนหัวจอเหลือแค่ปุ่มเดียว บอกทุ่งที่อยู่ กดแล้วเปิดแท็บทุ่ง */
 function renderPenTabs(){
-  let h = '';
-  for(let i = 0; i < S.penCount; i++)
-    h += `<button aria-pressed="${i===S.curPen}" data-pen="${i}">ทุ่งที่ ${i+1} · ${penCount(i)}/${penCap()}</button>`;
-  if(PEN_PRICE[S.penCount])
-    h += `<button data-newpen="1" ${S.coins < PEN_PRICE[S.penCount] ? 'disabled style="opacity:.45"' : ''}>+ เปิดทุ่งใหม่ 🪙${PEN_PRICE[S.penCount]}</button>`;
-  const cp = capPrice();
-  if(cp != null)
-    h += `<button data-cap="1" ${S.coins < cp ? 'disabled style="opacity:.45"' : ''}>+ ขยายทุ่งทุกผืน เป็น ${penCap()+PEN_CAP_STEP} ตัว 🪙${cp}</button>`;
-  $('#penTabs').innerHTML = h;
-  $('#penTabs').querySelectorAll('[data-pen]').forEach(b => b.onclick = () => {
-    S.curPen = +b.dataset.pen; S.selId = null; save(); render(); });
-  const np = $('#penTabs').querySelector('[data-newpen]'); if(np) np.onclick = buyPen;
-  const cb = $('#penTabs').querySelector('[data-cap]'); if(cb) cb.onclick = buyCap;
+  const p = S.curPen;
+  $('#penTabs').innerHTML =
+    `<button aria-pressed="true" data-openpen="1">🏡 ${penName(p)} · ${penCount(p)}/${penCap()}` +
+    `${S.penCount > 1 ? ` <small style="opacity:.75">(${p+1}/${S.penCount})</small>` : ''}</button>`;
+  const b = $('#penTabs').querySelector('[data-openpen]');
+  if(b) b.onclick = () => { sfx("tap"); switchTab('pen'); };
+}
+
+function renderPenPage(){
+  const box = $('#penList');
+  if(!box) return;
+  const away = awaySet();
+  const total = S.creatures.length, cap = S.penCount * penCap();
+  $('#penSum').textContent = `${S.penCount} ผืน · ${total}/${cap} ตัว`;
+
+  box.innerHTML = Array.from({ length:S.penCount }, (_, i) => {
+    const here = S.creatures.filter(c => c.pen === i);
+    const babies = here.filter(c => c.stage === "baby").length;
+    const out = here.filter(c => away.has(c.id)).length;
+    const sc = sceneOf(i);
+    const dec = decPlaced(i);
+    const rate = here.filter(c => !away.has(c.id)).reduce((a, c) => a + rateOf(c), 0);
+    const full = here.length >= penCap();
+    return `<div class="penrow ${i === S.curPen ? 'on' : ''}">
+      <button class="pengo" data-gopen="${i}">
+        <b>🏡 ${penName(i)}</b>
+        <span class="pl2">${sc.emoji} ${sc.name}${sc.el ? ` · หนุนธาตุ${sc.el}` : ''}</span>
+        <span class="pl2">${here.length}/${penCap()} ตัว${babies ? ` · ลูก ${babies}` : ''}${
+          out ? ` · ออกเดินทาง ${out}` : ''}${full ? ' · เต็ม' : ''}</span>
+        <span class="pl2">🪙 ${Math.round(rate)}/นาที · ของตกแต่ง ${dec.length}/${decSlots(i)}</span>
+        ${dec.length ? `<span class="pdec">${dec.map(id => (DEC[id]||{}).emoji || '').join(' ')}</span>` : ''}
+      </button>
+      <div class="penact">
+        <button class="ic ${penNamed(i) ? '' : 'off'}" data-penname="${i}" title="ตั้งชื่อทุ่ง">✏️</button>
+        ${i === S.curPen ? '<small>อยู่ที่นี่</small>' : ''}
+      </div></div>`;
+  }).join('');
+
+  box.querySelectorAll('[data-gopen]').forEach(b => b.onclick = () => {
+    S.curPen = +b.dataset.gopen; S.selId = null;
+    sfx("tap"); save(); render(); switchTab('field');
+  });
+  box.querySelectorAll('[data-penname]').forEach(b =>
+    b.onclick = () => setPenName(+b.dataset.penname));
+
+  const np = $('#btnNewPen'), cp = capPrice(), cb = $('#btnCapUp');
+  const price = PEN_PRICE[S.penCount];
+  if(np){
+    np.style.display = price ? '' : 'none';
+    np.textContent = price ? `+ เปิดทุ่งที่ ${S.penCount+1} · 🪙 ${price}` : '';
+    np.disabled = !price || S.coins < price;
+    np.onclick = buyPen;
+  }
+  if(cb){
+    cb.style.display = cp != null ? '' : 'none';
+    cb.textContent = cp != null ? `+ ขยายทุกทุ่งเป็น ${penCap()+PEN_CAP_STEP} ตัว · 🪙 ${cp}` : '';
+    cb.disabled = cp == null || S.coins < cp;
+    cb.onclick = buyCap;
+  }
+  $('#penNote').textContent = cp == null
+    ? `ขยายความจุเต็มเพดานแล้ว ทุ่งละ ${penCap()} ตัว`
+    : `ตอนนี้ทุ่งละ ${penCap()} ตัว · ขยายได้ถึง ${PEN_CAP_MAX} ตัว`;
 }
 
 function renderSel(){
@@ -3888,7 +4073,7 @@ function renderShop(){
     ` · ตัวตำนาน ${S.legends || 0} ตัว (ออกจากไข่บอสเท่านั้น)`;
 
   const rdy = readyCount();
-  const badge = $('#nestBadge');
+  const badge = $('#nestBadge2') || $('#nestBadge');
   badge.textContent = rdy || S.eggs.length;
   badge.classList.toggle('hide', S.eggs.length === 0);
   badge.classList.toggle('rdy', rdy > 0);
@@ -3901,6 +4086,7 @@ function renderShop(){
     const p = incProg(e), pk = eggPeek(e), ready = eggReady(e);
     const eb = e.bossId ? BOSS_POOL.find(b => b.id === e.bossId) : null;
     const name = eb ? '✦ ' + (BOSS_EGG_NAME[eb.id] || 'ไข่บอส')
+               : e.lgEgg ? '✦ ไข่ตำนาน'
                : e.bred ? '💞 ไข่สายเลือด' : e.starPull ? '⭐ ไข่ดาวมงคล'
                : e.boss ? 'ไข่บอส' : 'ไข่' + tn;
     return `<div class="item ${ready ? 'rare' : ''}">
@@ -3917,7 +4103,7 @@ function renderShop(){
   }).join('') : `<p class="empty" style="grid-column:1/-1">รังยังว่างอยู่</p>`;
   $('#eggList').querySelectorAll('[data-egg]').forEach(b => b.onclick = () => hatch(+b.dataset.egg));
   $('#eggList').querySelectorAll('[data-inc]').forEach(b => b.onclick = () => incubate(+b.dataset.inc));
-  $('#nestCount').textContent = `(${S.eggs.length}/${NEST_MAX}) · ช่องอุ่น ${used}/${slotsOf()}` +
+  $('#nestCount').textContent = `(${S.eggs.length}/${NEST_MAX} ฟอง) · ช่องอุ่น ${used}/${slotsOf()}` +
     (rdy ? ` · พร้อมแตก ${rdy}` : '');
   $('#btnAutoHatch').disabled = !S.eggs.length || (!rdy && used >= slotsOf());
   $('#btnAutoHatch').textContent = rdy ? `ฟักที่พร้อม ${rdy} ฟอง + เติมช่องอุ่น` : 'ใส่ไข่เข้าช่องอุ่นให้เต็ม';
@@ -3929,12 +4115,14 @@ const DEX_TABS = [
   { id:"r1",   name:"ธรรมดา" },
   { id:"r2",   name:"หายาก" },
   { id:"r3",   name:"หายากมาก" },
-  { id:"lg",   name:"✦ ตำนาน" }
+  { id:"lg",   name:"✦ ตำนาน" },
+  { id:"myth", name:"✧ อมตะ" }
 ];
 function dexPool(){
   const f = S.dexTab || "all";
   let pool = SPECIES;
   if(f === "miss") pool = SPECIES.filter(s => !(S.seen && S.seen[s.id]));
+  else if(f === "myth") pool = SPECIES.filter(s => s.legend);
   else if(f === "lg") pool = SPECIES.filter(s => s.legend);
   else if(f[0] === "r") pool = SPECIES.filter(s => !s.legend && s.rarity === +f[1]);
   if(S.dexEl) pool = pool.filter(s => s.el === S.dexEl);
@@ -3943,12 +4131,14 @@ function dexPool(){
 function renderDex(){
   const seen = S.seen || {};
   const nSeen = SPECIES.filter(s => seen[s.id]).length;
-  $('#dexProg').textContent = `${nSeen} / ${SPECIES.length} สายพันธุ์`;
+  $('#dexProg').textContent = `${nSeen} / ${SPECIES.length} สายพันธุ์` +
+    ` · ✧ อมตะ ${Object.keys(S.mythSeen || {}).length}/${LEGEND_LIST.length}`;
 
   $('#dexFilter').innerHTML =
     DEX_TABS.map(t => {
       const n = (t.id === "all" ? SPECIES
         : t.id === "miss" ? SPECIES.filter(s => !seen[s.id])
+        : t.id === "myth" ? SPECIES.filter(s => (S.mythSeen || {})[s.id])
         : t.id === "lg" ? SPECIES.filter(s => s.legend)
         : SPECIES.filter(s => !s.legend && s.rarity === +t.id[1])).length;
       return `<button class="dtab" aria-pressed="${(S.dexTab || 'all') === t.id}" data-dex="${t.id}">
@@ -3961,7 +4151,9 @@ function renderDex(){
     b.onclick = () => { S.dexTab = b.dataset.dex; renderDex(); });
   $('#dexEl').onchange = e => { S.dexEl = e.target.value || null; renderDex(); };
 
-  const pool = dexPool();
+  const mythSeen = S.mythSeen || {};
+  let pool = dexPool();
+  if((S.dexTab || "all") === "myth") pool = pool.filter(s => mythSeen[s.id]);
   const have = {};
   S.creatures.forEach(c => { if(c.stage === "adult") have[c.sid] = (have[c.sid] || 0) + 1; });
 
@@ -3970,7 +4162,7 @@ function renderDex(){
     const bz = s.legend ? (BOSS_POOL.find(b => b.id === s.boss) || {}).name : null;
     return `<div class="dex ${got ? '' : 'lock'} ${s.legend ? 'lg' : ''}">
       <div class="dth"><img src="${ART[s.id]}" alt="${got ? s.name : ''}" loading="lazy"></div>
-      <b>${got ? s.name : "???"}</b>
+      <b>${mythSeen[s.id] ? "✧ " : ""}${got ? s.name : "???"}</b>
       <small>${got ? `${s.legend ? '✦ ตำนาน' : RAR_NAME[s.rarity]} · ${s.el}` : "ยังไม่เคยเจอ"}</small>
       ${got && bz ? `<small class="dbz">จาก${bz}</small>` : ''}
       ${have[s.id] ? `<span class="dhave">มี ${have[s.id]}</span>` : ''}
@@ -4115,7 +4307,7 @@ function renderManage(){
     <div class="mgb">
       <button class="btn ghost sm" id="mgRel" ${freeIds.length ? '' : 'disabled'}>ปล่อยกลับป่า · 💠 ${gain}</button>
       ${Array.from({length:S.penCount}, (_,i) =>
-        `<button class="btn ghost sm" data-mgmove="${i}">ย้ายไปทุ่ง ${i+1} (${penCount(i)}/${penCap()})</button>`).join('')}
+        `<button class="btn ghost sm" data-mgmove="${i}">ย้ายไป ${penName(i)} (${penCount(i)}/${penCap()})</button>`).join('')}
     </div></div>` : '';
   const rel = $('#mgRel'); if(rel) rel.onclick = mgReleaseSel;
   $('#mgBulk').querySelectorAll('[data-mgmove]').forEach(b =>
@@ -4136,7 +4328,7 @@ function renderManage(){
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"></button>
       <div class="mgin">
         <b>${c.myth ? '✧ อมตะ' : ''}${sp.name} <span class="st">${baby ? "ลูกตุ้ยนุ้ย" : starStr(c.stars)}</span></b>
-        <div class="ml">ทุ่งที่ ${c.pen+1} · ${sp.el}${c.el2 ? "/" + c.el2 : ""} · ${NT[c.nature].emoji}${NT[c.nature].name}
+        <div class="ml">${penName(c.pen)} · ${sp.el}${c.el2 ? "/" + c.el2 : ""} · ${NT[c.nature].emoji}${NT[c.nature].name}
           ${baby ? ` · โตแล้ว ${Math.floor(c.exp/EXP_NEED*100)}%`
                  : ` · พลัง ${pw(c)} · 🪙${Math.round(rateOf(c))}/นาที`}</div>
         <div class="mtags">${tags.join('')}</div>
@@ -4159,6 +4351,19 @@ function renderManage(){
     sfx("tap"); save(); render(); switchTab("field");
   });
 }
+
+const SHOP_PANES = { mon:"shopMon", mkt:"shopMkt", dust:"shopDust", scene:"shopScene", dec:"shopDec" };
+function setShopMode(m){
+  S.shopMode = SHOP_PANES[m] ? m : "mon";
+  for(const k in SHOP_PANES){
+    const el = document.getElementById(SHOP_PANES[k]);
+    if(el) el.style.display = k === S.shopMode ? "" : "none";
+  }
+  document.querySelectorAll('#shopMode [data-shop]').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.shop === S.shopMode));
+}
+document.querySelectorAll('#shopMode [data-shop]').forEach(b =>
+  b.onclick = () => { sfx("tap"); setShopMode(b.dataset.shop); });
 
 function setBookMode(m){
   S.bookMode = m;
@@ -4210,8 +4415,9 @@ function render(){
   const seenLg = seenIds.filter(isLegend).length;
   $('#dexCount').textContent = `${seenBase} / ${nBase} สายพันธุ์ · ✦ ตำนาน ${seenLg}/${LEGEND_LIST.length}`;
   S.dexTab = S.dexTab || "all";
-  renderPenTabs(); renderSel(); renderShop(); renderBreed(); renderMyth(); renderDust(); renderBoss(); renderTrip(); renderDex(); renderManage(); renderStats(); renderBook();
+  renderPenTabs(); renderPenPage(); renderSel(); renderShop(); renderBreed(); renderMyth(); renderDust(); renderBoss(); renderTrip(); renderDex(); renderManage(); renderStats(); renderBook();
   setBookMode(S.bookMode || 'dex');
+  setShopMode(S.shopMode || 'mon');
   applyWeather(); applyTint();
   $('#farmLog').innerHTML = S.logs.map(l => `<li class="${l.tone}"><b>${l.text}</b></li>`).join('') || `<li>ยังไม่มีบันทึก</li>`;
   startPen();
@@ -4408,7 +4614,7 @@ function useScene(id){
 function renderScenes(){
   const cur = sceneIdOf(S.curPen);
   $('#sceneNote').textContent =
-    `ทุ่งที่ ${S.curPen+1} ใช้ฉาก ${SCN[cur].emoji} ${SCN[cur].name} · ` +
+    `${penName(S.curPen)} ใช้ฉาก ${SCN[cur].emoji} ${SCN[cur].name} · ` +
     `ซื้อครั้งเดียวใช้ได้ทุกทุ่ง เลือกแยกกันได้แต่ละทุ่ง`;
   $('#sceneList').innerHTML = SCENES.map(s => {
     const own = sceneOwned(s.id), on = cur === s.id;

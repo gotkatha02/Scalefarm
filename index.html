@@ -178,6 +178,20 @@ h2 + h2{margin-top:20px}
 .gift{font-family:var(--display);font-size:12.5px;color:#A97C05;background:#FFFBEF;
   border:2px solid var(--sun);border-radius:13px;padding:8px 12px;margin-bottom:11px}
 .bosshero{display:block;max-height:190px;max-width:82%;margin:0 auto 8px}
+.grewwrap{display:grid;gap:14px}
+.grew{border:2px solid var(--line);border-radius:20px;padding:14px 14px 12px;background:#F9FCF8;
+  opacity:0;transform:scale(.7);animation:pop .4s cubic-bezier(.2,1.5,.5,1) forwards}
+.grew.sh{border-color:var(--plum);background:linear-gradient(160deg,#FFF6FF,#F2F7FF);
+  box-shadow:0 0 0 4px #B98BD92E}
+.grew .art{height:150px;display:grid;place-items:center;margin-bottom:6px}
+.grew .art img,.grew .art svg{max-height:150px;max-width:100%}
+.grew h3{font-family:var(--display);font-size:19px;margin:0 0 2px}
+.grew .meta{font-family:var(--display);font-size:12.5px;color:var(--dim);margin:0 0 9px}
+.grew .st{font-size:16px;letter-spacing:1px;color:#C9A227}
+.grew .bars{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;margin-bottom:6px}
+.grew .newtag{display:inline-block;font-family:var(--display);font-size:11px;padding:2px 9px;
+  border-radius:9px;background:var(--sun);color:#4A3A08;margin-left:6px;vertical-align:middle}
+@media(max-height:620px){ .grew .art{height:104px} .grew .art img,.grew .art svg{max-height:104px} }
 .boss h3{font-family:var(--display);font-weight:700;font-size:16px;margin:0}
 .boss .bl{font-size:11.5px;color:var(--dim);line-height:1.5}
 .diffs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
@@ -227,6 +241,15 @@ h2 + h2{margin-top:20px}
 .item.rare .iemo{background:linear-gradient(160deg,#FFF3D0,#F6DFA0);border-color:var(--sun)}
 .pill.dust{border-color:#C9A8E6;color:#6B4C86;background:#F9F4FEF2}
 .hide{display:none!important}
+.sel{position:relative}
+.xbtn{position:absolute;top:6px;right:6px;z-index:3;width:30px;height:30px;border-radius:11px;
+  border:2px solid var(--line);background:#FFFFFFEE;color:var(--dim);font-size:14px;line-height:1;
+  display:grid;place-items:center;cursor:pointer;font-family:var(--display)}
+.xbtn:active{transform:scale(.92)}
+.brd{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
+.brd select{flex:1;min-width:130px;padding:7px 9px;border-radius:12px;border:2px solid var(--line);
+  background:#fff;font-family:var(--display);font-size:12.5px;color:var(--ink)}
+.brd .x{font-family:var(--display);color:var(--dim)}
 .warn{position:fixed;left:50%;top:9px;transform:translateX(-50%);z-index:96;
   max-width:min(430px,88vw);background:#FFF4F0;border:2px solid #E48F79;color:#9E3F28;
   border-radius:14px;padding:7px 14px;font-family:var(--display);font-size:12.5px;text-align:center;
@@ -336,6 +359,8 @@ h2 + h2{margin-top:20px}
   <h2>ร้านไข่ธรรมดา</h2>
   <div class="shop" id="shopList"></div>
   <p class="note">เกล็ดทุกตัวในทุ่งหาเงินให้เรื่อยๆ แม้ตอนคุณไม่อยู่ ตัวโตแล้วหาได้เยอะกว่าลูกเกล็ดมาก</p>
+  <h2>เรือนผสมพันธุ์</h2>
+  <div id="breedBox"></div>
   <h2>ร้านผงเกล็ด <span style="color:var(--dim);font-weight:400">💠 <span id="dustCount">0</span></span></h2>
   <p class="note" style="margin:0 0 10px" id="wxNote"></p>
   <p class="note" style="margin:0 0 10px">ผงเกล็ดได้จากการปล่อยเกล็ดกลับป่า ยิ่งดาวสูงยิ่งได้เยอะ ตัวไชนี่ได้สามเท่า
@@ -421,6 +446,12 @@ const blank = () => ({ coins:150, lastTick:Date.now(), hatched:0, shinies:0,
 function migrate(){                                  // เซฟเก่ายังเล่นต่อได้
   S.dust = S.dust || 0;
   S.workerBonus = S.workerBonus || 0;
+  if(!S.seenAdult){                                  // เซฟเก่า: ถือว่าที่มีอยู่แล้วคือเคยเห็นแล้ว
+    S.seenAdult = {};
+    (S.creatures || []).forEach(c => { if(c.stage === "adult") S.seenAdult[c.sid] = true; });
+  }
+  if(S.brA == null) S.brA = null;
+  if(S.brB == null) S.brB = null;
   if(!S.bag) S.bag = { grass:0, fruit:0, cake:0 };
   // ของการันตีแบบเก่าเปลี่ยนเป็น "พร" ที่ยังต้องลุ้น
   (S.creatures || []).forEach(c => {
@@ -504,12 +535,15 @@ function packSave(){
     c.sh ? [KIDX[c.sh.k] || 0, c.sh.h, Math.round(c.sh.s*100), Math.round(c.sh.b*100),
             Math.round((c.sh.sep || 0)*100)].map(c36).join(".") : "",
     c.bs ? BSTATS.map(b => c36(c.bs[b.k])).join(".") : "",
-    c.starPull ? c36(c.starPull*10) : ""
+    c.starPull ? c36(Math.round(c.starPull*10)) : "",
+    c.bredAt ? c36(Math.round((Date.now() - c.bredAt)/60000)) : ""
   ].join(",")).join(";");
 
   const eggs = (S.eggs || []).map(e => [
     c36(SIDX[e.sid] || 0), c36(e.tier), c36(e.rar), e.boss ? 1 : 0,
-    e.starPull ? c36(e.starPull*10) : ""
+    e.starPull ? c36(Math.round(e.starPull*10)) : "",
+    e.nature != null && NIDX[e.nature] != null ? c36(NIDX[e.nature]) : "",
+    e.bred ? 1 : 0
   ].join(",")).join(";");
 
   return [meta, seen, cre, eggs].join("|");
@@ -550,6 +584,7 @@ function unpackSave(txt){
       c.bs.total = BSTATS.reduce((a, b) => a + c.bs[b.k], 0);
     }
     if(f[12]) c.starPull = p36(f[12])/10;
+    if(f[13]) c.bredAt = Date.now() - p36(f[13])*60000;
     return c;
   });
 
@@ -558,6 +593,8 @@ function unpackSave(txt){
     const e = { sid:(SPECIES[p36(f[0])] || SPECIES[0]).id, tier:p36(f[1]), rar:p36(f[2]) };
     if(f[3] === "1") e.boss = true;
     if(f[4]) e.starPull = p36(f[4])/10;
+    if(f[5]) e.nature = (NATURES[p36(f[5])] || NATURES[0]).id;
+    if(f[6] === "1") e.bred = true;
     return e;
   });
   S2.curPen = Math.min(S2.curPen, S2.penCount - 1);
@@ -693,14 +730,16 @@ const rollShinyOnGrow = () => Math.random() < SHINY_BASE;
 const starStr = n => "★".repeat(n) + "☆".repeat(5-n);
 
 // ระดับการดูแล 1–5 มาจากคุณภาพอาหารเฉลี่ย บวกการลูบหัว
-function careOf(c){
+function careOf(c){                                  // เหลือไว้เป็นค่าความสุข ไม่มีผลกับดาวแล้ว
   const avgQ = c.expTotal > 0 ? c.qSum / c.expTotal : 1;
-  return clamp(avgQ + Math.min(1, (c.pets||0) * .04) + natOf(c).care + (c.starPull || 0), 1, 5);
+  return clamp(avgQ + Math.min(1, (c.pets||0) * .04) + natOf(c).care, 1, 5);
 }
-// ดาวไม่ได้ตายตัว การดูแลเป็นแค่ตัวกำหนด "โอกาส" ที่จะออกดาวไหน
+/* ดาวเป็นการสุ่มล้วน อาหารไม่เกี่ยว — ทางเดียวที่จะดันดาวขึ้นคือผสมพันธุ์ต่อรุ่นไปเรื่อยๆ
+   จุดกึ่งกลางของการสุ่มอยู่ที่ 2 ดาว · ไข่จากการผสมจะเลื่อนจุดกึ่งกลางตามดาวเฉลี่ยของพ่อแม่ */
+const STAR_BASE = 2.0;
 function starOdds(c){
-  const care = careOf(c), sig = 0.85;
-  const w = [1,2,3,4,5].map(i => Math.exp(-((i-care)**2) / (2*sig*sig)) + 0.03);
+  const center = STAR_BASE + (c.starPull || 0), sig = 1.0;
+  const w = [1,2,3,4,5].map(i => Math.exp(-((i-center)**2) / (2*sig*sig)) + 0.03);
   const tot = w.reduce((a,b) => a+b, 0);
   return w.map(x => x / tot);
 }
@@ -836,7 +875,7 @@ function tick(){
     S.coins += farmRate() * mins;
     const grown = growAll(mins);
     S.lastTick = now;
-    if(grown.length){ save(); render(); return; }
+    if(grown.length){ save(); render(); showGrown(grown); return; }
     refreshBabyBars();
     if(S.selId && S.creatures.some(c => c.id === S.selId && c.stage === "baby")) renderSel();
   }
@@ -896,6 +935,7 @@ function openChest(){
   showSpin({ emoji, title, detail, big: hit.id === "rare" || hit.id === "egg" });
   save(); render();
 }
+let pendingGrown = null;
 function catchUp(){
   const away = Math.min((Date.now() - S.lastTick) / 60000, 480);  // เก็บย้อนหลังได้ไม่เกิน 8 ชั่วโมง
   if(away > 3 && S.creatures.length){
@@ -903,7 +943,10 @@ function catchUp(){
     S.coins += got;
     logf(`ตอนคุณไม่อยู่ เกล็ดในทุ่งหาเงินได้ 🪙 ${got}`, "good");
     const grown = growAll(away);
-    if(grown.length) logf(`ระหว่างนั้นมี ${grown.length} ตัวโตเต็มวัยไปเอง`, "good");
+    if(grown.length){
+      logf(`ระหว่างนั้นมี ${grown.length} ตัวโตเต็มวัยไปเอง`, "good");
+      pendingGrown = grown.slice(0, 8);              // โชว์ให้ดูตอนหน้าจอพร้อม
+    }
   }
   S.lastTick = Date.now();
 }
@@ -932,7 +975,7 @@ function hatch(i){
   if(target < 0) return;
   const e = S.eggs.splice(i,1)[0];
   S.hatched++;
-  const c = { id:S.nextId++, sid:e.sid, shiny:false, nature:pick(NATURES).id,
+  const c = { id:S.nextId++, sid:e.sid, shiny:false, nature:e.nature || pick(NATURES).id,
     stage:"baby", exp:0, expTotal:0, qSum:0, pets:0, stars:1, pen:target,
     starPull:e.starPull || 0 };
   S.creatures.push(c);
@@ -953,7 +996,7 @@ function feed(fid){
   const g = Math.round(f.exp * natOf(c).grow * weatherNow().grow);   // นิสัยกับอากาศมีผลกับความเร็วในการโต
   c.exp += g; c.expTotal += g; c.qSum += g * f.q;
   popFx(c.id, f.emoji);
-  if(c.exp >= EXP_NEED){ evolve(c); save(); render(); return; }
+  if(c.exp >= EXP_NEED){ evolve(c); save(); render(); showGrown([c]); return; }
   lightUpdate(c);
   save();
 }
@@ -997,6 +1040,41 @@ function evolve(c){
     ? `✨ ${SP[c.sid].name} แปลงร่างออกมาเป็นสีที่ไม่เคยเห็นมาก่อน ${starStr(c.stars)} — ไชนี่ ${shinyName(c)} ${shinyOf(c).h}°!${flavor}`
     : `${SP[c.sid].name} โตเต็มวัยแล้ว ${starStr(c.stars)}${flavor} — พลังรวม ${c.bs.total} · หาเงินได้ 🪙 ${rateOf(c)}/นาที`, "good");
   burst(c.id, c.shiny ? 16 : 6);
+  return c;
+}
+
+/* ---- จอโชว์ตัวที่เพิ่งแปลงร่าง จะได้ไม่ต้องไปไล่จิ้มหาในทุ่ง ---- */
+function showGrown(list){
+  if(!list || !list.length) return;
+  const m = document.createElement('div');
+  m.className = 'mask';
+  const cards = list.map(c => {
+    const sp = SP[c.sid], n = NT[c.nature], b = ensureBattle(c);
+    const isNew = !S.seenAdult || !S.seenAdult[c.sid];
+    return `<div class="grew ${c.shiny ? 'sh' : ''}">
+      <div class="art"><img src="${ART[c.sid]}" alt="${sp.name}" style="${shinyFilter(c)}"></div>
+      <h3>${sp.name}${c.shiny ? ' ✨' : ''}${isNew ? '<span class="newtag">ตัวใหม่!</span>' : ''}</h3>
+      <p class="meta">${sp.el} · สาย${clusterOf(sp.el)} · ${RAR_NAME[sp.rarity]} · ${n.emoji} ${n.name}
+        ${c.shiny ? `<br><b style="color:var(--plum)">ไชนี่ ${shinyName(c)} ${shinyOf(c).h}°</b>` : ''}</p>
+      <p class="st">${starStr(c.stars)}</p>
+      <div class="bars">${BSTATS.map(t => `
+        <div class="b1"><span>${t.short}</span>
+          <div class="bt"><div class="bf" style="width:${clamp(b[t.k]/170*100,4,100)}%;background:${t.color}"></div></div>
+          <b>${b[t.k]}</b></div>`).join('')}</div>
+      <p class="xplab">พลังรวม <b>${b.total}</b> · หาเงินให้ฟาร์ม 🪙 ${Math.round(rateOf(c))}/นาที
+        · อยู่ทุ่งที่ ${c.pen + 1}</p>
+    </div>`;
+  }).join('');
+  m.innerHTML = `<div class="result">
+    <h2>${list.length > 1 ? `🎉 โตเต็มวัย ${list.length} ตัว` : '🎉 แปลงร่างสำเร็จ'}</h2>
+    <div class="grewwrap">${cards}</div>
+    <button class="btn" id="closeGrew" style="margin-top:14px">เข้าใจแล้ว</button></div>`;
+  document.body.appendChild(m);
+  S.seenAdult = S.seenAdult || {};
+  list.forEach(c => S.seenAdult[c.sid] = true);
+  const close = () => m.remove();
+  m.querySelector('#closeGrew').onclick = close;
+  m.onclick = e => { if(e.target === m) close(); };
 }
 function moveTo(pen){
   const c = S.creatures.find(x => x.id === S.selId);
@@ -1005,6 +1083,68 @@ function moveTo(pen){
   logf(`ย้าย${SP[c.sid].name}ไปทุ่งที่ ${pen+1}`, "");
   save(); render();
 }
+/* ---- เรือนผสมพันธุ์: ทางเดียวที่จะดันสายเลือดให้ดาวสูงขึ้น ---- */
+const BREED_COST = 400, BREED_CD = 3*3600*1000;      // พักหลังผสม 3 ชั่วโมง
+const breedLeft = c => Math.max(0, BREED_CD - (Date.now() - (c.bredAt || 0)));
+const breedReady = c => breedLeft(c) === 0;
+function hhmm(ms){
+  const m = Math.ceil(ms/60000);
+  return m >= 60 ? `${Math.floor(m/60)} ชม. ${m%60} น.` : `${m} นาที`;
+}
+function breed(){
+  const a = S.creatures.find(x => x.id === S.brA);
+  const b = S.creatures.find(x => x.id === S.brB);
+  if(!a || !b || a.id === b.id){ alert("เลือกพ่อพันธุ์กับแม่พันธุ์คนละตัว"); return; }
+  if(!breedReady(a) || !breedReady(b)){ alert("ยังมีตัวที่พักอยู่ รอให้ครบเวลาก่อน"); return; }
+  if(S.eggs.length >= NEST_MAX){ alert("รังเต็มแล้ว ฟักไข่ในรังก่อน"); return; }
+  if(S.coins < BREED_COST){ alert("เหรียญไม่พอ"); return; }
+  S.coins -= BREED_COST;
+  a.bredAt = b.bredAt = Date.now();
+  let sid = Math.random() < .5 ? a.sid : b.sid, mut = false;
+  if(Math.random() < .12){ sid = pickByRarity(SP[sid].rarity); mut = true; }   // กลายพันธุ์
+  const avg = (a.stars + b.stars) / 2;
+  const pull = Math.max(0, +(avg - STAR_BASE + rnd(-0.4, 0.4)).toFixed(2));    // สายเลือด ยังสุ่มอยู่
+  const nature = Math.random() < .8 ? pick([a.nature, b.nature]) : pick(NATURES).id;
+  S.eggs.push({ sid, tier:2, rar:SP[sid].rarity, starPull:pull, nature, bred:true });
+  logf(`${SP[a.sid].name} ${starStr(a.stars)} × ${SP[b.sid].name} ${starStr(b.stars)} → ไข่${SP[sid].name}` +
+       `${mut ? " (กลายพันธุ์!)" : ""} · แนวโน้มดาว ${(STAR_BASE + pull).toFixed(1)}`, "good");
+  save(); render();
+}
+function renderBreed(){
+  const adults = S.creatures.filter(c => c.stage === "adult");
+  const box = $('#breedBox');
+  if(adults.length < 2){
+    box.innerHTML = `<p class="note" style="margin:0">ต้องมีตัวโตเต็มวัยอย่างน้อยสองตัวถึงจะผสมพันธุ์ได้</p>`;
+    return;
+  }
+  const opts = sel => adults.map(c => `<option value="${c.id}" ${sel === c.id ? "selected" : ""}>` +
+    `${SP[c.sid].name} ${starStr(c.stars)}${c.shiny ? " ✨" : ""}${breedReady(c) ? "" : " · พักอยู่"}</option>`).join('');
+  if(!adults.some(c => c.id === S.brA)) S.brA = adults[0].id;
+  if(!adults.some(c => c.id === S.brB)) S.brB = (adults[1] || adults[0]).id;
+  const a = adults.find(c => c.id === S.brA), b = adults.find(c => c.id === S.brB);
+  const ok = a && b && a.id !== b.id && breedReady(a) && breedReady(b)
+             && S.coins >= BREED_COST && S.eggs.length < NEST_MAX;
+  const avg = a && b ? (a.stars + b.stars)/2 : 0;
+  const rest = [a,b].filter(x => x && !breedReady(x));
+  box.innerHTML = `
+    <div class="brd">
+      <select id="brA">${opts(S.brA)}</select><span class="x">×</span>
+      <select id="brB">${opts(S.brB)}</select>
+    </div>
+    <p class="note" style="margin:0 0 9px">
+      ลูกที่ออกมาจะสุ่มสายพันธุ์จากพ่อหรือแม่ (มีโอกาสกลายพันธุ์ 12%) นิสัยสืบจากพ่อแม่ 80%
+      ${a && b ? `<br>ดาวเฉลี่ยพ่อแม่ ${avg.toFixed(1)} → ลูกจะสุ่มดาวรอบๆ <b>${(avg).toFixed(1)} ดาว</b> ยังไม่การันตี` : ""}
+      ${rest.length ? `<br>⏳ ${rest.map(x => `${SP[x.sid].name} พักอีก ${hhmm(breedLeft(x))}`).join(" · ")}` : ""}
+      ${S.eggs.length >= NEST_MAX ? "<br>รังเต็มแล้ว" : ""}
+    </p>
+    <div class="foot" style="margin:0">
+      <button class="btn sun sm" id="btnBreed" ${ok ? "" : "disabled"}>ผสมพันธุ์ · 🪙 ${BREED_COST}</button>
+    </div>`;
+  $('#brA').onchange = e => { S.brA = +e.target.value; renderBreed(); };
+  $('#brB').onchange = e => { S.brB = +e.target.value; renderBreed(); };
+  $('#btnBreed').onclick = breed;
+}
+
 const dustOf = c => Math.round((c.stage === "baby" ? 3 : 6 + c.stars*4) * (c.shiny ? 3 : 1)
   * weatherNow().dust);
 
@@ -1326,7 +1466,7 @@ function autoHatch(){
 function hatchSilent(i, target){
   const e = S.eggs.splice(i,1)[0];
   S.hatched++;
-  S.creatures.push({ id:S.nextId++, sid:e.sid, shiny:false, nature:pick(NATURES).id,
+  S.creatures.push({ id:S.nextId++, sid:e.sid, shiny:false, nature:e.nature || pick(NATURES).id,
     stage:"baby", exp:0, expTotal:0, qSum:0, pets:0, stars:1, pen:target,
     starPull:e.starPull || 0 });
   S.seen[e.sid] = true;
@@ -1550,7 +1690,7 @@ function renderSel(){
   const sp = SP[c.sid], n = NT[c.nature];
   const pct = clamp(c.exp / EXP_NEED * 100, 0, 100);
   const avgQ = c.expTotal > 0 ? (c.qSum / c.expTotal) : 0;
-  box.innerHTML = `<div class="sel"><div class="row">
+  box.innerHTML = `<div class="sel"><button class="xbtn" id="selClose" aria-label="ปิด">✕</button><div class="row">
     <div class="who">
       <h3>${sp.name}${c.shiny ? ` ✨ <span style="font-size:12px;color:var(--plum)">${shinyName(c)} ${shinyOf(c).h}°</span>` : ''}</h3>
       <p class="sub">${sp.el} · ${n.emoji} ${n.name} · ${c.stage === 'baby' ? 'ลูกเกล็ด' : 'โตเต็มวัย'}${
@@ -1559,15 +1699,16 @@ function renderSel(){
       <p class="xplab" style="margin:-7px 0 8px">${n.emoji} นิสัย${n.name} — ${n.note || '-'}</p>
       ${c.stage === 'baby' ? `
         <div class="xpbig"><i style="width:${pct}%"></i></div>
-        <p class="xplab">โตแล้ว ${Math.floor(pct)}% · ระดับการดูแล ${careOf(c).toFixed(1)} / 5
-          · แทะหญ้าเองได้ ${PASSIVE_EXP}/นาที (เหลืออีก ~${Math.max(1, Math.ceil((EXP_NEED-c.exp)/PASSIVE_EXP/60))} ชม. ถ้าปล่อยไว้)</p>
-        ${avgQ ? `<div class="odds5">${starOdds(c).map((o,i) => `
+        <p class="xplab">โตแล้ว ${Math.floor(pct)}% · แทะหญ้าเองได้ ${PASSIVE_EXP}/นาที
+          (เหลืออีก ~${Math.max(1, Math.ceil((EXP_NEED-c.exp)/PASSIVE_EXP/60))} ชม. ถ้าปล่อยไว้)
+          ${c.starPull ? `· ⭐ สายเลือดดันดาวไปที่ ${(STAR_BASE + c.starPull).toFixed(1)}` : ''}</p>
+        ${`<div class="odds5">${starOdds(c).map((o,i) => `
           <div class="o5"><span>${i+1}★</span>
             <div class="ot"><div class="of" style="width:${(o*100).toFixed(0)}%;
               background:${["#B9C7BF","#9CC6E8","#7FD3A6","#F6C445","#F49A8B"][i]}"></div></div>
             <b>${(o*100).toFixed(0)}%</b></div>`).join('')}</div>
-          <p class="xplab">ดาวสุ่มตอนแปลงร่าง · ไชนี่คงที่ 1% ทุกตัว ไม่มีอะไรเพิ่มได้</p>`
-        : '<p class="xplab">ให้อาหารเพื่อกำหนดโอกาสได้ดาว · ดาวกับไชนี่รู้ตอนแปลงร่าง</p>'}
+          <p class="xplab">อาหารเร่งได้แค่ความเร็วในการโต ไม่มีผลกับดาว · ดาวสุ่มล้วนตอนแปลงร่าง
+            ไชนี่คงที่ 1% · อยากได้ตัวโหดต้องผสมพันธุ์ไล่รุ่นเอา</p>`}
         <div class="foods">${FOODS.map(f => `
           <button class="food" data-food="${f.id}"
             ${(S.bag && S.bag[f.id] > 0) || S.coins >= f.price ? '' : 'disabled'}>
@@ -1585,6 +1726,11 @@ function renderSel(){
       </div>
     </div>
   </div></div>`;
+  $('#selClose').onclick = () => {                    // ปิดการ์ด กลับไปดูเกล็ดเดินเล่น
+    S.selId = null;
+    walkers.forEach(x => x.el.classList.remove('sel'));
+    renderSel();
+  };
   box.querySelectorAll('[data-food]').forEach(b => b.onclick = () => feed(b.dataset.food));
   box.querySelectorAll('[data-move]').forEach(b => b.onclick = () => moveTo(+b.dataset.move));
   $('#btnRelease').onclick = release;
@@ -1630,8 +1776,8 @@ function renderShop(){
   $('#eggList').innerHTML = S.eggs.length ? S.eggs.map((e,i) => {
     const tn = ["ธรรมดา","พิเศษ","หายาก"][e.tier];
     return `<div class="item ${e.tier===2?'rare':''}">
-      <div class="shell"></div><h3>${e.starPull ? '⭐ ไข่ดาวมงคล' : e.boss ? 'ไข่บอส' : 'ไข่'+tn}</h3>
-      <p>${e.starPull ? 'ลุ้นดาวสูงง่ายขึ้นมาก · ' : ''}${e.rar ? RAR_NAME[e.rar] + ' · ' : ''}${e.tier >= 1 ? SP[e.sid].hint : "ยังดูไม่ออกว่าเป็นตัวอะไร"}</p>
+      <div class="shell"></div><h3>${e.bred ? '💞 ไข่สายเลือด' : e.starPull ? '⭐ ไข่ดาวมงคล' : e.boss ? 'ไข่บอส' : 'ไข่'+tn}</h3>
+      <p>${e.starPull ? `แนวโน้มดาว ${(STAR_BASE + e.starPull).toFixed(1)} · ` : ''}${e.rar ? RAR_NAME[e.rar] + ' · ' : ''}${e.tier >= 1 ? SP[e.sid].hint : "ยังดูไม่ออกว่าเป็นตัวอะไร"}</p>
       <button class="btn ${e.tier===2?'sun':''}" data-egg="${i}" ${anyRoom ? '' : 'disabled'}>
         ${anyRoom ? 'ฟักลงทุ่ง' : 'ทุ่งเต็ม'}</button></div>`;
   }).join('') : `<p class="empty" style="grid-column:1/-1">รังยังว่างอยู่</p>`;
@@ -1660,7 +1806,7 @@ function render(){
   $('#hRate').textContent = Math.round(farmRate());
   $('#hCount').textContent = S.creatures.length;
   $('#dexCount').textContent = `${Object.keys(S.seen||{}).length} / ${SPECIES.length} สายพันธุ์`;
-  renderPenTabs(); renderSel(); renderShop(); renderDust(); renderBoss(); renderBook();
+  renderPenTabs(); renderSel(); renderShop(); renderBreed(); renderDust(); renderBoss(); renderBook();
   applyWeather();
   $('#farmLog').innerHTML = S.logs.map(l => `<li class="${l.tone}"><b>${l.text}</b></li>`).join('') || `<li>ยังไม่มีบันทึก</li>`;
   startPen();
@@ -1735,7 +1881,7 @@ function rngFrom(a){
 function sceneSVG(W, H, seed){
   const R = rngFrom(seed * 9973 + 17);
   const rr = (a,b) => a + R()*(b-a);
-  const hz = H * 0.42;                       // เส้นขอบฟ้า
+  const hz = 0;                              // ไม่มีท้องฟ้าแล้ว หญ้าเต็มจอ รอระบบตกแต่งมาวางของ
   const dens = Math.max(1, Math.min(7, (W*H)/(800*420)));   // จอใหญ่ = ของในทุ่งเยอะขึ้นตาม
   const Z  = Math.max(1, Math.min(1.9, W/1100));            // จอใหญ่ ของในฉากใหญ่ตามด้วย
   const N  = k => Math.round(k * dens);                      // ของเล็ก เพิ่มตามพื้นที่ตรงๆ
@@ -1743,22 +1889,22 @@ function sceneSVG(W, H, seed){
   const PH = phaseNow();
   let sun = "", far = "", streak = "", near = "", extra = "";
 
-  // ดวงอาทิตย์ / ดวงจันทร์ เคลื่อนตามเวลาจริง
+  const SKY = false;                         // ปิดของบนฟ้าทั้งหมด (พระอาทิตย์ ดาว ภูเขา นก)
   const t = PH.t;
   let prog;                                            // 0 = เพิ่งขึ้น, 1 = กำลังลับขอบฟ้า
   if(PH.key === "night") prog = ((t >= 19.5 ? t - 19.5 : t + 4.5) / 9.5);
   else prog = clamp((t - 5) / 14.5, 0, 1);
   const ox = W * (0.1 + prog*0.8), oy = H*0.36 - Math.sin(prog*Math.PI) * H*0.28;
   const orb = PH.orb;
-  sun = `<circle cx="${ox}" cy="${oy}" r="${orb.kind === "moon" ? 40 : 48}" fill="${orb.halo}" opacity=".5"/>
+  if(SKY) sun = `<circle cx="${ox}" cy="${oy}" r="${orb.kind === "moon" ? 40 : 48}" fill="${orb.halo}" opacity=".5"/>
          <circle cx="${ox}" cy="${oy}" r="${orb.kind === "moon" ? 22 : 26}" fill="${orb.fill}"/>`;
-  if(orb.kind === "moon")
+  if(SKY && orb.kind === "moon")
     sun += `<circle cx="${ox-7}" cy="${oy-5}" r="4.5" fill="#C9D6EE" opacity=".7"/>
             <circle cx="${ox+6}" cy="${oy+4}" r="3" fill="#C9D6EE" opacity=".6"/>
             <circle cx="${ox+2}" cy="${oy-9}" r="2.4" fill="#C9D6EE" opacity=".5"/>`;
 
   // กลางคืน: ดาวเต็มฟ้า
-  if(PH.key === "night"){
+  if(SKY && PH.key === "night"){
     for(let i = 0; i < N(26); i++){
       const stx = rr(0,W), sty = rr(0, hz*0.92), sr = rr(.8,2.1);
       extra += `<circle cx="${stx}" cy="${sty}" r="${sr}" fill="#FFFFFF" opacity=".85">
@@ -1768,7 +1914,7 @@ function sceneSVG(W, H, seed){
   }
 
   // ภูเขาไกลๆ
-  for(let i = 0; i < 3; i++){
+  for(let i = 0; SKY && i < 3; i++){
     far += `<ellipse cx="${rr(-40,W+40)}" cy="${hz+4}" rx="${rr(120,260)}" ry="${rr(40,78)}"
              fill="${PH.hills[i]}"/>`;
   }
@@ -1857,7 +2003,7 @@ function sceneSVG(W, H, seed){
       </g>`;
       continue;
     }
-    const bx = rr(W*0.15, W*0.85), by = hz - rr(6,46), c = ["#F6C445","#F49A8B","#E3D3F5"][i%3];
+    const bx = rr(W*0.15, W*0.85), by = rr(H*0.08, H*0.34), c = ["#F6C445","#F49A8B","#E3D3F5"][i%3];
     near += `<g><animateTransform attributeName="transform" type="translate"
         values="0 0; ${rr(28,70).toFixed(0)} ${(-rr(10,26)).toFixed(0)}; ${rr(-40,-10).toFixed(0)} ${rr(6,20).toFixed(0)}; 0 0"
         dur="${rr(9,15).toFixed(1)}s" repeatCount="indefinite"/>
@@ -1869,21 +2015,18 @@ function sceneSVG(W, H, seed){
         <rect x="-.7" y="-2.4" width="1.4" height="5" rx=".7" fill="#6B5B4A"/></g></g>`;
   }
   // นกไกลๆ
-  for(let i = 0; PH.key !== "night" && i < Math.min(12, M(3)); i++){
+  for(let i = 0; SKY && PH.key !== "night" && i < Math.min(12, M(3)); i++){
     near += `<path d="M0 0 q4 -4 8 0 q4 -4 8 0" stroke="#4A6B7A" stroke-opacity=".5"
       stroke-width="1.6" fill="none" transform="translate(${rr(0,W)} ${rr(H*0.08,H*0.3)}) scale(${rr(.7,1.1)})"/>`;
   }
 
   return `<svg class="scene" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="sk" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="${PH.sky[0]}"/><stop offset="1" stop-color="${PH.sky[1]}"/></linearGradient>
       <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="${PH.gr[0]}"/><stop offset="1" stop-color="${PH.gr[1]}"/></linearGradient>
     </defs>
-    <rect width="${W}" height="${hz+1}" fill="url(#sk)"/>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="url(#gr)"/>
     ${extra}${sun}${far}
-    <rect x="0" y="${hz}" width="${W}" height="${H-hz}" fill="url(#gr)"/>
     ${streak}${near}
   </svg>`;
 }
@@ -1909,7 +2052,6 @@ function startPen(){
   cancelAnimationFrame(anim);
   const BW = box.clientWidth || 600, BH = box.clientHeight || 340;
   box.innerHTML = sceneSVG(BW, BH, S.curPen)
-    + '<div class="cloud c1"></div><div class="cloud c2"></div>'
     + foreSVG(BW, Math.max(1, Math.min(1.9, BW/1100)));
   walkers = [];
   const here = S.creatures.filter(c => c.pen === S.curPen);
@@ -1922,7 +2064,7 @@ function startPen(){
   const zoom = Math.max(0.7, Math.min(1.9, Math.min(W/1100, H/520)));
   window.__zoom = zoom;
 
-  const GY0 = H * (H < 460 ? 0.5 : 0.44), pad = 8;
+  const GY0 = H * (H < 460 ? 0.30 : 0.24), pad = 8;
 
   here.forEach((c, idx) => {
     const sp = SP[c.sid];
@@ -2055,6 +2197,7 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
   migrate();
   catchUp();
   render();
+  if(pendingGrown){ showGrown(pendingGrown); pendingGrown = null; }
   if(!S.creatures.length) switchTab('shop');
   applyTint();
   let lastPhase = phaseNow().key, lastWx = weatherNow().id;

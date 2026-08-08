@@ -684,6 +684,19 @@ h2 + h2{margin-top:20px}
 .evcmp>i,.evcmp>b{flex:1;text-align:right;font-style:normal;font-weight:600;color:#5B4A8A}
 .evcmp u{text-decoration:none;color:#3B6E96;font-size:9.5px;font-weight:400}
 .evcmp .w{color:#2E6B4C}
+.holdbox{background:#FFFDF4;border:1.5px solid #EFE0BC;border-radius:14px;padding:10px 12px;margin:0 0 12px}
+.holdbox h4{font-family:var(--display);font-size:13.5px;margin:0 0 7px;color:#8A6A20}
+.holdrow{display:flex;align-items:center;gap:7px;font-size:12px;margin-bottom:6px}
+.holdrow span{width:52px;flex:none;color:var(--dim);font-weight:700}
+.holdrow select{flex:1;font-family:inherit;font-size:12px;padding:5px 7px;border-radius:9px;
+  border:1.5px solid #E2D6B8;background:#fff;color:#4A4030}
+.holdshop{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:6px;margin-top:8px}
+.hsb{text-align:left;font-family:inherit;font-size:11.5px;line-height:1.45;padding:6px 8px;cursor:pointer;
+  background:#fff;border:1.5px solid #E7DCC2;border-radius:11px;color:#4A4030}
+.hsb b{display:block;font-size:12.5px}
+.hsb small{color:#A97C05;font-weight:600}
+.hsb:disabled{opacity:.45;cursor:not-allowed}
+.grptag{font-size:11px;color:var(--dim)}
 .evcmp.hd>i,.evcmp.hd>b{font-weight:700;color:var(--dim)}
 .evfoods{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:5px;margin-bottom:9px}
 .evb{font-family:var(--display);font-size:11px;font-weight:600;cursor:pointer;padding:5px 4px;
@@ -1241,7 +1254,9 @@ const TALENTS = [
   { id:"blood",    emoji:"🩸", name:"สายเลือดดี",  w:5,  pull:0.35,
     note:"ลูกของมันได้แนวโน้มดาวเพิ่มอีก 0.35 ทุกรุ่น" },
   { id:"dual",     emoji:"🌗", name:"สองธาตุ",     w:0,  breedOnly:true,
-    note:"มีธาตุที่สอง ตอนสู้บอสจะใช้ธาตุฝั่งที่ได้เปรียบกว่า" }
+    note:"มีธาตุที่สอง ตอนสู้บอสจะใช้ธาตุฝั่งที่ได้เปรียบกว่า" },
+  { id:"warm",     emoji:"🔥", name:"กายอบอุ่น",   w:7,  hatch:0.30,
+    note:"อยู่ในฟาร์มแล้วไข่ทุกฟองในรังฟักเร็วขึ้น 30% (หลายตัวรวมกันได้ถึง 50%)" }
 ];
 const TAL = Object.fromEntries(TALENTS.map(t => [t.id, t]));
 const talOf = c => (c && c.tal && TAL[c.tal]) || null;
@@ -1467,7 +1482,8 @@ function packSave(){
     LEGEND_LIST.map(s => (S.mythSeen || {})[s.id] ? "1" : "0").join("") + "," +
     Object.keys(S.penName || {}).map(k => k + ":" + encodeURIComponent(S.penName[k])).join("~") + "," +
     [S.bossTier || 0, S.capBonus || 0, S.decayCut || 0,
-     S.incLv || 0, S.twinLv || 0, S.hires || 0].map(c36).join(".");
+     S.incLv || 0, S.twinLv || 0, S.hires || 0].map(c36).join(".") + "," +
+    HELD.map(x => c36(heldOwn(x.id))).join(".");
 
   let bits = "";                                     // สมุดภาพ = 1 บิตต่อสายพันธุ์
   SPECIES.forEach(s => bits += (S.seen && S.seen[s.id]) ? "1" : "0");
@@ -1493,7 +1509,9 @@ function packSave(){
     c.dgAt ? c36(Math.round((Date.now() - c.dgAt)/60000)) : "",
     BSTATS.map(b => c36(ivOf(c)[b.k])).join("."),
     evSum(c) ? BSTATS.map(b => c36(evOf(c)[b.k])).join(".") : "",
-    c.sex === "f" ? "f" : c.sex === "n" ? "n" : "m"
+    c.sex === "f" ? "f" : c.sex === "n" ? "n" : "m",
+    c.it && HELDMAP[c.it] ? c36(HELD.findIndex(x => x.id === c.it) + 1) : "",
+    c.masu ? 1 : ""
   ].join(",")).join(";");
 
   const eggs = (S.eggs || []).map(e => [
@@ -1507,7 +1525,9 @@ function packSave(){
     e.el2 ? c36(ELEMENTS.indexOf(e.el2) + 1) : "",
     e.lgEgg ? 1 : "",
     e.iv ? BSTATS.map(b => c36(e.iv[b.k])).join(".") : "",
-    e.collab ? 1 : ""
+    e.collab ? 1 : "",
+    e.masu ? 1 : "",
+    e.peek ? 1 : ""
   ].join(",")).join(";");
 
   const IDX = {}; (S.creatures || []).forEach((c, i) => IDX[c.id] = i);
@@ -1573,6 +1593,9 @@ function unpackSave(txt){
     S2.incLv = Math.min(INC_LV_MAX, p36(x[3] || "0"));
     S2.twinLv = Math.min(TWIN_LV_MAX, p36(x[4] || "0"));
     S2.hires = p36(x[5] || "0"); }
+  S2.hbag = {};
+  if(m[22]){ const v = m[22].split(".");
+    HELD.forEach((x, i) => { const n = p36(v[i] || "0"); if(n) S2.hbag[x.id] = n; }); }
   S2.incMigrated = true;
 
   S2.seen = {};
@@ -1613,6 +1636,8 @@ function unpackSave(txt){
     if(f[22]){ const v = f[22].split("."); c.ev = {};
       BSTATS.forEach((b, k) => c.ev[b.k] = Math.min(EV_MAX, p36(v[k] || "0"))); }
     c.sex = (f[23] === "f" || f[23] === "n") ? f[23] : "m";
+    if(f[24]){ const it = HELD[p36(f[24]) - 1]; if(it) c.it = it.id; }
+    if(f[25] === "1") c.masu = true;
     return c;
   });
 
@@ -1631,6 +1656,8 @@ function unpackSave(txt){
     if(f[12]){ const v = f[12].split("."); e.iv = {};
       BSTATS.forEach((b, k) => e.iv[b.k] = Math.min(IV_MAX, p36(v[k] || "0"))); }
     if(f[13] === "1") e.collab = true;
+    if(f[14] === "1") e.masu = true;
+    if(f[15] === "1") e.peek = true;
     return e;
   });
   S2.trips = (trips ? trips.split(";") : []).filter(Boolean).map(row => {
@@ -1906,7 +1933,7 @@ function shinyFilter(c){
 const shinyName = c => (SHINY_KIND.find(x => x.id === shinyOf(c).k) || SHINY_KIND[0]).name;
 
 const shinyChance = () => SHINY_BASE;
-const rollShinyOnGrow = () => Math.random() < SHINY_BASE;
+const rollShinyOnGrow = c => Math.random() < SHINY_BASE * (c && c.masu ? MASUDA_MUL : 1);
 const starStr = n => "★".repeat(Math.max(0, n)) + "☆".repeat(Math.max(0, 5 - n));
 
 // ระดับการดูแล 1–5 มาจากคุณภาพอาหารเฉลี่ย บวกการลูบหัว
@@ -2239,6 +2266,7 @@ function makeBaby(e, target){
   const tl = e.tal || (Math.random() < TALENT_CHANCE + decAdd(target, "tal") + festAdd("talent") ? rollTalent() : null);
   if(tl){ c.tal = tl; if(e.el2) c.el2 = e.el2; }
   c.iv = e.iv ? Object.assign({}, e.iv) : rollIV();     // ค่าแฝงล็อกตั้งแต่ฟัก
+  if(e.masu) c.masu = true;                            // คู่ต่างถิ่น ดันโอกาสไชนี่ตอนแปลงร่าง
   c.ev = zeroEV();
   c.sex = rollSex(sid);                                 // เพศรู้ตอนไข่แตก ไม่รู้ก่อน
   S.creatures.push(c);
@@ -2343,7 +2371,7 @@ function evolve(c){
   c.stars = rollStars(c);
   c.exp = EXP_NEED;
   c.bs = rollBattle(c);
-  c.shiny = rollShinyOnGrow();
+  c.shiny = rollShinyOnGrow(c);
   if(c.shiny){ c.sh = rollShinyLook(); S.shinies++; }
   if(!c.tal && (nur.tal || decAdd(c.pen, "tal")) &&
      Math.random() < nur.tal * decMul(c.pen, "nurture") + decAdd(c.pen, "tal")){        // ยาปลุกธาตุ ปลุกพรสวรรค์ตอนโต
@@ -2445,10 +2473,18 @@ function breed(){
   const lgPair = isLegendPair(a, b);
   const oneLegend = !lgPair && (SP[a.sid].legend || SP[b.sid].legend);
   if(oneLegend){ alert("ตำนานผสมได้กับตำนานด้วยกันเท่านั้น"); return; }
-  if(!canPair(a, b)){
+  if(!sexPairOk(a, b)){
     alert(sexOf(a).id === "n" || sexOf(b).id === "n"
       ? "ตัวที่ไม่มีเพศผสมพันธุ์ไม่ได้"
-      : "ต้องเป็นตัวผู้ ♂ คู่กับตัวเมีย ♀ เท่านั้น");
+      : isDitto(a) && isDitto(b)
+        ? "ตัวลอกเลียนสองตัวผสมกันเองไม่ได้"
+        : "ต้องเป็นตัวผู้ ♂ คู่กับตัวเมีย ♀ เท่านั้น");
+    return;
+  }
+  if(!groupOk(a, b)){
+    alert(`กลุ่มไข่ไม่เข้ากัน\n\n${SP[a.sid].name} — ${eggGroups(a.sid).join(" · ")}\n` +
+      `${SP[b.sid].name} — ${eggGroups(b.sid).join(" · ")}\n\n` +
+      "ต้องมีกลุ่มร่วมกันอย่างน้อยหนึ่งกลุ่ม หรือใช้ตัวลอกเลียนเป็นคู่ก็ได้");
     return;
   }
   if(lgPair){
@@ -2463,8 +2499,11 @@ function breed(){
   }
   a.bredAt = b.bredAt = Date.now();
   const mom = isFemale(a) ? a : b, dad = mom === a ? b : a;   // ยึดเพศจริง ไม่ยึดช่อง
-  const momSide = Math.random() < MOM_CHANCE;
-  let sid = momSide ? mom.sid : dad.sid, mut = false;
+  const dit = isDitto(a) ? a : isDitto(b) ? b : null;         // คู่ลอกเลียน สายพันธุ์มาจากอีกฝั่งเสมอ
+  const other = dit ? (dit === a ? b : a) : null;
+  let momSide = Math.random() < MOM_CHANCE;
+  let sid = dit ? other.sid : momSide ? mom.sid : dad.sid, mut = false;
+  if(dit) momSide = other === mom;
   if(!lgPair && Math.random() < .12){ sid = pickByRarity(SP[sid].rarity); mut = true; }   // กลายพันธุ์
   else if(lgPair && Math.random() < .10){                       // ตำนานก็กลายพันธุ์ได้ แต่อยู่ในบอสเดียวกัน
     const pool = LEGEND_BY_BOSS[SP[sid].boss] || [];
@@ -2473,7 +2512,10 @@ function breed(){
   const avg = (a.stars + b.stars) / 2;
   const bonus = talG(a, "pull", 0) + talG(b, "pull", 0);                       // 🩸 สายเลือดดี
   const pull = Math.max(0, +(avg - STAR_BASE + bonus + rnd(-0.4, 0.4)).toFixed(2));
-  const nature = Math.random() < .8 ? pick([a.nature, b.nature]) : pick(NATURES).id;
+  /* 🪨 หินนิรันดร์ ล็อกนิสัยจากตัวที่ถือ · ถือทั้งคู่ก็สุ่มระหว่างสองตัวนั้น */
+  const stoneHolders = [a, b].filter(x => x.it === "stone");
+  const nature = stoneHolders.length ? pick(stoneHolders).nature
+    : Math.random() < .8 ? pick([a.nature, b.nature]) : pick(NATURES).id;
 
   /* พรสวรรค์: มีทั้งคู่และเหมือนกัน 80% · คนละอย่าง 55% แล้วสุ่มว่าได้ของใคร
      มีข้างเดียว 45% · ไม่มีใครมีเลย ยังลุ้นติดใหม่ 3% */
@@ -2488,19 +2530,27 @@ function breed(){
 
   let el2 = null;
   const elA = SP[a.sid].el, elB = SP[b.sid].el;
-  if(elA !== elB && Math.random() < TAL_DUAL_CHANCE){          // ลูกข้ามธาตุ ลุ้นได้สองธาตุ
+  const dualCh = hasHeld(a, b, "incense") ? 1 : TAL_DUAL_CHANCE;   // 🌸 ธูปหอม การันตีสองธาตุ
+  if(elA !== elB && Math.random() < dualCh){                   // ลูกข้ามธาตุ ลุ้นได้สองธาตุ
     tal = "dual";
     el2 = SP[sid].el === elA ? elB : elA;
   }
 
-  /* ค่าแฝงลูก: หยิบจากพ่อแม่ IV_PASS ช่อง ที่เหลือสุ่มใหม่ (แบบเดียวกับที่โปเกม่อนทำ) */
+  /* ค่าแฝงลูก: หยิบจากพ่อแม่ตามจำนวนช่องที่ส่งได้ ที่เหลือสุ่มใหม่
+     🪢 ผ้าพันธะ ส่งครบ 6 ช่อง · 🏋️ ของถ่วง บังคับช่องนั้นจากตัวที่ถือ */
+  const passN = hasHeld(a, b, "knot") ? BSTATS.length : IV_PASS;
   const iv = rollIV();
-  const keys = BSTATS.map(b => b.k).sort(() => Math.random() - 0.5).slice(0, IV_PASS);
+  const keys = BSTATS.map(b => b.k).sort(() => Math.random() - 0.5).slice(0, passN);
   keys.forEach(k => {
     const pa = ivOf(a)[k], pb = ivOf(b)[k];
     iv[k] = Math.random() < 0.5 ? pa : pb;
   });
+  [a, b].forEach(par => {
+    const f = heldOf(par) && heldOf(par).force;
+    if(f) iv[f] = ivOf(par)[f];
+  });
   const egg = { sid, tier:2, rar:SP[sid].rarity, starPull:pull, nature, bred:true, iv };
+  if(isForeign(a) !== isForeign(b) || (isForeign(a) && isForeign(b))) egg.masu = true;
   if(lgPair) egg.lgEgg = true;
   if(tal) egg.tal = tal;
   if(el2) egg.el2 = el2;
@@ -2509,8 +2559,9 @@ function breed(){
        `${mut ? " (กลายพันธุ์!)" : momSide ? " (ข้างแม่)" : " (ข้างพ่อ)"}` +
        ` · แนวโน้มดาว ${(STAR_BASE + pull).toFixed(1)}` +
        `${tal ? ` · สืบพรสวรรค์ ${TAL[tal].emoji} ${TAL[tal].name}` : ""}`, "good");
-  /* 💞 ไข่ดก จากพ่อหรือแม่ ลุ้นไข่ฟองที่สอง (ค่าแฝงกับเพศสุ่มใหม่ทั้งหมด) */
-  const e2 = Math.max(talG(a, "egg2", 0), talG(b, "egg2", 0));
+  /* 💞 ไข่ดก จากพ่อหรือแม่ ลุ้นไข่ฟองที่สอง (ค่าแฝงกับเพศสุ่มใหม่ทั้งหมด)
+     🥚 เครื่องรางไข่ ดันโอกาสขึ้นอีก 20% */
+  const e2 = Math.max(talG(a, "egg2", 0), talG(b, "egg2", 0)) + (hasHeld(a, b, "oval") ? 0.20 : 0);
   if(e2 && Math.random() < e2 && S.eggs.length < NEST_MAX){
     const iv2 = rollIV();
     BSTATS.map(x => x.k).sort(() => Math.random() - 0.5).slice(0, IV_PASS)
@@ -2547,6 +2598,7 @@ function brSlot(c, side, active){
     <small>${starStr(c.stars)} · ${sp.el}${c.el2 ? "/" + c.el2 : ""}</small>
     <small>${talOf(c) ? talOf(c).emoji + " " + talOf(c).name : "ไม่มีพรสวรรค์"}</small>
     <small>🧬 ${ivSum(c)}/${IV_MAX*6} · 💪 ${evSum(c)}/${EV_TOTAL}</small>
+    ${heldOf(c) ? `<small>${heldOf(c).emoji} ${heldOf(c).name}</small>` : ""}
     ${rest ? `<small class="rs">พักอีก ${hhmm(rest)}</small>` : ""}</button>`;
 }
 
@@ -2598,12 +2650,47 @@ function renderBreed(){
         : `ไม่มีใครมี → ลุ้นติดใหม่ ${Math.round(TAL_FRESH*100)}%`)
     : "—";
 
+  const grpOk = a && b ? groupOk(a, b) : true;
+  const holdSel = (c, slot) => {
+    if(!c) return "";
+    const opts = HELD.filter(x => heldFree(x.id) > 0 || c.it === x.id);
+    return `<div class="holdrow"><span>${slot === "A" ? "♂ พ่อ" : "♀ แม่"}</span>
+      <select data-hold="${c.id}">
+        <option value="">— ไม่ถืออะไร —</option>
+        ${opts.map(x => `<option value="${x.id}" ${c.it === x.id ? "selected" : ""}
+          >${x.emoji} ${x.name}${c.it === x.id ? "" : ` (ว่าง ${heldFree(x.id)})`}</option>`).join('')}
+      </select></div>`;
+  };
   box.innerHTML = `
     <div class="brpair">
       ${brSlot(a, "A", S.brPick === "A")}
       <span class="brx">×</span>
       ${brSlot(b, "B", S.brPick === "B")}
     </div>
+
+    <div class="holdbox">
+      <h4>🎒 ของถือ <span class="grptag">สวมให้พ่อแม่ก่อนกดผสม · ถอดสลับได้ไม่จำกัด</span></h4>
+      ${a || b ? (holdSel(a, "A") + holdSel(b, "B")) : `<p class="grptag">เลือกพ่อแม่ก่อนถึงจะสวมของถือได้</p>`}
+      ${a && b ? `<p class="grptag">กำลังใช้:
+        ${[hasHeld(a,b,"knot") && "🪢 ส่งค่าแฝงครบ 6 ช่อง",
+           [a,b].some(x => x.it === "stone") && "🪨 ล็อกนิสัย",
+           hasHeld(a,b,"oval") && "🥚 ไข่แฝด +20%",
+           hasHeld(a,b,"incense") && "🌸 สองธาตุแน่นอน",
+           [a,b].map(x => heldOf(x) && heldOf(x).force
+             ? `🏋️ ล็อกช่อง ${BSTATS.find(s => s.k === heldOf(x).force).short}` : null)
+             .filter(Boolean).join(" · ")
+          ].filter(Boolean).join(" · ") || "ยังไม่ได้สวมอะไร"}</p>` : ''}
+      <div class="holdshop">${HELD.map(x => `
+        <button class="hsb" data-buyheld="${x.id}" ${(S.dust||0) < x.dust ? 'disabled' : ''}>
+          <b>${x.emoji} ${x.name}${heldOwn(x.id) ? ` ×${heldOwn(x.id)}` : ''}</b>
+          ${x.note}<br><small>💠 ${x.dust}</small></button>`).join('')}</div>
+    </div>
+
+    ${a && b ? `<div class="pl" style="margin-bottom:10px"><span>🥚 กลุ่มไข่</span><b>
+      ${isDitto(a) || isDitto(b) ? "มีตัวลอกเลียนอยู่ในคู่ — ผสมกับอะไรก็ได้ ไม่สนเพศและกลุ่ม"
+        : `${SP[a.sid].name} (${eggGroups(a.sid).join(" · ")}) ·
+           ${SP[b.sid].name} (${eggGroups(b.sid).join(" · ")}) —
+           ${grpOk ? "เข้ากันได้" : "ไม่มีกลุ่มร่วมกัน ผสมไม่ได้"}`}</b></div>` : ''}
 
     ${a && b ? `<div class="brpred">
       <h4>ลูกที่จะออกมา</h4>
@@ -2649,7 +2736,8 @@ function renderBreed(){
           : a.id === b.id ? "ต้องเป็นคนละตัว"
           : mixed ? "ตำนานต้องคู่กับตำนาน"
           : sexOf(a).id === "n" || sexOf(b).id === "n" ? "ตัวไม่มีเพศผสมไม่ได้"
-          : !pairOk ? "ต้องเป็น ♂ คู่กับ ♀"
+          : !sexPairOk(a, b) ? (isDitto(a) && isDitto(b) ? "ลอกเลียนคู่กันเองไม่ได้" : "ต้องเป็น ♂ คู่กับ ♀")
+          : !grpOk ? "กลุ่มไข่ไม่เข้ากัน"
           : !breedReady(a) || !breedReady(b) ? "ตัวนี้ผสมไม่ได้"
           : S.eggs.length >= NEST_MAX ? "รังเต็มแล้ว"
           : lgPair ? (lgLack.length ? "ยังขาด " + lgLack.join(" · ") : `✦ ผสมตำนาน · 🪙 ${LG_BREED_COIN}`)
@@ -2680,6 +2768,10 @@ function renderBreed(){
       · ตำนานผสมได้เฉพาะกับตำนานด้วยกัน และต้องมีวัสดุ${
       nMyth ? `<br>✧ อมตะ ${nMyth} ตัวไม่อยู่ในรายการ เพราะเป็นปลายทางของสายเลือดแล้ว` : ""}</p>`;
 
+  box.querySelectorAll('[data-hold]').forEach(el =>
+    el.onchange = () => setHeld(+el.dataset.hold, el.value || null));
+  box.querySelectorAll('[data-buyheld]').forEach(el =>
+    el.onclick = () => buyHeld(el.dataset.buyheld));
   box.querySelectorAll('[data-slot]').forEach(el =>
     el.onclick = () => { S.brPick = el.dataset.slot; sfx("tap"); renderBreed(); });
   box.querySelectorAll('[data-brtab]').forEach(el =>
@@ -2966,7 +3058,8 @@ const slotsOf = () => Math.min(SLOT_MAX, SLOT_BASE + (S.slotBonus || 0));
 const hatchMs = e => {
   const it = SHOP.find(s => s.tier === e.tier);
   const hrs = e.collab ? COLLAB_EGG_HRS : e.lgEgg ? LG_EGG_HRS : e.bred ? 3 : it ? it.hrs : (e.rar === 3 ? 2 : 0.35);
-  return Math.max(60000, hrs * 3600000 * incSpeed() * festFx("hatch", 1) * decGlobal("hatch", "mul"));     // อย่างน้อยหนึ่งนาที
+  return Math.max(60000, hrs * 3600000 * incSpeed() * festFx("hatch", 1) * decGlobal("hatch", "mul")
+    * (1 - warmCut()) * (1 - patrolCut()));     // อย่างน้อยหนึ่งนาที
 };
 const incProg = e => e.inc ? clamp((Date.now() - e.inc) / hatchMs(e), 0, 1) : 0;
 const incLeft = e => e.inc ? Math.max(0, hatchMs(e) - (Date.now() - e.inc)) : hatchMs(e);
@@ -2987,6 +3080,17 @@ function eggPeek(e){
   if(p >= .50) return { txt:`เริ่มรู้แล้วว่าเป็นธาตุ${sp.el}`, dot:sp.c1 };
   if(p >= .25) return { txt:"เปลือกเริ่มขึ้นสี แต่ยังบอกอะไรไม่ได้มาก", dot:sp.c1 };
   return { txt:"เพิ่งเริ่มอุ่น ยังดูไม่ออกเลยสักนิด", dot:null };
+}
+const PEEK_COST = 90;
+function peekEgg(i){
+  const e = S.eggs[i];
+  if(!e || e.peek) return;
+  if((S.dust || 0) < PEEK_COST){ alert("ผงตุ้ยนุ้ยไม่พอ"); return; }
+  S.dust -= PEEK_COST;
+  e.peek = true;
+  S.eggOpen = i;
+  logf(`🔍 ส่องไข่แล้ว — ดูค่าแฝงกับนิสัยได้ในรายละเอียดของไข่ฟองนั้น`, "");
+  sfx("tap"); save(); render();
 }
 function incubate(i){
   const e = S.eggs[i];
@@ -4351,8 +4455,12 @@ const sexTag = c => { const s = sexOf(c);
   return `<i class="sx" style="color:${s.col}">${s.sym}</i>`; };
 const isMale = c => c && c.sex === "m";
 const isFemale = c => c && c.sex === "f";
-const canPair = (a, b) => !!(a && b && a.id !== b.id
-  && ((isMale(a) && isFemale(b)) || (isFemale(a) && isMale(b))));
+/* ตัวลอกเลียนผสมกับใครก็ได้ ไม่สนเพศ แต่ลอกเลียนสองตัวด้วยกันไม่ได้ */
+const sexPairOk = (a, b) => !!(a && b && a.id !== b.id && (
+  (isDitto(a) || isDitto(b))
+    ? !(isDitto(a) && isDitto(b)) && sexOf(a).id !== "n" && sexOf(b).id !== "n"
+    : ((isMale(a) && isFemale(b)) || (isFemale(a) && isMale(b)))));
+const canPair = (a, b) => sexPairOk(a, b) && groupOk(a, b);
 
 /* ==== ค่าแฝง (IV) กับ ค่าฝึก (EV) แบบเดียวกับที่โปเกม่อนใช้ ==== */
 const IV_MAX = 31;                 // ค่าแฝงต่อช่อง 0–31 ล็อกตั้งแต่เกิด
@@ -4360,6 +4468,77 @@ const IV_PASS = 5;                 // ผสมพันธุ์ส่งค่
 const EV_MAX = 252;                // ค่าฝึกต่อช่องสูงสุด
 const EV_TOTAL = 510;              // ค่าฝึกรวมทั้งตัวสูงสุด
 const EV_PER_FOOD = 12;            // อาหารฝึกหนึ่งชิ้นได้เท่านี้
+
+/* ==== ของถือ · แบบเดียวกับของถือตอนเพาะในโปเกม่อน ====
+   ซื้อครั้งเดียวใช้ได้ตลอด สวมให้ตัวไหนก็ได้ ถอดสลับได้ทุกเมื่อ */
+const HELD = [
+  { id:"knot",    emoji:"🪢", name:"ผ้าพันธะ",     dust:1400,
+    note:`ส่งค่าแฝงจากพ่อแม่ครบทั้ง 6 ช่อง (ปกติได้ ${IV_PASS} ช่อง)` },
+  { id:"stone",   emoji:"🪨", name:"หินนิรันดร์",   dust:800,
+    note:"ลูกได้นิสัยเดียวกับตัวที่ถือแน่นอน 100%" },
+  { id:"oval",    emoji:"🥚", name:"เครื่องรางไข่", dust:1600,
+    note:"ผสมครั้งนั้นลุ้นไข่แฝดเพิ่มอีก 20%" },
+  { id:"incense", emoji:"🌸", name:"ธูปหอม",        dust:900,
+    note:"ถ้าพ่อแม่คนละธาตุ ลูกได้ 🌗 สองธาตุแน่นอน" },
+].concat(BSTATS.map(b => ({
+  id:"pw_" + b.k, emoji:"🏋️", name:"ของถ่วง " + b.short, dust:500, force:b.k,
+  note:`บังคับส่งค่าแฝงช่อง ${b.short} จากตัวที่ถือให้ลูกเสมอ` })));
+const HELDMAP = Object.fromEntries(HELD.map(x => [x.id, x]));
+const heldOf   = c => (c && c.it && HELDMAP[c.it]) || null;
+const heldOwn  = id => (S.hbag && S.hbag[id]) || 0;
+const heldUsed = id => (S.creatures || []).filter(c => c.it === id).length;
+const heldFree = id => Math.max(0, heldOwn(id) - heldUsed(id));
+const hasHeld  = (a, b, id) => (a && a.it === id) || (b && b.it === id);
+function buyHeld(id){
+  const it = HELDMAP[id];
+  if(!it) return;
+  if((S.dust || 0) < it.dust){ alert("ผงตุ้ยนุ้ยไม่พอ"); return; }
+  S.dust -= it.dust;
+  S.hbag = S.hbag || {};
+  S.hbag[id] = heldOwn(id) + 1;
+  logf(`ซื้อ ${it.emoji} ${it.name} แล้ว — เอาไปสวมให้พ่อแม่พันธุ์ได้เลย`, "good");
+  sfx("buy"); save(); render();
+}
+function setHeld(cid, id){
+  const c = (S.creatures || []).find(x => x.id === cid);
+  if(!c) return;
+  if(!id){ c.it = null; }
+  else if(c.it === id){ /* ถืออยู่แล้ว */ }
+  else if(heldFree(id) > 0){ c.it = id; }
+  else { alert("ของชิ้นนี้ถูกตัวอื่นถืออยู่หมดแล้ว ถอดจากตัวนั้นก่อนหรือซื้อเพิ่ม"); return; }
+  save(); render();
+}
+
+/* ==== กลุ่มไข่ · ต้องมีกลุ่มร่วมกันอย่างน้อยหนึ่งกลุ่มถึงผสมกันได้ ==== */
+const EGG_GROUPS = ["ผืนดิน", "วารี", "ปีก", "แร่ธาตุ", "พฤกษา", "อาคม", "ไร้รูป", "สรรพสัตว์"];
+const DITTO_IDS = ["mimicooze", "cbalienooze"];
+const isDitto = c => !!(c && DITTO_IDS.indexOf(c.sid) >= 0);
+function eggGroups(sid){
+  const sp = SP[sid];
+  if(!sp) return [];
+  if(DITTO_IDS.indexOf(sid) >= 0) return EGG_GROUPS.slice();
+  const g = [sp.form === "water" ? "วารี" : sp.form === "wing" ? "ปีก" : "ผืนดิน"];
+  const el = sp.el;
+  if(el === "หิน" || el === "เหล็ก") g.push("แร่ธาตุ");
+  else if(el === "พืช") g.push("พฤกษา");
+  else if(el === "วิญญาณ" || el === "จิต" || el === "รัตติกาล") g.push("อาคม");
+  else if(el === "พิษ" || el === "แมลง") g.push("ไร้รูป");
+  else g.push("สรรพสัตว์");
+  return g;
+}
+const groupOk = (a, b) => !!(a && b &&
+  (isDitto(a) || isDitto(b) ||
+   eggGroups(a.sid).some(g => eggGroups(b.sid).indexOf(g) >= 0)));
+
+/* ==== วิธีคู่ต่างถิ่น (Masuda) · พ่อแม่ที่มาจากชุด collab นับเป็นตัวต่างถิ่น ==== */
+const MASUDA_MUL = 6;
+const isForeign = c => !!(c && SP[c.sid] && SP[c.sid].collab);
+
+/* ==== 🔥 กายอบอุ่น อยู่ในฟาร์มแล้วไข่ฟักเร็วขึ้น + ตัวที่ออกลาดตระเวนช่วยเร่งอีกนิด ==== */
+const warmCut = () => Math.min(0.5, (S.creatures || [])
+  .filter(c => c.stage === "adult" && talG(c, "hatch", 0))
+  .reduce((a, c) => a + talG(c, "hatch", 0), 0));
+const patrolCut = () => Math.min(0.2, awaySet().size * 0.02);
 
 const zeroEV = () => ({ hp:0, atk:0, def:0, spa:0, spd:0, spe:0 });
 function rollIV(){
@@ -4564,7 +4743,10 @@ function renderGuide(){
     </div>
     <div class="gbox"><h4>✨ ไชนี่</h4>
       <div class="dl"><span>โอกาส</span><b>1% ตายตัว ตัดสินตอนแปลงร่างเป็นตัวโต</b></div>
-      <div class="dl"><span>ดันขึ้นได้ไหม</span><b>ไม่ได้เลย ไม่มีไอเทม อาหาร ดาว หรืออากาศช่วย</b></div>
+      <div class="dl"><span>ดันขึ้นได้ไหม</span><b>ไม่มีไอเทม อาหาร ดาว หรืออากาศช่วยได้เลย
+        · มีทางเดียวคือวิธีคู่ต่างถิ่น (ดูหัวข้อ 🎒 ของถือกับกฎการเพาะ)</b></div>
+      <div class="dl"><span>✨ วิธีคู่ต่างถิ่น</span><b>ผสมโดยมีพ่อหรือแม่เป็นตัวชุด ✧ collab
+        ไข่ฟองนั้นโอกาสไชนี่เป็น ${(SHINY_BASE*MASUDA_MUL*100).toFixed(0)}% (×${MASUDA_MUL})</b></div>
       <div class="dl"><span>ได้อะไร</span><b>หาเงิน ×2 · ผงตอนปล่อย ×3 · สีไม่ซ้ำใคร</b></div>
     </div>
     <div class="gbox"><h4>⭐ ดาว</h4>
@@ -4600,6 +4782,9 @@ function renderGuide(){
       <div class="dl"><span>ทำไมลูกยังไม่ดีขึ้น</span><b>สุ่มว่าช่องไหนและของใคร ลูกอาจได้ช่องแย่มา ต้องผสมหลายรุ่นแล้วเก็บตัวที่ 🧬 รวมสูงขึ้นไว้ทำพ่อแม่รุ่นถัดไป</b></div>
       <div class="dl"><span>วิธีไล่รุ่นเร็วที่สุด</span><b>ผสมได้ไม่ต้องพัก · ฟักไข่สายเลือด 3 ชม. · ปล่อยตัวที่ 🧬 ต่ำทิ้งเอาผงไว้ใช้ต่อ</b></div>
       <div class="dl"><span>อย่าลืม</span><b>ดาว พรสวรรค์ นิสัย และธาตุก็ส่งผลกับพลังรวมด้วย ไม่ใช่ 🧬 อย่างเดียว</b></div>
+      <div class="dl"><span>ทางลัด</span><b>🪢 ผ้าพันธะ ส่งค่าแฝงครบ 6 ช่อง · 🏋️ ของถ่วง ล็อกช่องที่ต้องการ
+        · 🪨 หินนิรันดร์ ล็อกนิสัย — ดูหัวข้อ 🎒 ของถือ</b></div>
+      <div class="dl"><span>เช็กก่อนอุ่น</span><b>🔍 ส่องไข่ 💠 ${PEEK_COST} ดูค่าแฝงได้เลย ไม่ถูกใจก็ทิ้งเอาผงคืน</b></div>
     </div>
     <div class="gbox"><h4>✧ ไข่ collab</h4>
       <div class="dl"><span>ได้อะไร</span><b>สุ่ม 1 ตัวจากชุด collab ${COLLAB_LIST.length} ตัว · ตัวที่ยังไม่มีจะออกก่อน</b></div>
@@ -4609,6 +4794,37 @@ function renderGuide(){
       <div class="dl"><span>เวลาอุ่น</span><b>${COLLAB_EGG_HRS} ชั่วโมง นานที่สุดในเกม · ติดดาวมงคลมาให้ ดาวสูงตั้งแต่เกิด</b></div>
       <div class="dl"><span>รู้ตัวก่อนได้ไหม</span><b>ไม่ได้ รู้ว่าได้ตัวไหนตอนไข่แตกเท่านั้น</b></div>
       <div class="dl"><span>ผสมพันธุ์ได้ไหม</span><b>ได้ตามปกติ แต่ลูกจะไม่ใช่ตัว collab — ตัว collab ออกจากไข่ collab ทางเดียว</b></div>
+    </div>
+    <div class="gbox"><h4>🎒 ของถือ ${HELD.length} ชิ้น</h4>
+      <div class="dl"><span>ซื้อที่ไหน</span><b>แท็บผสมพันธุ์ กล่อง 🎒 ของถือ · จ่ายด้วยผงตุ้ยนุ้ย 💠</b></div>
+      <div class="dl"><span>ใช้ยังไง</span><b>สวมให้พ่อหรือแม่ก่อนกดผสม · ซื้อครั้งเดียวใช้ตลอด ถอดสลับตัวได้ไม่จำกัด
+        · ชิ้นหนึ่งใส่ได้ทีละตัวเดียว</b></div>
+      ${HELD.map(x => `<div class="dl"><span>${x.emoji} ${x.name}</span><b>${x.note} <i
+        style="color:var(--dim);font-style:normal">· 💠 ${x.dust}</i></b></div>`).join('')}
+      <div class="dl"><span>วิธีไล่ 31 ทุกช่อง</span><b>ผ้าพันธะ + ของถ่วงช่องที่อยากล็อก แล้วผสมไล่รุ่น
+        เก็บลูกที่ช่องนั้นเต็มไว้เป็นพ่อแม่รุ่นถัดไป</b></div>
+    </div>
+    <div class="gbox"><h4>🥚 กลุ่มไข่ กับ ตัวลอกเลียน</h4>
+      <div class="dl"><span>กฎ</span><b>คู่ที่จะผสมกันต้องมีกลุ่มไข่ร่วมกันอย่างน้อยหนึ่งกลุ่ม</b></div>
+      <div class="dl"><span>กลุ่มมาจากอะไร</span><b>ร่างของมัน (ผืนดิน · วารี · ปีก) บวกอีกกลุ่มตามธาตุ</b></div>
+      <div class="dl"><span>แร่ธาตุ</span><b>ธาตุหิน · เหล็ก</b></div>
+      <div class="dl"><span>พฤกษา</span><b>ธาตุพืช</b></div>
+      <div class="dl"><span>อาคม</span><b>ธาตุวิญญาณ · จิต · รัตติกาล</b></div>
+      <div class="dl"><span>ไร้รูป</span><b>ธาตุพิษ · แมลง</b></div>
+      <div class="dl"><span>สรรพสัตว์</span><b>ธาตุที่เหลือทั้งหมด</b></div>
+      <div class="dl"><span>ดูกลุ่มที่ไหน</span><b>แท็บผสมพันธุ์ บรรทัด 🥚 กลุ่มไข่ ขึ้นให้ทันทีที่เลือกครบสองตัว</b></div>
+      <div class="dl"><span>🫧 ตัวลอกเลียน</span><b>เมือกลอกเลียน กับ เมือกต่างดาว ผสมกับตัวไหนก็ได้
+        ไม่สนเพศและไม่สนกลุ่ม ลูกออกมาเป็นสายพันธุ์ของอีกฝ่ายเสมอ (ลอกเลียนสองตัวคู่กันเองไม่ได้)</b></div>
+      <div class="dl"><span>ใช้ทำอะไร</span><b>เอาไว้เพาะตัวที่หาคู่ยาก หรือตัวที่มีเพศเดียวในฟาร์ม</b></div>
+    </div>
+    <div class="gbox"><h4>🔥 เร่งฟักไข่ กับ 🔍 ส่องไข่</h4>
+      <div class="dl"><span>🔥 กายอบอุ่น</span><b>พรสวรรค์ใหม่ · มีตัวนี้อยู่ในฟาร์ม ไข่ทุกฟองในรังฟักเร็วขึ้น 30%
+        หลายตัวรวมกันได้ถึง 50% (ไม่ต้องเอาไปทำอะไร แค่มีอยู่)</b></div>
+      <div class="dl"><span>🧭 ลาดตระเวน</span><b>ตัวที่ออกลาดตระเวนอยู่ช่วยเร่งฟักอีกตัวละ 2% รวมได้ถึง 20%</b></div>
+      <div class="dl"><span>ตอนนี้ลดได้</span><b>🔥 -${Math.round(warmCut()*100)}% · 🧭 -${Math.round(patrolCut()*100)}%</b></div>
+      <div class="dl"><span>🔍 ส่องไข่</span><b>💠 ${PEEK_COST} ต่อฟอง · เห็นค่าแฝงทั้ง 6 ช่อง นิสัย พรสวรรค์
+        และธาตุที่สอง ก่อนจะเสียเวลาอุ่นให้ครบ</b></div>
+      <div class="dl"><span>เอาไปทำอะไร</span><b>ส่องแล้วเจอค่าแฝงแย่ ก็ทิ้งไข่เอาผงคืน ไม่ต้องรออุ่นจนแตก</b></div>
     </div>
     <div class="gbox"><h4>✦ พรสวรรค์ ${TALENTS.length} อย่าง</h4>
       <div class="dl"><span>ติดตอนไหน</span><b>ฟักไข่ ${Math.round(TALENT_CHANCE*100)}% · สืบจากพ่อแม่ได้ถึง ${Math.round(TAL_BOTH_SAME*100)}%</b></div>
@@ -5670,7 +5886,8 @@ function renderSel(){
               background:${["#B9C7BF","#9CC6E8","#7FD3A6","#F6C445","#F49A8B"][i]}"></div></div>
             <b>${(o*100).toFixed(0)}%</b></div>`).join('')}</div>
           <p class="xplab">อาหารเร่งได้แค่ความเร็วในการโต ไม่มีผลกับดาว · ดาวสุ่มล้วนตอนแปลงร่าง
-            ไชนี่คงที่ 1% · อยากได้ตัวโหดต้องผสมพันธุ์ไล่รุ่นเอา</p>`}
+            ไชนี่ 1% ยกเว้นไข่จากคู่ต่างถิ่นที่เป็น ${(SHINY_BASE*MASUDA_MUL*100).toFixed(0)}%
+            · อยากได้ตัวโหดต้องผสมพันธุ์ไล่รุ่นเอา</p>`}
         ${(() => { const nu = nurOf(c);
           const rows = [["pull","⭐ แนวโน้มดาว","+" + nu.pull.toFixed(2)],
                         ["pw","💥 พลังรวม","+" + Math.round(nu.pw*100) + "%"],
@@ -5762,7 +5979,8 @@ function renderShop(){
     `เพิ่มตัวใหม่ไม่คุ้มเท่าอัปตัวเดิมให้ดาวสูงขึ้น` +
     ` · โบนัสรายได้จากพรสวรรค์ ฉาก และของตกแต่ง รวมกันได้ไม่เกิน ${EARN_CAP} เท่าต่อตัว`;
   $('#pityLine').textContent = `ไชนี่ตัดสินตอนแปลงร่างเท่านั้น · 1% ตายตัวทุกตัว ` +
-    `ไม่มีไอเทม อากาศ ดาว หรือระบบสะสมใดดันขึ้นได้ · ฟักไปแล้ว ${S.hatched || 0} ฟอง เจอไชนี่ ${S.shinies || 0} ตัว` +
+    `ไม่มีไอเทม อากาศ ดาว หรือระบบสะสมใดดันขึ้นได้ · ทางเดียวคือคู่ต่างถิ่น (พ่อหรือแม่เป็นตัว collab) ×${MASUDA_MUL}` +
+    ` · ฟักไปแล้ว ${S.hatched || 0} ฟอง เจอไชนี่ ${S.shinies || 0} ตัว` +
     ` · ตัวตำนาน ${S.legends || 0} ตัว (ออกจากไข่บอสเท่านั้น)`;
 
   const rdy = readyCount();
@@ -5808,6 +6026,7 @@ function renderShop(){
       <div class="eggrow">
         <button class="ec" data-eggdet="${i}">${open ? '▲ ย่อ' : '▼ รายละเอียด'}</button>
         ${rc ? `<button class="ec" data-rush="${i}" ${(S.dust||0) >= rc ? '' : 'disabled'}>⏩ เร่ง 💠${rc}</button>` : ''}
+        ${e.peek ? '' : `<button class="ec" data-look="${i}" ${(S.dust||0) >= PEEK_COST ? '' : 'disabled'}>🔍 ส่อง 💠${PEEK_COST}</button>`}
         <button class="ec bad" data-toss="${i}">🗑</button>
       </div>
       ${open ? `<div class="eggdet">
@@ -5822,7 +6041,17 @@ function renderShop(){
         <div class="dl"><span>พรสวรรค์</span><b>${od.talent >= 1 ? "สืบมาแล้ว"
           : Math.round(od.talent*100) + "%"}</b></div>
         <div class="dl"><span>ไข่แฝด</span><b>${od.twin ? Math.round(od.twin*100) + "%" : "ยังไม่ได้อัปรังไข่แฝด"}</b></div>
-        <div class="dl"><span>เวลาอุ่นเต็ม</span><b>${(hatchMs(e)/3600000).toFixed(2)} ชม.</b></div>
+        <div class="dl"><span>เวลาอุ่นเต็ม</span><b>${(hatchMs(e)/3600000).toFixed(2)} ชม.${
+          warmCut() ? ` · 🔥 กายอบอุ่น -${Math.round(warmCut()*100)}%` : ''}${
+          patrolCut() ? ` · 🧭 ลาดตระเวน -${Math.round(patrolCut()*100)}%` : ''}</b></div>
+        ${e.peek ? `<div class="dl"><span>🔍 ส่องแล้ว</span><b>
+          🧬 ค่าแฝงรวม ${e.iv ? BSTATS.reduce((s,x) => s + e.iv[x.k], 0) : '?'}/${IV_MAX*6}
+          ${e.iv ? `<br>${BSTATS.map(x => `${x.short} ${e.iv[x.k]}`).join(" · ")}` : ''}
+          <br>นิสัย ${e.nature && NT[e.nature] ? NT[e.nature].emoji + " " + NT[e.nature].name : "สุ่มตอนแตก"}
+          ${e.tal && TAL[e.tal] ? `<br>พรสวรรค์ ${TAL[e.tal].emoji} ${TAL[e.tal].name}` : ''}
+          ${e.el2 ? `<br>🌗 ธาตุที่สอง ${e.el2}` : ''}
+          ${e.masu ? `<br>✨ คู่ต่างถิ่น — โอกาสไชนี่ ×${MASUDA_MUL}` : ''}</b></div>`
+          : `<div class="dl"><span>🔍 ส่องไข่</span><b>💠 ${PEEK_COST} แล้วเห็นค่าแฝง นิสัย และพรสวรรค์ทันที</b></div>`}
         <div class="dl"><span>ทิ้งได้ผง</span><b>💠 ${Math.round(30 + (e.rar||1)*40 + (e.starPull||0)*60 + (e.boss||e.lgEgg ? 220 : 0))}</b></div>
       </div>` : ''}
     </div>`;
@@ -5831,6 +6060,7 @@ function renderShop(){
   $('#eggList').querySelectorAll('[data-inc]').forEach(b => b.onclick = () => incubate(+b.dataset.inc));
   $('#eggList').querySelectorAll('[data-eggdet]').forEach(b => b.onclick = () => toggleEggDetail(+b.dataset.eggdet));
   $('#eggList').querySelectorAll('[data-rush]').forEach(b => b.onclick = () => rushEgg(+b.dataset.rush));
+  $('#eggList').querySelectorAll('[data-look]').forEach(b => b.onclick = () => peekEgg(+b.dataset.look));
   $('#eggList').querySelectorAll('[data-toss]').forEach(b => b.onclick = () => tossEgg(+b.dataset.toss));
   const wa = $('#btnWarmAll');
   if(wa){

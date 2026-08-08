@@ -1536,7 +1536,8 @@ function packSave(){
     Object.keys(S.penName || {}).map(k => k + ":" + encodeURIComponent(S.penName[k])).join("~") + "," +
     [S.bossTier || 0, S.capBonus || 0, S.decayCut || 0,
      S.incLv || 0, S.twinLv || 0, S.hires || 0].map(c36).join(".") + "," +
-    HELD.map(x => c36(heldOwn(x.id))).join(".");
+    HELD.map(x => c36(heldOwn(x.id))).join(".") + "," +
+    (S.bossTryDay === todayKey() ? c36(S.bossTry || 0) : "0");
 
   let bits = "";                                     // สมุดภาพ = 1 บิตต่อสายพันธุ์
   SPECIES.forEach(s => bits += (S.seen && S.seen[s.id]) ? "1" : "0");
@@ -1654,6 +1655,7 @@ function unpackSave(txt){
   S2.hbag = {};
   if(m[22]){ const v = m[22].split(".");
     HELD.forEach((x, i) => { const n = p36(v[i] || "0"); if(n) S2.hbag[x.id] = n; }); }
+  if(m[23]){ const n = p36(m[23]); if(n){ S2.bossTry = n; S2.bossTryDay = todayKey(); } }
   S2.incMigrated = true;
 
   S2.seen = {};
@@ -2744,8 +2746,8 @@ function brSlot(c, side, active){
 }
 
 function renderBreed(){
-  const gone = awaySet();
-  const all = S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id));
+  const gone = awaySet();      // ลาดตระเวนอยู่ก็ผสมพันธุ์ได้ ไม่ต้องรอกลับ
+  const all = S.creatures.filter(c => c.stage === "adult");
   const adults = all.filter(c => !c.myth);                // อมตะเป็นปลายทาง ผสมต่อไม่ได้
   const nMyth = all.length - adults.length;
   const box = $('#breedBox');
@@ -3232,8 +3234,9 @@ const LEGEND_POWER = 1.45;    // ตัวตำนานได้แต้ม�
 const LEGEND_STAR  = 1.2;     // เกิดมาพร้อมแนวโน้มดาวสูง
 /* ---- การอุ่นไข่: ต้องใส่ช่องอุ่นแล้วรอเวลา ระหว่างรอเปลือกจะบอกใบ้ทีละขั้น ---- */
 /* ---- โรงฟักไข่: อัปเกรดด้วยเหรียญ เร่งเวลา เพิ่มช่อง ลุ้นไข่แฝด ---- */
-const SLOT_BASE = 4, SLOT_MAX = 12;
-const INC_LV_MAX  = 10, INC_STEP  = 0.08;    // เร่งความร้อน ระดับละ 8% (ทบต้น)
+const SLOT_BASE = 4, SLOT_MAX = 40;          // ขยายได้จนอุ่นพร้อมกันครบทั้งรัง
+const INC_LV_MAX  = 40, INC_STEP  = 0.08;    // เร่งความร้อน ระดับละ 8% (ทบต้น)
+const HATCH_FLOOR = 3600000;                 // เร่งเท่าไหร่ก็ไม่ต่ำกว่าหนึ่งชั่วโมง
 const TWIN_LV_MAX = 5,  TWIN_STEP = 0.03;    // ไข่แฝด ระดับละ 3%
 const incLv    = () => S.incLv || 0;
 const twinLv   = () => S.twinLv || 0;
@@ -3243,14 +3246,14 @@ const twinChance = () => TWIN_STEP * twinLv();
 const NURSERY = [
   { id:"slot",  emoji:"🪺", name:"ขยายช่องอุ่นไข่",
     lv: () => Math.max(0, slotsOf() - SLOT_BASE), max: SLOT_MAX - SLOT_BASE,
-    price: () => Math.round(6000 * Math.pow(2.05, Math.max(0, slotsOf() - SLOT_BASE))),
+    price: () => Math.round(6000 * Math.pow(1.28, Math.max(0, slotsOf() - SLOT_BASE))),
     now: () => `อุ่นพร้อมกันได้ ${slotsOf()} ฟอง`,
     next: () => `เป็น ${slotsOf() + 1} ฟอง`,
     run: () => { S.slotBonus = (S.slotBonus || 0) + 1; } },
   { id:"speed", emoji:"⏩", name:"เร่งความร้อนเตาฟัก",
     lv: incLv, max: INC_LV_MAX,
-    price: () => Math.round(9000 * Math.pow(1.95, incLv())),
-    now: () => `เวลาฟักเหลือ ${Math.round(incSpeed()*100)}% ของปกติ`,
+    price: () => Math.round(9000 * Math.pow(1.32, incLv())),
+    now: () => `เวลาฟักเหลือ ${Math.round(incSpeed()*100)}% ของปกติ (ต่ำสุด 1 ชม.)`,
     next: () => `เหลือ ${Math.round(Math.pow(1 - INC_STEP, incLv() + 1)*100)}%`,
     run: () => { S.incLv = incLv() + 1; } },
   { id:"twin",  emoji:"👯", name:"รังไข่แฝด",
@@ -3287,8 +3290,10 @@ const slotsOf = () => Math.min(SLOT_MAX, SLOT_BASE + (S.slotBonus || 0));
 const hatchMs = e => {
   const it = SHOP.find(s => s.tier === e.tier);
   const hrs = e.collab ? COLLAB_EGG_HRS : e.lgEgg ? LG_EGG_HRS : e.bred ? 3 : it ? it.hrs : (e.rar === 3 ? 2 : 0.35);
-  return Math.max(60000, hrs * 3600000 * incSpeed() * festFx("hatch", 1) * decGlobal("hatch", "mul")
-    * (1 - warmCut()) * (1 - patrolCut()));     // อย่างน้อยหนึ่งนาที
+  const base = hrs * 3600000;
+  const cut = base * incSpeed() * festFx("hatch", 1) * decGlobal("hatch", "mul")
+    * (1 - warmCut()) * (1 - patrolCut());
+  return Math.max(Math.min(base, HATCH_FLOOR), cut);   // ลดได้ถึงหนึ่งชั่วโมง ไข่ที่สั้นกว่านั้นอยู่แล้วไม่ถูกดึงยาว
 };
 const incProg = e => e.inc ? clamp((Date.now() - e.inc) / hatchMs(e), 0, 1) : 0;
 const incLeft = e => e.inc ? Math.max(0, hatchMs(e) - (Date.now() - e.inc)) : hatchMs(e);
@@ -5038,6 +5043,49 @@ function renderGuide(){
       <div class="dl"><span>รู้ตัวก่อนได้ไหม</span><b>ไม่ได้ รู้ว่าได้ตัวไหนตอนไข่แตกเท่านั้น</b></div>
       <div class="dl"><span>ผสมพันธุ์ได้ไหม</span><b>ได้ตามปกติ แต่ลูกจะไม่ใช่ตัว collab — ตัว collab ออกจากไข่ collab ทางเดียว</b></div>
     </div>
+    <div class="gbox"><h4>♻️ ใช้ตัวเดิมซ้ำได้ทุกโหมด</h4>
+      <div class="dl"><span>บอสรายวัน</span><b>ตีกี่รอบก็ได้ ทีมเดิมส่งซ้ำได้ทันที</b></div>
+      <div class="dl"><span>ดันเจี้ยน</span><b>ไม่มีเวลาพักแล้ว (เดิมต้องพัก 4 ชม.) ลุยวนด้วยทีมเดิมได้เลย</b></div>
+      <div class="dl"><span>หอคอย</span><b>ตัวที่ส่งลงชั้นก่อนหน้าใช้ซ้ำได้ทุกชั้น ไม่ต้องสลับทีมแล้ว</b></div>
+      <div class="dl"><span>ผสมพันธุ์</span><b>ไม่มีเวลาพักอยู่แล้ว ขีดจำกัดจริงคือช่องในรัง</b></div>
+      <div class="dl"><span>ยังจำกัดอยู่อย่างเดียว</span><b>🧭 ลาดตระเวน — ตัวที่ออกเดินทางจะไม่อยู่ในฟาร์มจนกลับมา
+        จึงส่งไปสู้ในระหว่างนั้นไม่ได้</b></div>
+    </div>
+    <div class="gbox"><h4>♻️ ใช้ตัวเดิมซ้ำได้ทุกอย่าง ไม่มีคูลดาวน์</h4>
+      <div class="dl"><span>บอสรายวัน</span><b>ทีมเดิม 3 ตัวส่งลงได้ทุกรอบ ไม่จำกัดรอบ ไม่ต้องพัก</b></div>
+      <div class="dl"><span>ดันเจี้ยน</span><b>ไม่มีเวลาพักเลย ลุยติดกันได้ทันที</b></div>
+      <div class="dl"><span>หอคอย</span><b>ใช้ตัวเดิมซ้ำได้ทุกชั้นในรอบเดียวกัน</b></div>
+      <div class="dl"><span>ผสมพันธุ์</span><b>ผสมรัวได้ ไม่มีเวลาพักทั้งตัวปกติและตัวตำนาน
+        · ขีดจำกัดจริงคือช่องในรังไข่</b></div>
+      <div class="dl"><span>🧭 ลาดตระเวน</span><b>ตัวที่ออกลาดตระเวนอยู่ก็ยังเลือกลงทีมสู้และผสมพันธุ์ได้
+        จะขึ้นไอคอน 🧭 กำกับไว้ให้รู้ว่าตัวนั้นออกไปด้วย</b></div>
+      <div class="dl"><span>ที่ยังทำไม่ได้ตอนลาดตระเวน</span><b>ส่งขาย · ปล่อยกลับป่า · เก็บเข้าตู้ฝาก · ย้ายทุ่ง
+        (กันเผลอทำตัวที่ไม่อยู่บ้านหาย)</b></div>
+      <div class="dl"><span>ตัวในตู้ฝาก 📦</span><b>อันนี้ลงทีมไม่ได้ ต้องดึงออกมาก่อน</b></div>
+    </div>
+    <div class="gbox"><h4>🪺 โรงฟักไข่</h4>
+      <div class="dl"><span>ช่องอุ่นไข่</span><b>ขยายได้ถึง ${SLOT_MAX} ฟอง = อุ่นพร้อมกันได้ทั้งรัง
+        (รังจุ ${NEST_MAX} ฟอง) · ซื้อได้เรื่อยๆ ราคาขึ้นทีละ 28%</b></div>
+      <div class="dl"><span>เร่งความร้อน</span><b>อัปได้ถึงระดับ ${INC_LV_MAX} · ระดับละ −8% ทบต้น
+        เต็มขั้นเหลือ ${Math.round(Math.pow(1-INC_STEP,INC_LV_MAX)*100)}% ของเวลาปกติ</b></div>
+      <div class="dl"><span>เวลาต่ำสุด</span><b>เร่งเท่าไหร่ก็ไม่ต่ำกว่า 1 ชั่วโมง
+        · ไข่ที่เดิมสั้นกว่า 1 ชม.อยู่แล้ว (ไข่ร้านค้า) ไม่ถูกดึงให้ยาวขึ้น</b></div>
+      <div class="dl"><span>เต็มขั้นแล้วได้เท่าไหร่</span><b>ไข่ collab 24 ชม. → 1 ชม. · ไข่ตำนาน 12 ชม. → 1 ชม.
+        · ไข่สายเลือด 3 ชม. → 1 ชม.</b></div>
+      <div class="dl"><span>ลดเพิ่มได้อีก</span><b>🔥 กายอบอุ่นในฟาร์ม −50% · 🧭 ลาดตระเวน −20% · ของแต่งทุ่งบางชิ้น
+        (แต่ก็ยังไม่ต่ำกว่า 1 ชม.)</b></div>
+    </div>
+    <div class="gbox"><h4>👹 บอสรายวัน ตีซ้ำได้ไม่จำกัด</h4>
+      <div class="dl"><span>จำนวนรอบ</span><b>ตีกี่รอบก็ได้ ไม่มีลิมิตต่อวันแล้ว</b></div>
+      <div class="dl"><span>รอบแรกของวัน</span><b>รางวัลเต็ม 100% · ได้ไข่บอส 💠 ผงตุ้ยนุ้ย 💎 แกนพลัง
+        และขึ้นชั้นนรกได้ (ต้องชนะ)</b></div>
+      <div class="dl"><span>รอบซ้ำ</span><b>ได้ของทุกอย่างเหมือนกันหมด — ไข่บอส 🪙 อาหาร 💠 💎
+        แค่น้อยลงเป็น 65% → 55% → 50% → 45% แล้วคงที่ 40% ตลอด</b></div>
+      <div class="dl"><span>รอบซ้ำไม่ได้อะไร</span><b>แค่ชั้นนรกกับเควสต์บอส (ต้องเป็นรอบแรกของวันเท่านั้น)</b></div>
+      <div class="dl"><span>ฟาร์มไข่บอส</span><b>ตีวนได้ทั้งวัน ไข่บอสมีโอกาสออกทุกรอบ
+        ยิ่งความยากสูงโอกาสยิ่งเยอะ · ตัวตำนานประจำบอสตัวนั้นออกจากไข่ทุกฟองได้เท่ากัน</b></div>
+      <div class="dl"><span>แพ้ก็ยังได้</span><b>ได้รางวัลตามดาเมจที่ทำได้เหมือนเดิม และนับเป็นรอบซ้ำด้วย</b></div>
+    </div>
     <div class="gbox"><h4>📦 ตู้ฝากตุ้ยนุ้ย</h4>
       <div class="dl"><span>อยู่ไหน</span><b>แท็บจัดการตุ้ยนุ้ย กล่องสีม่วงบนสุด · จุได้ ${BOX_MAX} ตัว</b></div>
       <div class="dl"><span>เก็บไว้ทำไม</span><b>ทุ่งเต็มแล้วไม่ต้องปล่อยทิ้ง เก็บเข้าตู้แทน
@@ -5505,9 +5553,9 @@ function renderTradeEgg(){
 
 /* ==== ดันเจี้ยน ==== */
 const DG_TEAM = 5;
-const DG_CD   = 4*3600*1000;      // ตุ้ยนุ้ยที่ลุยแล้วต้องพักก่อนลุยอีก
+const DG_CD   = 0;                // ไม่มีเวลาพัก ใช้ตัวเดิมลุยซ้ำได้ไม่จำกัด
 const dgLv    = id => (S.dgLv && S.dgLv[id]) || 1;
-const dgTired = c => Math.max(0, DG_CD - (Date.now() - (c.dgAt || 0)));
+const dgTired = c => DG_CD ? Math.max(0, DG_CD - (Date.now() - (c.dgAt || 0))) : 0;
 function dgFoe(x){
   const lv = dgLv(x.id), k = Math.pow(1.14, lv - 1);
   return { id:x.id, name:`${x.boss.name} · ชั้นลึก ${lv}`, art:x.boss.art, el:x.el,
@@ -5515,7 +5563,7 @@ function dgFoe(x){
 }
 function dgAvail(){
   const gone = awaySet();
-  return S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !c.box && !dgTired(c))
+  return S.creatures.filter(c => c.stage === "adult" && !c.box && !dgTired(c))
     .sort((a, b) => ensureBattle(b).total - ensureBattle(a).total);
 }
 function dgFight(){
@@ -5559,7 +5607,7 @@ function dgResult(x, F, win, dealt, team){
     logf(`ถอยออกจาก${x.name} — ทำดาเมจได้ ${Math.round(dealt*100)}% ได้ 🪙 ${coins}`, "");
     sfx("lose");
     showSpin({ emoji:"💤", title:`ยังไม่ผ่าน${x.name}`,
-      detail:`ทำดาเมจได้ ${Math.round(dealt*100)}% · ได้ 🪙 ${coins}<br>ทีมที่ใช้ไปต้องพัก ${DG_CD/3600000} ชั่วโมง` });
+      detail:`ทำดาเมจได้ ${Math.round(dealt*100)}% · ได้ 🪙 ${coins}<br>ลองใหม่ได้เลย ทีมเดิมไม่ต้องพัก` });
   }
   save(); render();
 }
@@ -5590,8 +5638,7 @@ function renderDungeon(){
       </div></div>
     <p class="note" style="margin:0 0 10px">${x.desc}<br>
       ชนะได้ <b>${x.egg}</b> หนึ่งฟองทุกครั้ง ลุ้นตำนานประจำถ้ำ ${Math.round(LEGEND_CHANCE*100)}%
-      · ตุ้ยนุ้ยที่ลุยแล้วต้องพัก ${DG_CD/3600000} ชั่วโมง${
-      tired.length ? ` · ตอนนี้พักอยู่ ${tired.length} ตัว` : ''}</p>
+      · ลุยซ้ำได้ไม่จำกัด ใช้ทีมเดิมวนได้เลย ไม่มีเวลาพัก</p>
 
     <div class="lgbox">
       <h4>✦ ตำนานประจำ${x.name} · ${pool.length} ตัว</h4>
@@ -5608,16 +5655,16 @@ function renderDungeon(){
       const mu = unitMult(c, F);
       return `<button class="tm" aria-pressed="${on}" data-dg="${c.id}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
+          awaySet().has(c.id) ? " 🧭" : ""}
           <br>${multTag(mu)}</small>
       </button>`;
-    }).join('') : `<p class="empty" style="grid-column:1/-1">ตุ้ยนุ้ยพักอยู่หมด รออีกสักพัก</p>`}</div>
+    }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวโตเต็มวัยไปลุย</p>`}</div>
     <div class="foot" style="margin:10px 0 0">
       <button class="btn sun" id="btnDgGo" ${team.length ? '' : 'disabled'}>
         ${team.length ? `${x.emoji} บุก${x.name}` : "เลือกทีมก่อน"}</button>
     </div>
-    ${tired.length ? `<p class="note">พักอยู่: ${tired.slice(0, 8).map(c =>
-      `${SP[c.sid].name} (${hhmm(dgTired(c))})`).join(" · ")}${tired.length > 8 ? " …" : ""}</p>` : ''}`;
+    `;
 
   box.querySelectorAll('[data-dgsel]').forEach(b =>
     b.onclick = () => { S.dgCur = b.dataset.dgsel; S.dgTeam = []; renderDungeon(); });
@@ -5630,7 +5677,7 @@ function renderDungeon(){
   const g = $('#btnDgGo'); if(g) g.onclick = dgFight;
 }
 
-/* ---- หอคอยไต่ชั้น: ตัวที่ใช้แล้วห้ามใช้ซ้ำในรอบเดียวกัน ---- */
+/* ---- หอคอยไต่ชั้น: ใช้ตัวเดิมซ้ำได้ทุกชั้นกัน ---- */
 const TW_TEAM   = 5;
 const TW_CHECK  = 5;          // จุดพักทุกห้าชั้น เริ่มรอบใหม่จากตรงนี้ได้
 const towerBest = () => S.twBest || 0;
@@ -5661,8 +5708,8 @@ function towerLoot(f){
   };
 }
 function towerAvail(){
-  const gone = awaySet(), used = new Set((towerRun() || {}).used || []);
-  return S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !c.box && !used.has(c.id))
+  const gone = awaySet();
+  return S.creatures.filter(c => c.stage === "adult" && !c.box)
     .sort((a, b) => ensureBattle(b).total - ensureBattle(a).total);
 }
 function towerStart(from){
@@ -5697,7 +5744,7 @@ function towerFight(){
 function towerResult(F, win, dealt, team){
   const r = towerRun();
   if(!r) return;
-  r.used = (r.used || []).concat(team.map(c => c.id));
+  r.used = (r.used || []).concat(team.map(c => c.id));   // เก็บไว้แค่โชว์สถิติ ไม่ได้ห้ามใช้ซ้ำแล้ว
   S.twTeam = [];
   const got = [];
   if(win){
@@ -5714,7 +5761,7 @@ function towerResult(F, win, dealt, team){
     logf(`ผ่านหอคอยชั้น ${F.floor} — ${got.join(" · ")}`, "good");
     sfx("win");
     showSpin({ emoji: F.guard ? "🛡" : "🗼", title:`ผ่านชั้น ${F.floor}`,
-      detail: got.join(" · ") + `<br>ตัวที่ใช้ไปแล้วรวม ${r.used.length} ตัว`, big: F.guard });
+      detail: got.join(" · ") + `<br>ส่งลงสนามไปแล้วรวม ${r.used.length} ครั้ง`, big: F.guard });
   } else {
     logf(`ตกรอบที่หอคอยชั้น ${F.floor} — ทำดาเมจได้ ${Math.round(dealt*100)}%`, "");
     sfx("lose");
@@ -5738,7 +5785,7 @@ function renderTower(){
     if(!stops.length) stops.push(1);
     box.innerHTML = `
       <div class="twhead"><b>🗼 ชั้นสูงสุดที่เคยไปถึง ${best || "—"}</b>
-        <span>ตัวที่ใช้ไปแล้วในรอบหนึ่ง จะใช้ซ้ำไม่ได้จนกว่าจะจบรอบ · เลือกได้ทีละ ${TW_TEAM} ตัว</span></div>
+        <span>ใช้ตัวเดิมซ้ำได้ทุกชั้น ไม่มีคูลดาวน์ · เลือกได้ทีละ ${TW_TEAM} ตัว</span></div>
       <p class="note" style="margin:0 0 10px">ทุก ${TW_CHECK} ชั้นเป็นจุดพัก รอบใหม่เริ่มจากจุดพักที่ปลดล็อกไว้ได้เลย
         · ทุกชั้นที่ 10 เจอผู้พิทักษ์ที่แกร่งกว่าปกติมาก</p>
       <div class="twstops">${stops.map(f =>
@@ -5772,7 +5819,8 @@ function renderTower(){
       const mu = unitMult(c, F);
       return `<button class="tm" aria-pressed="${on}" data-tw="${c.id}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
+          awaySet().has(c.id) ? " 🧭" : ""}
           <br>${multTag(mu)}</small>
       </button>`;
     }).join('') : `<p class="empty" style="grid-column:1/-1">ตุ้ยนุ้ยหมดแล้ว จบรอบนี้ก่อน</p>`}</div>
@@ -6291,21 +6339,33 @@ function diffOf(i){
 }
 const todayKey = () => { const d = new Date();
   return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
-const bossDone = () => S.lastBoss === todayKey();
+const bossDone = () => S.lastBoss === todayKey();        // เคลียร์รอบแรกของวันไปแล้วหรือยัง
+/* ตีบอสรายวันได้ไม่จำกัดรอบ · รอบแรกของวันได้รางวัลเต็ม รอบต่อไปได้ลดหลั่น */
+const bossTries = () => (S.bossTryDay === todayKey() ? (S.bossTry || 0) : 0);
+const REPEAT_CUT = [1, 0.65, 0.55, 0.50, 0.45, 0.40];   // รอบซ้ำได้ของทุกอย่าง แค่น้อยลง
+const repeatMul = () => REPEAT_CUT[Math.min(bossTries(), REPEAT_CUT.length - 1)];
+function bumpBossTry(){
+  if(S.bossTryDay !== todayKey()){ S.bossTryDay = todayKey(); S.bossTry = 0; }
+  S.bossTry = (S.bossTry || 0) + 1;
+}
 
 function fight(diff){
   const B = bossToday(), D = diffOf(diff);
   const team = (S.team || []).map(id => S.creatures.find(c => c.id === id))
     .filter(c => c && c.stage === "adult");
-  if(!team.length || bossDone()) return;
+  if(!team.length) return;
+  const first = !bossDone();                 // รอบแรกของวัน (ยังไม่เคยเคลียร์)
+  const rm = repeatMul();                    // ตัวคูณรางวัลรอบซ้ำ
 
   const bhp = Math.round(D.hp * (B.mul||1)), bpw = Math.round(D.pw * (B.mul||1));
   const R0 = runBattle(team, { name:B.name, el:B.el, hp:bhp, pw:bpw }, { maxRound:18 });
   const units = R0.units, boss = R0.boss, log = R0.log, ev = R0.ev, fightSfx = R0.sfxq;
   const dealt = R0.dealt, win = R0.win;
   const L = B.loot || {};
-  const coins = Math.round(D.coins * (L.coin || 1) * decGlobal("bossCoin", "mul") * festFx("bossCoin", 1) * (win ? 1 : dealt*0.6));
-  const nFood = Math.max(1, Math.round(D.foods * (L.foodMult || 1) * (win ? 1 : dealt*0.5)));
+  const coins = Math.round(D.coins * (L.coin || 1) * decGlobal("bossCoin", "mul") * festFx("bossCoin", 1)
+    * (win ? 1 : dealt*0.6) * rm);
+  const nFood = Math.max(rm >= 1 ? 1 : 0,
+    Math.round(D.foods * (L.foodMult || 1) * (win ? 1 : dealt*0.5) * rm));
   const gotFood = {};
   for(let i = 0; i < nFood; i++){
     const f = L.foodPick || (win && Math.random() < .45 ? "cake" : Math.random() < .5 ? "fruit" : "grass");
@@ -6313,30 +6373,38 @@ function fight(diff){
     S.bag[f] = (S.bag[f] || 0) + 1;
   }
   const eggs = [];
-  if(win){
+  if(win){                                   // รอบซ้ำก็ได้ไข่บอส แต่โอกาสน้อยลงตามตัวคูณ
     for(let i = 0; i < (L.eggs || 1) + festAdd("bossEgg"); i++){
       if(S.eggs.length >= NEST_MAX) break;
-      const sure = !!L.eggs;                     // วันที่ของขวัญคือไข่ ได้แน่นอนทุกความยาก
-      if(!sure && Math.random() >= (i === 0 ? D.eggCh : D.eggCh*0.85)) continue;
+      const sure = !!L.eggs && first;            // วันที่ของขวัญคือไข่ ได้แน่นอนเฉพาะรอบแรก
+      if(!sure && Math.random() >= (i === 0 ? D.eggCh : D.eggCh*0.85) * (first ? 1 : rm)) continue;
       const e = { sid:pickByRarity(3), tier:2, rar:3, boss:true, bossId:B.id };
       if(L.eggStar) e.starPull = L.eggStar;
       S.eggs.push(e); eggs.push(e);
     }
   }
   S.coins += coins;
-  const gotDust = win ? (L.dust || 0) : Math.round((L.dust || 0) * dealt * 0.5);
+  const gotDust = Math.round((win ? (L.dust || 0) : (L.dust || 0) * dealt * 0.5) * rm);
   if(gotDust) S.dust = (S.dust || 0) + gotDust;
-  S.lastBoss = todayKey();
+  bumpBossTry();
+  if(win) S.lastBoss = todayKey();
   S.bossWins = (S.bossWins || 0) + (win ? 1 : 0);
-  if(win){ addMat("core", diff >= 3 ? 3 : diff >= 2 ? 2 : 1); qAdd("boss"); }
+  if(win){
+    const nCore = diff >= 3 ? 3 : diff >= 2 ? 2 : 1;
+    if(first) addMat("core", nCore);
+    else if(Math.random() < rm) addMat("core", Math.max(1, Math.round(nCore * rm)));
+    if(first) qAdd("boss");
+  }
   let climbed = false;
-  if(win && DIFFS[diff] && DIFFS[diff].endless){        // ชนะนรก = ชั้นถัดไปรออยู่พรุ่งนี้
+  if(win && first && DIFFS[diff] && DIFFS[diff].endless){   // ชนะนรก = ชั้นถัดไปรออยู่พรุ่งนี้
     S.bossTier = hellTier() + 1; climbed = true;
   }
   if(climbed) logf(`ผ่านนรกชั้น ${hellTier()} — พรุ่งนี้เจอชั้น ${hellTier() + 1} ที่โหดกว่าเดิม`, "good");
   sfx(win ? "win" : "lose");
-  logf(win ? `ชนะ${B.name} (${D.name}) — ได้ 🪙 ${coins}`
-           : `สู้กับ${B.name}ไม่ไหว ทำดาเมจได้ ${Math.round(dealt*100)}% — ได้ 🪙 ${coins}`, win ? "good" : "");
+  logf((win ? `ชนะ${B.name} (${D.name}) — ได้ 🪙 ${coins}`
+            : `สู้กับ${B.name}ไม่ไหว ทำดาเมจได้ ${Math.round(dealt*100)}% — ได้ 🪙 ${coins}`)
+    + (first ? "" : ` · รอบซ้ำที่ ${bossTries()} ของวันนี้ รางวัล ${Math.round(rm*100)}%`),
+    win ? "good" : "");
   showArena(B, D, log, ev, units, boss,
     { win, dealt, coins, gotFood, eggs, units, dust:gotDust });
   save(); render();
@@ -6527,8 +6595,8 @@ function renderBoss(){
   $('#bossCard').querySelectorAll('[data-diff]').forEach(b =>
     b.onclick = () => { S.diff = +b.dataset.diff; save(); renderBoss(); });
 
-  const gone = awaySet();
-  const adults = S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !c.box)
+  const gone = awaySet();      // ออกลาดตระเวนอยู่ก็ยังส่งลงสู้ได้ ไม่มีคูลดาวน์
+  const adults = S.creatures.filter(c => c.stage === "adult" && !c.box)
     .sort((a,b) => ensureBattle(b).total - ensureBattle(a).total);
   S.team = (S.team || []).filter(id => adults.some(a => a.id === id));
   $('#teamList').innerHTML = adults.length ? adults.map(c => {
@@ -6536,7 +6604,8 @@ function renderBoss(){
     const filt = shinyFilter(c);
     return `<button class="tm" aria-pressed="${on}" data-t="${c.id}">
       <img src="${ART[c.sid]}" alt="" style="${filt}"><b>${sp.name}</b>
-      <small>${starStr(c.stars).slice(0,c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+      <small>${starStr(c.stars).slice(0,c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
+        gone.has(c.id) ? " 🧭" : ""}
         <br>${multTag(unitMult(c, B))}</small></button>`;
   }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวโตเต็มวัยไปสู้</p>`;
   $('#teamList').querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
@@ -6547,13 +6616,19 @@ function renderBoss(){
   });
 
   const fb = $('#btnFight');
-  fb.disabled = done || !S.team.length;
-  fb.textContent = done ? "วันนี้สู้ไปแล้ว กลับมาพรุ่งนี้" : `ออกไปสู้ (${S.team.length}/3)`;
+  const tries = bossTries(), rmNow = repeatMul();
+  fb.disabled = !S.team.length;
+  fb.textContent = !S.team.length ? "เลือกทีมก่อน"
+    : tries === 0 ? `ออกไปสู้ (${S.team.length}/3)`
+    : `สู้อีกรอบ · รอบที่ ${tries + 1} · รางวัล ${Math.round(rmNow*100)}%`;
   fb.onclick = () => fight(d);
-  $('#bossNote').textContent = done
-    ? `ชนะบอสมาแล้วทั้งหมด ${S.bossWins || 0} ครั้ง · ผ่านนรกไปแล้ว ${hellTier()} ชั้น` +
-      ` · พรุ่งนี้เจอ${bossFor((new Date().getDay()+1)%7).name}`
-    : "ตีได้วันละครั้งเดียว บอสวนครบเจ็ดตัวต่อสัปดาห์ ของที่ได้ไม่ซ้ำกัน · แพ้ก็ยังได้รางวัลตามดาเมจที่ทำได้";
+  $('#bossNote').textContent =
+    (done ? `เคลียร์รอบแรกของวันนี้แล้ว · ` : "") +
+    `ตีซ้ำได้ไม่จำกัดรอบ · วันนี้สู้ไป ${tries} รอบ` +
+    (tries ? ` · รอบถัดไปได้รางวัล ${Math.round(rmNow*100)}%` : " · รอบแรกได้รางวัลเต็ม") +
+    ` · รอบซ้ำได้ของทุกอย่างรวมไข่บอส แค่น้อยลง (ไม่ขึ้นชั้นนรก ไม่นับเควสต์)` +
+    ` · ชนะมาแล้วทั้งหมด ${S.bossWins || 0} ครั้ง · ผ่านนรก ${hellTier()} ชั้น` +
+    ` · พรุ่งนี้เจอ${bossFor((new Date().getDay()+1)%7).name}`;
 }
 
 /* ---- แสดงผล ---- */

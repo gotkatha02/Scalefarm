@@ -708,6 +708,11 @@ h2 + h2{margin-top:20px}
   padding:7px 10px;margin:8px 0 0;font-size:11.5px;color:#2F5A7A;line-height:1.55}
 .buildchip b{font-family:var(--display);font-size:13px;display:block;color:#24506E}
 .buildchip i{font-style:normal;color:var(--dim)}
+.boxbar{background:#F3F0FF;border:1.5px solid #DCD3F3;border-radius:14px;padding:10px 12px;margin:0 0 10px}
+.boxbar h4{font-family:var(--display);font-size:13.5px;margin:0 0 3px;color:#57459A}
+.boxbar .bxs{display:block;font-size:11px;color:var(--dim);margin-bottom:7px;line-height:1.5}
+.mgrow.boxed{opacity:.72;border-style:dashed}
+.tg.bx{background:#E7E0FA;color:#57459A}
 .mgdet{grid-column:1/-1;background:#FBFAF6;border-top:1.5px dashed #E3DCCB;
   margin:6px -8px -6px;padding:9px 10px 10px;border-radius:0 0 11px 11px}
 .mgdet .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:4px 10px}
@@ -1104,6 +1109,7 @@ h2 + h2{margin-top:20px}
   <div id="paneManage">
     <h2>จัดการตุ้ยนุ้ย <span id="mgCount" style="color:var(--dim);font-weight:400"></span></h2>
     <div class="dexbar" id="mgFilter"></div>
+    <div id="boxBar"></div>
     <div id="sellBar"></div>
     <div class="dexbar" id="mgTools"></div>
     <div id="mgBulk"></div>
@@ -1560,7 +1566,9 @@ function packSave(){
     c.it && HELDMAP[c.it] ? c36(HELD.findIndex(x => x.id === c.it) + 1) : "",
     c.masu ? 1 : "",
     c.mv && c.mv.length ? c.mv.map(id => c36(MOVES.findIndex(m => m.id === id) + 1)).join(".") : "",
-    c.mvEgg && MV[c.mvEgg] ? c36(MOVES.findIndex(m => m.id === c.mvEgg) + 1) : ""
+    c.mvEgg && MV[c.mvEgg] ? c36(MOVES.findIndex(m => m.id === c.mvEgg) + 1) : "",
+    c.box ? 1 : "",
+    c.box && c.penBack != null ? c36(c.penBack) : ""
   ].join(",")).join(";");
 
   const eggs = (S.eggs || []).map(e => [
@@ -1691,6 +1699,8 @@ function unpackSave(txt){
     if(f[26]){ const ids = f[26].split(".").map(x => (MOVES[p36(x) - 1] || {}).id).filter(Boolean);
       if(ids.length) c.mv = ids; }
     if(f[27]){ const m = MOVES[p36(f[27]) - 1]; if(m) c.mvEgg = m.id; }
+    if(f[28] === "1") c.box = true;
+    if(c.box && f[29]) c.penBack = p36(f[29]);
     return c;
   });
 
@@ -2029,7 +2039,7 @@ const WORK_DECAY_BASE = 0.12;
 const WORK_DECAY = 0.12;   // ค่ากลาง (ของจริงอ่านจาก decayNow)
 const workSlice = () => {
   const away = awaySet();
-  return S.creatures.filter(c => !away.has(c.id))
+  return S.creatures.filter(c => !away.has(c.id) && !c.box)
     .sort((a,b) => rateOf(b) - rateOf(a))
     .slice(0, WORKERS + (S.workerBonus || 0));
 };
@@ -2138,7 +2148,7 @@ function logf(text, tone){
 function growAll(mins){
   const grown = [];
   S.creatures.forEach(c => {
-    if(c.stage !== "baby") return;
+    if(c.stage !== "baby" || c.box) return;          // ตัวในตู้ฝากหยุดโต
     const wg = weatherNow().grow;
     const hardy = talG(c, "hardy", false) || decHardy(c.pen);
     const g = PASSIVE_EXP * mins * natOf(c).grow * talG(c, "grow", 1) * talG(c, "passive", 1)
@@ -2294,7 +2304,75 @@ function buyPen(){
   logf(`เปิดทุ่งที่ ${S.penCount} แล้ว`, "good");
   save(); render();
 }
-function penCount(i){ return S.creatures.filter(c => c.pen === i).length; }
+function penCount(i){ return S.creatures.filter(c => c.pen === i && !c.box).length; }
+
+/* ==== 📦 ตู้ฝากตุ้ยนุ้ย ====
+   ตัวที่อยู่ในตู้ไม่กินที่ในทุ่ง ไม่หาเงิน ไม่โต ไม่ไปสู้ ไม่ผสม
+   แต่เก็บทุกอย่างไว้ครบ ดึงออกมาเมื่อไหร่ก็ได้ ไม่มีวันหมดอายุ */
+const BOX_MAX = 600;
+const inBox   = c => !!(c && c.box);
+const boxList = () => S.creatures.filter(inBox);
+const boxRoom = () => Math.max(0, BOX_MAX - boxList().length);
+const outOfBox = () => S.creatures.filter(c => !inBox(c));
+function boxPut(ids, quiet){
+  const away = awaySet();
+  const list = (ids || []).map(id => S.creatures.find(c => c.id === id))
+    .filter(c => c && !inBox(c) && !away.has(c.id));
+  if(!list.length){ if(!quiet) alert("ไม่มีตัวไหนเก็บเข้าตู้ได้ (ตัวที่ออกเดินทางอยู่เก็บไม่ได้)"); return 0; }
+  if(list.length > boxRoom()){ alert(`ตู้เหลือที่ ${boxRoom()} ตัว แต่จะเก็บ ${list.length} ตัว`); return 0; }
+  list.forEach(c => {
+    c.box = true;
+    c.penBack = c.pen;                                  // จำทุ่งเดิมไว้ ดึงออกมาจะกลับที่เดิม
+  });
+  const set = new Set(list.map(c => c.id));
+  S.team    = (S.team || []).filter(id => !set.has(id));
+  S.dgTeam  = (S.dgTeam || []).filter(id => !set.has(id));
+  S.twTeam  = (S.twTeam || []).filter(id => !set.has(id));
+  S.tripSel = (S.tripSel || []).filter(id => !set.has(id));
+  S.mgSel   = (S.mgSel || []).filter(id => !set.has(id));
+  if(set.has(S.brA)) S.brA = null;
+  if(set.has(S.brB)) S.brB = null;
+  if(set.has(S.selId)) S.selId = null;
+  if(!quiet){
+    logf(`📦 เก็บตุ้ยนุ้ย ${list.length} ตัวเข้าตู้ฝาก — ในตู้ตอนนี้ ${boxList().length} ตัว`, "");
+    sfx("tap"); save(); render();
+  }
+  return list.length;
+}
+function boxTake(ids, quiet){
+  const list = (ids || []).map(id => S.creatures.find(c => c.id === id)).filter(inBox);
+  if(!list.length) return 0;
+  let n = 0, full = 0;
+  list.forEach(c => {
+    let p = (c.penBack != null && penCount(c.penBack) < penCap()) ? c.penBack : freePen();
+    if(p < 0){ full++; return; }
+    c.box = false; c.pen = p; delete c.penBack; n++;
+  });
+  if(!n){ alert("ทุ่งเต็มทุกทุ่ง ขยายทุ่งหรือเก็บตัวอื่นเข้าตู้ก่อน"); return 0; }
+  if(!quiet){
+    logf(`📦 ดึงตุ้ยนุ้ย ${n} ตัวออกจากตู้` + (full ? ` · อีก ${full} ตัวไม่มีที่ในทุ่ง` : ""), "");
+    sfx("tap"); save(); render();
+  }
+  return n;
+}
+/* เก็บ "ตัวที่เพิ่งได้มา" ทั้งกอง — ลูกตุ้ยนุ้ยกับตัวที่โตมาแล้วยังไม่ได้ทำอะไร */
+function boxStashNew(){
+  const away = awaySet();
+  const ids = S.creatures.filter(c => !inBox(c) && !away.has(c.id) && !c.lock
+    && (c.stage === "baby" || (!c.tal && !awkOf(c) && !(c.nur && c.nur.pw) && !c.shiny
+        && !SP[c.sid].legend && !SP[c.sid].prize && !c.myth))).map(c => c.id);
+  if(!ids.length){ alert("ไม่มีตัวใหม่ที่ยังไม่ได้ใช้งานให้เก็บ"); return; }
+  if(!confirm(`เก็บตัวใหม่ ${ids.length} ตัวเข้าตู้ฝาก?\n\n` +
+    `นับลูกตุ้ยนุ้ยทั้งหมด และตัวโตที่ยังไม่มีพรสวรรค์ ไม่เคยปลุกพลัง ไม่มีผลการเลี้ยง\n` +
+    `ตัวไชนี่ ตำนาน ล้ำค่า อมตะ และตัวที่ล็อกไว้จะไม่ถูกเก็บ\n\n` +
+    `เก็บแล้วทุ่งจะว่าง ดึงออกมาเมื่อไหร่ก็ได้ ไม่เสียอะไรเลย`)) return;
+  boxPut(ids);
+}
+function boxTakeAll(){
+  const ids = boxList().map(c => c.id);
+  if(!ids.length) return;
+  boxTake(ids);
+}
 
 /* ไข่บอสมีโอกาส 10% กลายเป็นตัวตำนานประจำบอสตัวนั้น (สุ่มจากเจ็ดตัวของบอส) */
 function rollHatchSid(e){
@@ -4960,6 +5038,25 @@ function renderGuide(){
       <div class="dl"><span>รู้ตัวก่อนได้ไหม</span><b>ไม่ได้ รู้ว่าได้ตัวไหนตอนไข่แตกเท่านั้น</b></div>
       <div class="dl"><span>ผสมพันธุ์ได้ไหม</span><b>ได้ตามปกติ แต่ลูกจะไม่ใช่ตัว collab — ตัว collab ออกจากไข่ collab ทางเดียว</b></div>
     </div>
+    <div class="gbox"><h4>📦 ตู้ฝากตุ้ยนุ้ย</h4>
+      <div class="dl"><span>อยู่ไหน</span><b>แท็บจัดการตุ้ยนุ้ย กล่องสีม่วงบนสุด · จุได้ ${BOX_MAX} ตัว</b></div>
+      <div class="dl"><span>เก็บไว้ทำไม</span><b>ทุ่งเต็มแล้วไม่ต้องปล่อยทิ้ง เก็บเข้าตู้แทน
+        ตัวในตู้ไม่กินที่ในทุ่งเลย</b></div>
+      <div class="dl"><span>ตัวในตู้</span><b>ไม่หาเงิน · ลูกตุ้ยนุ้ยหยุดโต · ไปสู้บอส ดันเจี้ยน หอคอย ลาดตระเวน
+        และผสมพันธุ์ไม่ได้ · ไม่ถูกแนะนำให้ปล่อยหรือขายอัตโนมัติ</b></div>
+      <div class="dl"><span>เก็บอะไรไว้ครบ</span><b>ดาว ค่าแฝง ค่าฝึก ท่า ของถือ พรสวรรค์ ผลการเลี้ยง
+        ทุกอย่างเหมือนเดิมเป๊ะ ไม่มีวันหมดอายุ ไม่เสียอะไรเลย</b></div>
+      <div class="dl"><span>📦 เก็บตัวใหม่ทั้งหมด</span><b>ปุ่มเดียวเก็บลูกตุ้ยนุ้ยทั้งหมด
+        กับตัวโตที่ยังไม่มีพรสวรรค์ ไม่เคยปลุกพลัง ไม่มีผลการเลี้ยง
+        · ตัวไชนี่ ตำนาน ล้ำค่า อมตะ และตัวที่ล็อก 🔒 จะไม่ถูกเก็บ</b></div>
+      <div class="dl"><span>ดึงออก</span><b>กด 📦 ที่แถวนั้น หรือเลือกหลายตัวแล้วกดดึงออก
+        · จะกลับไปทุ่งเดิมที่มันอยู่ ถ้าทุ่งเดิมเต็มจะไปทุ่งที่ว่าง</b></div>
+      <div class="dl"><span>ตัวกรองใหม่</span><b>📦 ในตู้ฝาก · อยู่ในทุ่ง — สลับดูได้ในแท็บจัดการ</b></div>
+      <div class="dl"><span>ขายจากในตู้</span><b>ได้เลย ไม่ต้องดึงออกมาก่อน · กด 🏷 ส่งขายในกล่องดูละเอียด
+        หรือกรอง 📦 ในตู้ฝาก แล้วเลือกทั้งหมดแล้วขายยกกอง</b></div>
+      <div class="dl"><span>รายการแนะนำ</span><b>ปกติจะไม่แตะตัวในตู้เลย ถ้าอยากให้แนะนำตัวในตู้ด้วย
+        กดสวิตช์ 📦 รวมตัวในตู้ฝากด้วย ในกล่อง 🧾</b></div>
+    </div>
     <div class="gbox"><h4>🥊 โครงตัว 5 แบบ</h4>
       <div class="dl"><span>ดูที่ไหน</span><b>แตะตัวโตเต็มวัย ป้ายสีฟ้าเหนือแถบค่าพลัง · ในหน้าเลือกทีมจะขึ้นเป็นอีโมจิเล็กข้างพลังรวม</b></div>
       <div class="dl"><span>คิดจากอะไร</span><b>สัดส่วนค่าพลังจริงของตัวนั้น ไม่ใช่สายพันธุ์ ตัวเดียวกันคนละตัวอาจได้โครงต่างกัน</b></div>
@@ -5080,6 +5177,7 @@ const autoSell = () => S.autoSell || (S.autoSell = { on:false, stars:2, keepTal:
 /* ตัวที่ห้ามแตะไม่ว่ากรณีไหน */
 function sellSafe(c, ctx){
   if(!c || c.lock || ctx.away.has(c.id)) return false;
+  if(c.box && !ctx.withBox) return false;          // ค่าเริ่มต้นไม่แตะตัวในตู้ กดสวิตช์ให้รวมได้
   if(c.shiny || c.myth) return false;
   const sp = SP[c.sid];
   if(sp.legend || sp.prize) return false;
@@ -5145,7 +5243,7 @@ function autoSellSweep(){
 function sellCtx(){
   const hasAdult = new Set();
   S.creatures.forEach(c => { if(c.stage === "adult") hasAdult.add(c.sid); });
-  return { away:awaySet(), dupe:dupeSet(), hasAdult };
+  return { away:awaySet(), dupe:dupeSet(), hasAdult, withBox: !!S.sgBox };
 }
 function sellPick(id){
   const p = SELL_PRESETS.find(x => x.id === id);
@@ -5153,6 +5251,40 @@ function sellPick(id){
   const ctx = sellCtx();
   S.mgSel = S.creatures.filter(c => sellSafe(c, ctx) && p.f(c, ctx)).map(c => c.id);
   sfx("tap"); renderManage();
+}
+function renderBoxBar(){
+  const box = $('#boxBar');
+  if(!box) return;
+  const away = awaySet();
+  const inb = boxList(), out = outOfBox();
+  const sel = (S.mgSel || []).map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
+  const selOut = sel.filter(c => !c.box && !away.has(c.id));
+  const selIn  = sel.filter(c => c.box);
+  const stash = S.creatures.filter(c => !c.box && !away.has(c.id) && !c.lock
+    && (c.stage === "baby" || (!c.tal && !awkOf(c) && !(c.nur && c.nur.pw) && !c.shiny
+        && !SP[c.sid].legend && !SP[c.sid].prize && !c.myth))).length;
+  box.innerHTML = `<div class="boxbar">
+    <h4>📦 ตู้ฝากตุ้ยนุ้ย ${inb.length}/${BOX_MAX}</h4>
+    <span class="bxs">อยู่ในทุ่ง ${out.length} ตัว · เหลือที่ในตู้ ${boxRoom()} ตัว
+      <br>ตัวในตู้ไม่กินที่ในทุ่ง ไม่หาเงิน ลูกตุ้ยนุ้ยหยุดโต ไปสู้และผสมพันธุ์ไม่ได้
+      <br>ทุกอย่างเก็บไว้ครบ ดาว ค่าแฝง ค่าฝึก ท่า ของถือ · ดึงออกมาเมื่อไหร่ก็ได้ ไม่เสียอะไรเลย
+      <br>🏷 ตัวในตู้ส่งขายหรือปล่อยได้ตามปกติ ไม่ต้องดึงออกมาก่อน (กรอง 📦 ในตู้ฝาก แล้วเลือกได้เลย)</span>
+    <div class="sellrow">
+      <button class="btn sm sun" id="bxStash" ${stash ? '' : 'disabled'}>
+        📦 เก็บตัวใหม่ทั้งหมด (${stash})</button>
+      <button class="dtab" id="bxPut" ${selOut.length ? '' : 'disabled'}>
+        เก็บที่เลือก ${selOut.length ? "(" + selOut.length + ")" : ""}</button>
+      <button class="dtab" id="bxTake" ${selIn.length ? '' : 'disabled'}>
+        ดึงที่เลือกออก ${selIn.length ? "(" + selIn.length + ")" : ""}</button>
+      <button class="dtab" id="bxAllOut" ${inb.length ? '' : 'disabled'}>
+        ดึงออกทั้งตู้ (${inb.length})</button>
+    </div>
+  </div>`;
+  const g = id => box.querySelector('#' + id);
+  if(g('bxStash')) g('bxStash').onclick = boxStashNew;
+  if(g('bxPut'))   g('bxPut').onclick   = () => boxPut(selOut.map(c => c.id));
+  if(g('bxTake'))  g('bxTake').onclick  = () => boxTake(selIn.map(c => c.id));
+  if(g('bxAllOut'))g('bxAllOut').onclick= boxTakeAll;
 }
 function renderSellBar(){
   const box = $('#sellBar');
@@ -5226,13 +5358,20 @@ function renderSellBar(){
               <b>${sp.name} ${sexTag(c)} ${c.stage === "baby" ? "· ลูกตุ้ยนุ้ย" : "· " + starStr(c.stars).slice(0, c.stars)}</b>
               <small>${sp.el}${c.el2 ? "/" + c.el2 : ""} · 🧬 ${ivSum(c)}/${IV_MAX*6}${
                 c.stage === "adult" ? " · พลัง " + pw(c) : ""} · ${penName(c.pen)}</small>
-              <small>${x.why.join(" · ")}</small>
+              <small>${c.box ? "📦 อยู่ในตู้ฝาก · " : ""}${x.why.join(" · ")}</small>
             </span>
             <span class="sgd">🪙${priceOf(c)}<br><i style="font-style:normal;color:#8A6A20">💠${dustOf(c)}</i></span>
           </button>`;
         }).join('')}${sug.length > show.length
           ? `<p class="note" style="margin:4px 2px 0">แสดง ${show.length} ตัวแรกจาก ${sug.length} ตัว
              · ปล่อยชุดนี้แล้วที่เหลือจะเลื่อนขึ้นมา</p>` : ''}</div>
+        <div class="sellrow" style="align-items:center">
+          <button class="dtab" aria-pressed="${!!S.sgBox}" id="sgBoxTgl">
+            ${S.sgBox ? "📦 รวมตัวในตู้ฝากด้วย: เปิด" : "📦 รวมตัวในตู้ฝากด้วย: ปิด"}</button>
+          <span class="sl2">${S.sgBox
+            ? "ตัวในตู้ถูกนำมาแนะนำด้วยแล้ว (มีป้าย 📦 กำกับ)"
+            : "ตอนนี้ไม่แตะตัวในตู้ฝากเลย"}</span>
+        </div>
         <div class="sellrow">
           <button class="dtab" id="sgAll">${nSel === sug.length && nSel
             ? "ล้างที่เลือก" : "เลือกทั้งหมดที่แนะนำ (" + sug.length + ")"}</button>
@@ -5258,6 +5397,8 @@ function renderSellBar(){
   if(sgr) sgr.onclick = mgReleaseSel;
   const sgs = box.querySelector('#sgSell');
   if(sgs) sgs.onclick = () => sellForCoins(S.mgSel || []);
+  const sgb = box.querySelector('#sgBoxTgl');
+  if(sgb) sgb.onclick = () => { S.sgBox = !S.sgBox; sfx("tap"); save(); renderManage(); };
   box.querySelectorAll('[data-sellstar]').forEach(b =>
     b.onclick = () => { S.sellStar = +b.dataset.sellstar; sfx("tap"); renderManage(); });
   const ab = box.querySelector('[data-autosell]');
@@ -5374,7 +5515,7 @@ function dgFoe(x){
 }
 function dgAvail(){
   const gone = awaySet();
-  return S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !dgTired(c))
+  return S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !c.box && !dgTired(c))
     .sort((a, b) => ensureBattle(b).total - ensureBattle(a).total);
 }
 function dgFight(){
@@ -5521,7 +5662,7 @@ function towerLoot(f){
 }
 function towerAvail(){
   const gone = awaySet(), used = new Set((towerRun() || {}).used || []);
-  return S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !used.has(c.id))
+  return S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !c.box && !used.has(c.id))
     .sort((a, b) => ensureBattle(b).total - ensureBattle(a).total);
 }
 function towerStart(from){
@@ -6387,7 +6528,7 @@ function renderBoss(){
     b.onclick = () => { S.diff = +b.dataset.diff; save(); renderBoss(); });
 
   const gone = awaySet();
-  const adults = S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id))
+  const adults = S.creatures.filter(c => c.stage === "adult" && !gone.has(c.id) && !c.box)
     .sort((a,b) => ensureBattle(b).total - ensureBattle(a).total);
   S.team = (S.team || []).filter(id => adults.some(a => a.id === id));
   $('#teamList').innerHTML = adults.length ? adults.map(c => {
@@ -6454,7 +6595,7 @@ function renderPenPage(){
   $('#penSum').textContent = `${S.penCount} ผืน · ${total}/${cap} ตัว`;
 
   box.innerHTML = Array.from({ length:S.penCount }, (_, i) => {
-    const here = S.creatures.filter(c => c.pen === i);
+    const here = S.creatures.filter(c => c.pen === i && !c.box);
     const babies = here.filter(c => c.stage === "baby").length;
     const out = here.filter(c => away.has(c.id)).length;
     const sc = sceneOf(i);
@@ -6887,6 +7028,8 @@ const MG_FILTERS = [
   { id:"dupe",  name:"ตัวซ้ำ",       f: (c, ctx) => ctx.dupe.has(c.id) },
   { id:"away",  name:"🧭 ออกเดินทาง", f: (c, ctx) => ctx.away.has(c.id) },
   { id:"lock",  name:"🔒 ล็อกไว้",    f: c => !!c.lock },
+  { id:"box",   name:"📦 ในตู้ฝาก",   f: c => !!c.box },
+  { id:"out",   name:"อยู่ในทุ่ง",     f: c => !c.box },
   { id:"iv",   name:"🧬 ค่าแฝงดี",   f: c => ivPct(c) >= 0.7 },
   { id:"m",    name:"♂ ตัวผู้",       f: c => isMale(c) },
   { id:"f",    name:"♀ ตัวเมีย",      f: c => isFemale(c) }
@@ -6991,7 +7134,8 @@ function mgDetail(c, ctx){
       ${row("ระดับหายาก", c.myth ? "✧ อมตะ" : sp.legend ? "✦ ตำนาน"
         : sp.prize ? "◈ ล้ำค่า" : sp.collab ? "✧ collab" : RAR_NAME[sp.rarity])}
       ${row("ปลุกพลัง", awkOf(c) ? `ระดับ ${awkOf(c)}` : "—")}
-      ${row("อยู่ที่", penName(c.pen) + (away ? " · 🧭 ออกเดินทาง" : ""))}
+      ${row("อยู่ที่", c.box ? "📦 ตู้ฝาก (ไม่หาเงิน ไม่โต ไปสู้ไม่ได้)"
+        : penName(c.pen) + (away ? " · 🧭 ออกเดินทาง" : ""))}
       ${row("หาเงิน", adult ? `🪙 ${Math.round(rateOf(c))}/นาที` : "ยังไม่หาเงิน")}
       ${row("ผสมพันธุ์", !adult ? "ยังเด็ก" : c.myth ? "อมตะผสมไม่ได้"
         : breedReady(c) ? "พร้อมผสม" : `พักอีก ${hhmm(breedLeft(c))}`)}
@@ -7022,7 +7166,8 @@ function mgDetail(c, ctx){
       <button class="rel" data-mgrel1="${c.id}" ${c.lock || away ? "disabled" : ""}>ปล่อยกลับป่า 💠 ${dustOf(c)}</button>
       <button data-mglock2="${c.id}">${c.lock ? "🔓 ปลดล็อก" : "🔒 ล็อกกันเผลอ"}</button>
       <button data-mgsel2="${c.id}">${(S.mgSel||[]).indexOf(c.id) >= 0 ? "☑️ เอาออกจากที่เลือก" : "⬜ เพิ่มในที่เลือก"}</button>
-      <button data-mggo2="${c.id}" ${away ? "disabled" : ""}>👁 ดูในทุ่ง</button>
+      <button data-mgbox2="${c.id}" ${away ? "disabled" : ""}>${c.box ? "📤 ดึงออกจากตู้ฝาก" : "📦 เก็บเข้าตู้ฝาก"}</button>
+      <button data-mggo2="${c.id}" ${away || c.box ? "disabled" : ""}>👁 ดูในทุ่ง</button>
     </div>
   </div>`;
 }
@@ -7093,6 +7238,7 @@ function renderManage(){
   $('#mgFilter').querySelectorAll('[data-mgf]').forEach(b =>
     b.onclick = () => { S.mgFilter = b.dataset.mgf; renderManage(); });
 
+  renderBoxBar();
   renderSellBar();
   $('#mgTools').innerHTML =
     `<select class="dsel" id="mgSortSel">${MG_SORTS.map(s =>
@@ -7142,8 +7288,9 @@ function renderManage(){
     if(awkOf(c)) tags.push(`<i class="tg aw">✦ ปลุก ${awkOf(c)}</i>`);
     if(ctx.dupe.has(c.id)) tags.push(`<i class="tg dp">ตัวซ้ำ</i>`);
     if(isAway) tags.push(`<i class="tg aw">🧭 ออกเดินทาง</i>`);
+    if(c.box) tags.push(`<i class="tg bx">📦 อยู่ในตู้ฝาก</i>`);
 
-    return `<div class="mgrow ${sel.has(c.id) ? 'on' : ''} ${isAway ? 'away' : ''}">
+    return `<div class="mgrow ${sel.has(c.id) ? 'on' : ''} ${isAway ? 'away' : ''} ${c.box ? 'boxed' : ''}">
       <button class="mgpick" data-mgsel="${c.id}" aria-pressed="${sel.has(c.id)}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"></button>
       <div class="mgin">
@@ -7156,7 +7303,9 @@ function renderManage(){
       </div>
       <div class="mgact">
         <button class="ic ${c.lock ? 'on' : ''}" data-mglock="${c.id}" title="ล็อกกันปล่อย">${c.lock ? '🔒' : '🔓'}</button>
-        <button class="ic" data-mggo="${c.id}" title="ดูในทุ่ง" ${isAway ? 'disabled' : ''}>👁</button>
+        <button class="ic ${c.box ? 'on' : ''}" data-mgbox="${c.id}"
+          title="${c.box ? 'ดึงออกจากตู้ฝาก' : 'เก็บเข้าตู้ฝาก'}" ${isAway ? 'disabled' : ''}>📦</button>
+        <button class="ic" data-mggo="${c.id}" title="ดูในทุ่ง" ${isAway || c.box ? 'disabled' : ''}>👁</button>
         <small>🪙${priceOf(c)}</small>
         <small>💠${dustOf(c)}</small>
       </div>
@@ -7168,6 +7317,11 @@ function renderManage(){
     b.onclick = () => mgToggle(+b.dataset.mgsel));
   $('#mgList').querySelectorAll('[data-mglock]').forEach(b =>
     b.onclick = () => mgLock(+b.dataset.mglock));
+  $('#mgList').querySelectorAll('[data-mgbox]').forEach(b => b.onclick = () => {
+    const id = +b.dataset.mgbox, c = S.creatures.find(x => x.id === id);
+    if(!c) return;
+    if(c.box) boxTake([id]); else boxPut([id]);
+  });
   $('#mgList').querySelectorAll('[data-mgexp]').forEach(b =>
     b.onclick = () => mgExpand(+b.dataset.mgexp));
   $('#mgList').querySelectorAll('[data-mgsell1]').forEach(b =>
@@ -7178,6 +7332,11 @@ function renderManage(){
     b.onclick = () => mgLock(+b.dataset.mglock2));
   $('#mgList').querySelectorAll('[data-mgsel2]').forEach(b =>
     b.onclick = () => mgToggle(+b.dataset.mgsel2));
+  $('#mgList').querySelectorAll('[data-mgbox2]').forEach(b => b.onclick = () => {
+    const id = +b.dataset.mgbox2, c = S.creatures.find(x => x.id === id);
+    if(!c) return;
+    if(c.box) boxTake([id]); else boxPut([id]);
+  });
   $('#mgList').querySelectorAll('[data-mggo2]').forEach(b => b.onclick = () => {
     const c = S.creatures.find(x => x.id === +b.dataset.mggo2);
     if(!c) return;
@@ -7795,7 +7954,7 @@ function startPen(){
     + foreSVG(BW, Math.max(1, Math.min(1.9, BW/1100)));
   walkers = [];
   const gone = awaySet();
-  const here = S.creatures.filter(c => c.pen === S.curPen && !gone.has(c.id));
+  const here = S.creatures.filter(c => c.pen === S.curPen && !gone.has(c.id) && !c.box);
   if(!here.length){
     box.innerHTML += `<div class="penhint">ทุ่งนี้ยังว่าง<br>ไปที่ <b>ร้านค้า</b> ซื้อไข่มาฟักได้เลย</div>`;
     return;

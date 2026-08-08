@@ -704,6 +704,31 @@ h2 + h2{margin-top:20px}
 .mv1 select{flex:1;font-family:inherit;font-size:11.5px;padding:4px 6px;border-radius:9px;
   border:1.5px solid #D9CEF0;background:#fff;color:#4A4030}
 .mvnote{font-size:10.5px;color:var(--dim);line-height:1.55}
+.buildchip{display:block;background:#EEF6FF;border:1.5px solid #CFE2F5;border-radius:12px;
+  padding:7px 10px;margin:8px 0 0;font-size:11.5px;color:#2F5A7A;line-height:1.55}
+.buildchip b{font-family:var(--display);font-size:13px;display:block;color:#24506E}
+.buildchip i{font-style:normal;color:var(--dim)}
+.mgdet{grid-column:1/-1;background:#FBFAF6;border-top:1.5px dashed #E3DCCB;
+  margin:6px -8px -6px;padding:9px 10px 10px;border-radius:0 0 11px 11px}
+.mgdet .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:4px 10px}
+.mgdet .d1{display:flex;justify-content:space-between;gap:6px;font-size:11px;line-height:1.6}
+.mgdet .d1 span{color:var(--dim)}
+.mgdet .d1 b{font-weight:700;color:#4A4030;text-align:right}
+.mgst{display:flex;align-items:center;gap:5px;font-size:10.5px;margin-bottom:2px}
+.mgst>span{width:28px;flex:none;color:var(--dim);font-weight:700}
+.mgst .mt{flex:1;height:7px;background:#EDE7DA;border-radius:99px;overflow:hidden}
+.mgst .mt i{display:block;height:100%;border-radius:99px}
+.mgst>b{width:34px;flex:none;text-align:right}
+.mgst>u{width:56px;flex:none;text-align:right;text-decoration:none;color:#5B4A8A;font-size:10px}
+.mgdet h5{font-family:var(--display);font-size:11.5px;margin:8px 0 3px;color:#8A6A20}
+.mgdet .dact{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.mgdet .dact button{font-family:inherit;font-size:11px;padding:5px 9px;border-radius:9px;
+  border:1.5px solid #E2D6B8;background:#fff;color:#4A4030;cursor:pointer}
+.mgdet .dact button.sell{border-color:#F0C86A;background:#FFF8E6;font-weight:700}
+.mgdet .dact button.rel{border-color:#CFE2F5;background:#F1F8FF}
+.mgrow{flex-wrap:wrap}
+.mgexp{flex:none;font-family:inherit;font-size:11px;padding:4px 7px;border-radius:8px;
+  border:1.5px solid #E2D6B8;background:#fff;color:#7A6A48;cursor:pointer}
 .sgbox{background:#FFF9F2;border:1.5px solid #F0DCC4;border-radius:14px;padding:10px 12px;margin:0 0 10px}
 .sgbox h4{font-family:var(--display);font-size:13.5px;margin:0 0 3px;color:#9A6A28}
 .sgbox .sgsum{font-size:11px;color:var(--dim);display:block;margin-bottom:7px;line-height:1.5}
@@ -4935,6 +4960,14 @@ function renderGuide(){
       <div class="dl"><span>รู้ตัวก่อนได้ไหม</span><b>ไม่ได้ รู้ว่าได้ตัวไหนตอนไข่แตกเท่านั้น</b></div>
       <div class="dl"><span>ผสมพันธุ์ได้ไหม</span><b>ได้ตามปกติ แต่ลูกจะไม่ใช่ตัว collab — ตัว collab ออกจากไข่ collab ทางเดียว</b></div>
     </div>
+    <div class="gbox"><h4>🥊 โครงตัว 5 แบบ</h4>
+      <div class="dl"><span>ดูที่ไหน</span><b>แตะตัวโตเต็มวัย ป้ายสีฟ้าเหนือแถบค่าพลัง · ในหน้าเลือกทีมจะขึ้นเป็นอีโมจิเล็กข้างพลังรวม</b></div>
+      <div class="dl"><span>คิดจากอะไร</span><b>สัดส่วนค่าพลังจริงของตัวนั้น ไม่ใช่สายพันธุ์ ตัวเดียวกันคนละตัวอาจได้โครงต่างกัน</b></div>
+      ${BUILDS.map(b => `<div class="dl"><span>${b.emoji} ${b.name}</span><b>${b.note}</b></div>`).join('')}
+      <div class="dl"><span>ทำไมต้องดู</span><b>ตอนนี้ท่าแยกกายภาพกับพลังพิเศษ ถ้าใส่ท่าผิดฝั่งกับโครงตัว
+        ดาเมจหายไปครึ่งเลย · ป้ายจะบอกด้วยว่าของถือที่ใส่อยู่เข้ากับโครงหรือเปล่า</b></div>
+      <div class="dl"><span>ธาตุก็มีผล</span><b>ธาตุจิต วิญญาณ ประกาย เอนไปทางพลังพิเศษ · ธาตุหิน เหล็ก ดิน เอนไปทางกายภาพ</b></div>
+    </div>
     <div class="gbox"><h4>🏷 ส่งขายตุ้ยนุ้ย</h4>
       <div class="dl"><span>ต่างจากปล่อยกลับป่า</span><b>ส่งขายได้ 🪙 เหรียญตามสเตตัส · ปล่อยกลับป่าได้ 💠 ผงตุ้ยนุ้ย
         เลือกได้อย่างใดอย่างหนึ่ง ไม่ได้ทั้งสองอย่าง</b></div>
@@ -5399,7 +5432,7 @@ function renderDungeon(){
   S.dgTeam = (S.dgTeam || []).filter(id => avail.some(c => c.id === id));
   const team = S.dgTeam.map(id => avail.find(c => c.id === id)).filter(Boolean);
   const power = team.reduce((a, c) => a + ensureBattle(c).total, 0);
-  const cnt = counters(F.el);
+  const cnt = bestAgainst(F);
   const pool = LEGEND_BY_BOSS[x.id] || [];
   const tired = S.creatures.filter(c => c.stage === "adult" && dgTired(c));
 
@@ -5409,8 +5442,9 @@ function renderDungeon(){
     <div class="twfoe guard">
       <img src="${F.art}" alt="">
       <div><h3>${F.name}</h3>
-        <div class="bl">ธาตุ${F.el} · เลือด ${F.hp} · พลัง ${F.pw}</div>
-        <div class="bl">${cnt.length ? `แพ้ทางธาตุ ${cnt.join(" · ")}` : "ไม่แพ้ทางธาตุไหน"}</div>
+        <div class="bl">ธาตุ${foeEls(F).join(" + ")} · เลือด ${F.hp} · พลัง ${F.pw}</div>
+        <div class="bl">${cnt.length ? `แพ้ทาง ${cnt.map(x => `${x.el} ×${x.mu.toFixed(2)}`).join(" · ")}`
+          : "ไม่แพ้ทางธาตุไหน"}</div>
         <div class="bl">ชนะแล้วชั้นลึกขึ้นถาวร · ไม่จำกัดจำนวนครั้งต่อวัน</div>
       </div></div>
     <p class="note" style="margin:0 0 10px">${x.desc}<br>
@@ -5430,12 +5464,11 @@ function renderDungeon(){
     <h3 class="dsub">เลือกทีม ${team.length}/${DG_TEAM} · พลังรวม ${power}</h3>
     <div class="team">${avail.length ? avail.slice(0, 60).map(c => {
       const on = S.dgTeam.includes(c.id), b = ensureBattle(c);
-      let mu = elMult(SP[c.sid].el, F.el);
-      if(c.el2) mu = Math.max(mu, elMult(c.el2, F.el));
+      const mu = unitMult(c, F);
       return `<button class="tm" aria-pressed="${on}" data-dg="${c.id}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}
-          ${mu > 1 ? '<br><b class="up">ได้เปรียบ</b>' : mu < 1 ? '<br><b class="dn">เสียเปรียบ</b>' : ''}</small>
+        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+          <br>${multTag(mu)}</small>
       </button>`;
     }).join('') : `<p class="empty" style="grid-column:1/-1">ตุ้ยนุ้ยพักอยู่หมด รออีกสักพัก</p>`}</div>
     <div class="foot" style="margin:10px 0 0">
@@ -5579,7 +5612,7 @@ function renderTower(){
   S.twTeam = (S.twTeam || []).filter(id => avail.some(c => c.id === id));
   const team = S.twTeam.map(id => avail.find(c => c.id === id)).filter(Boolean);
   const power = team.reduce((a, c) => a + ensureBattle(c).total, 0);
-  const cnt = counters(F.el);
+  const cnt = bestAgainst(F);
 
   box.innerHTML = `
     <div class="twhead"><b>🗼 กำลังอยู่ชั้น ${r.floor}</b>
@@ -5588,18 +5621,18 @@ function renderTower(){
     <div class="twfoe ${F.guard ? 'guard' : ''}">
       <img src="${ART[F.sp.id]}" alt="">
       <div><h3>${F.name}</h3>
-        <div class="bl">ธาตุ${F.el} · เลือด ${F.hp} · พลัง ${F.pw}</div>
-        <div class="bl">${cnt.length ? `แพ้ทางธาตุ ${cnt.join(" · ")}` : "ไม่แพ้ทางธาตุไหน"}</div>
+        <div class="bl">ธาตุ${foeEls(F).join(" + ")} · เลือด ${F.hp} · พลัง ${F.pw}</div>
+        <div class="bl">${cnt.length ? `แพ้ทาง ${cnt.map(x => `${x.el} ×${x.mu.toFixed(2)}`).join(" · ")}`
+          : "ไม่แพ้ทางธาตุไหน"}</div>
       </div></div>
     <h3 class="dsub">เลือกทีม ${team.length}/${TW_TEAM} · พลังรวม ${power}</h3>
     <div class="team">${avail.length ? avail.slice(0, 60).map(c => {
       const on = S.twTeam.includes(c.id), b = ensureBattle(c);
-      let mu = elMult(SP[c.sid].el, F.el);
-      if(c.el2) mu = Math.max(mu, elMult(c.el2, F.el));
+      const mu = unitMult(c, F);
       return `<button class="tm" aria-pressed="${on}" data-tw="${c.id}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}
-          ${mu > 1 ? '<br><b class="up">ได้เปรียบ</b>' : mu < 1 ? '<br><b class="dn">เสียเปรียบ</b>' : ''}</small>
+        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+          <br>${multTag(mu)}</small>
       </button>`;
     }).join('') : `<p class="empty" style="grid-column:1/-1">ตุ้ยนุ้ยหมดแล้ว จบรอบนี้ก่อน</p>`}</div>
     <div class="foot" style="margin:10px 0 0">
@@ -5770,6 +5803,57 @@ const wxMul = el => {
 };
 
 const MONO_BONUS = 1.15;      // ตัวธาตุเดียวใช้ท่าธาตุตัวเองได้โบนัส (แทน STAB)
+
+/* ---- ป้ายโครงตัว: ดูจากสัดส่วนค่าพลังจริง แล้วแนะนำของถือที่เข้ากัน ---- */
+const BUILDS = [
+  { id:"phys",  emoji:"🥊", name:"สายกายภาพ",   item:"band",
+    note:"ATK เด่น — ใช้ท่ากายภาพคุ้มที่สุด ควรถือ 🥊 สายรัดหมัด" },
+  { id:"spec",  emoji:"👓", name:"สายพลังพิเศษ", item:"specs",
+    note:"SPA เด่น — ท่าหนักประจำธาตุเป็นพลังพิเศษทั้งหมด ควรถือ 👓 แว่นพลังจิต" },
+  { id:"tank",  emoji:"🛡", name:"สายถังเลือด",  item:"berry",
+    note:"HP กับเกราะเด่น — อยู่ในสนามได้นาน ควรถือ 🍓 เบอร์รี่ฟื้นพลัง" },
+  { id:"fast",  emoji:"💨", name:"สายเร็ว",      item:"sash",
+    note:"SPE เด่น — ออกก่อนและคริตบ่อย แต่บาง ควรถือ 🎗️ ผ้าคาดกันน็อก" },
+  { id:"mixed", emoji:"⚖️", name:"สายสมดุล",     item:"orb",
+    note:"ไม่มีด้านไหนโดดชัด ทำได้ทุกอย่างแต่ไม่สุดทาง ถือ 🔮 ลูกแก้วชีวิตเพิ่มดาเมจได้" }
+];
+const BUILD = Object.fromEntries(BUILDS.map(b => [b.id, b]));
+function buildOf(c){
+  if(!c || c.stage !== "adult") return null;
+  const b = ensureBattle(c), t = b.total || 1;
+  const bulk = (b.hp + b.def + b.spd) / t;
+  const atk = b.atk / t, spa = b.spa / t, spe = b.spe / t;
+  if(atk > spa * 1.45 && atk >= 0.20) return BUILD.phys;
+  if(spa > atk * 1.45 && spa >= 0.20) return BUILD.spec;
+  if(bulk >= 0.56) return BUILD.tank;
+  if(spe >= 0.175) return BUILD.fast;
+  return BUILD.mixed;
+}
+/* ค่าที่โดดที่สุดสองอันดับแรก เอาไปโชว์ว่าเด่นด้านไหน */
+function topStats(c, n){
+  const b = ensureBattle(c);
+  return BSTATS.slice().sort((x, y) => b[y.k] - b[x.k]).slice(0, n || 2);
+}
+/* ---- ธาตุของศัตรู: คิดครบทั้งสองธาตุ ใช้ร่วมกันทุกหน้า ---- */
+const foeEls = foe => [foe.el, foe.el2 !== undefined ? foe.el2 : bossEl2(foe.el)].filter(Boolean);
+function unitMult(c, foe){
+  const els = foeEls(foe);
+  const mine = [SP[c.sid].el, c.el2].filter(Boolean);
+  return Math.max.apply(null, mine.map(el =>
+    els.reduce((a, d) => a * elMult(el, d), 1)));
+}
+const multTag = mu => mu >= 1.9 ? '<b class="up">แรงมาก ×' + mu.toFixed(2) + '</b>'
+  : mu > 1 ? '<b class="up">ได้เปรียบ ×' + mu.toFixed(2) + '</b>'
+  : mu <= 0.4 ? '<b class="dn">แทบไม่ระคาย ×' + mu.toFixed(2) + '</b>'
+  : mu < 1 ? '<b class="dn">เสียเปรียบ ×' + mu.toFixed(2) + '</b>' : '×1.00';
+/* ธาตุที่ได้เปรียบศัตรูตัวนี้จริง (คิดสองธาตุ) */
+function bestAgainst(foe){
+  const els = foeEls(foe);
+  return ELEMENTS.map(el => ({ el, mu:els.reduce((a, d) => a * elMult(el, d), 1) }))
+    .filter(x => x.mu > 1)
+    .sort((a, b) => b.mu - a.mu)
+    .slice(0, 6);
+}
 const CRIT_MUL   = 1.5;
 
 /* ---- เครื่องต่อสู้กลาง ใช้ร่วมกันทั้งบอสประจำวัน ดันเจี้ยน และหอคอย ---- */
@@ -6277,10 +6361,14 @@ function renderBoss(){
         ${DAY_TH[dw].slice(0,2)}<b>${x.name}</b></div>`; }).join('')}</div>
     <div class="boss"><div class="face"><img src="${BOSS_ART[B.id]}" alt="${B.name}"></div>
       <div><h3>${B.name}</h3>
-        <div class="bl">วัน${DAY_TH[B.day]} · ธาตุ${B.el} · สาย${clusterOf(B.el)}<br>
+        <div class="bl">วัน${DAY_TH[B.day]} · ธาตุ${foeEls(B).join(" + ")} · สาย${clusterOf(B.el)}<br>
           พลังชีวิต ${bhp} · พลังโจมตี ${bpw}<br>
-          ${counters(B.el).length ? `แพ้ทางธาตุ ${counters(B.el).join(" · ")}` : "ไม่แพ้ทางธาตุไหนเลย"}<br>
-          ${(BEATS_EL[B.el] || []).length ? `ตัวมันกินธาตุ ${(BEATS_EL[B.el] || []).join(" · ")}` : ""}</div>
+          ${(() => { const bs = bestAgainst(B);
+            return bs.length ? `แพ้ทาง ${bs.map(x => `${x.el} ×${x.mu.toFixed(2)}`).join(" · ")}`
+              : "ไม่แพ้ทางธาตุไหนเลย"; })()}<br>
+          ${(() => { const els = foeEls(B);
+            const eat = ELEMENTS.filter(el => els.reduce((a, d) => a * elMult(d, el), 1) > 1);
+            return eat.length ? `ตัวมันกินธาตุ ${eat.join(" · ")}` : ""; })()}</div>
       </div></div>
     <div class="gift">🎁 ${B.gift}</div>
     <div class="lgbox">
@@ -6307,7 +6395,8 @@ function renderBoss(){
     const filt = shinyFilter(c);
     return `<button class="tm" aria-pressed="${on}" data-t="${c.id}">
       <img src="${ART[c.sid]}" alt="" style="${filt}"><b>${sp.name}</b>
-      <small>${starStr(c.stars).slice(0,c.stars)} · ${b.total}<br>×${elMult(sp.el, B.el)}</small></button>`;
+      <small>${starStr(c.stars).slice(0,c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+        <br>${multTag(unitMult(c, B))}</small></button>`;
   }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวโตเต็มวัยไปสู้</p>`;
   $('#teamList').querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
     const id = +b.dataset.t;
@@ -6527,6 +6616,20 @@ function renderSel(){
                  ? `<br>🥚 ท่าไข่ที่สืบมาจากพ่อแม่: ${MV[c.mvEgg].n}` : ""}
                ${it && it.battle ? `<br>${it.emoji} ${it.name} — ${it.note}` : ""}</p>
            </div>`;
+         })()}
+         ${(() => {
+           const bd = buildOf(c), tops = topStats(c, 2), it = heldOf(c);
+           if(!bd) return '';
+           const want = HELDMAP[bd.item];
+           return `<span class="buildchip">
+             <b>${bd.emoji} ${bd.name} · เด่น ${tops.map(t => t.short).join(" + ")}</b>
+             ${bd.note}
+             <br><i>${it && it.battle
+               ? (it.id === bd.item ? `✅ ถืออยู่แล้ว ${it.emoji} ${it.name} — เข้ากับโครงตัวนี้พอดี`
+                  : `ตอนนี้ถือ ${it.emoji} ${it.name} · ที่แนะนำสำหรับโครงนี้คือ ${want.emoji} ${want.name}`)
+               : it ? `ตอนนี้ถือ ${it.emoji} ${it.name} (ใช้ตอนเพาะ ไม่มีผลในสนามรบ) · ที่แนะนำคือ ${want.emoji} ${want.name}`
+               : `ยังไม่ได้ถืออะไร · แนะนำ ${want.emoji} ${want.name} 💠${want.dust} (ซื้อได้ในแท็บผสมพันธุ์)`}</i>
+           </span>`;
          })()}
          <div class="bstats">${(() => { const b = ensureBattle(c); return BSTATS.map(t => `
            <div class="b1"><span>${t.short}</span>
@@ -6795,7 +6898,11 @@ const MG_SORTS = [
   { id:"weak",  name:"อ่อนสุดก่อน",  f:(a,b) => pw(a) - pw(b) || a.stars - b.stars },
   { id:"kind",  name:"เรียงสายพันธุ์", f:(a,b) => a.sid < b.sid ? -1 : a.sid > b.sid ? 1 : b.stars - a.stars },
   { id:"new",   name:"ใหม่สุดก่อน",  f:(a,b) => b.id - a.id },
-  { id:"ivs",   name:"ค่าแฝงสูงสุด", f:(a,b) => ivSum(b) - ivSum(a) }
+  { id:"ivs",   name:"ค่าแฝงสูงสุด", f:(a,b) => ivSum(b) - ivSum(a) },
+  { id:"ivw",   name:"ค่าแฝงต่ำสุด",  f:(a,b) => ivSum(a) - ivSum(b) },
+  { id:"price", name:"ราคาแพงสุด",   f:(a,b) => priceOf(b) - priceOf(a) },
+  { id:"cheap", name:"ราคาถูกสุด",   f:(a,b) => priceOf(a) - priceOf(b) },
+  { id:"name",  name:"เรียงชื่อ ก-ฮ", f:(a,b) => SP[a.sid].name.localeCompare(SP[b.sid].name, "th") }
 ];
 const pw = c => c.stage === "adult" ? (ensureBattle(c) || {}).total || 0 : 0;
 
@@ -6817,13 +6924,107 @@ function mgPool(){
   const ctx = { away:awaySet(), dupe:dupeSet() };
   const F = (MG_FILTERS.find(x => x.id === (S.mgFilter || "all")) || MG_FILTERS[0]).f;
   const S2 = (MG_SORTS.find(x => x.id === (S.mgSort || "star")) || MG_SORTS[0]).f;
-  return { ctx, list:S.creatures.filter(c => F(c, ctx)).slice().sort(S2) };
+  const q = (S.mgQ || "").trim();
+  let list = S.creatures.filter(c => F(c, ctx));
+  if(q) list = list.filter(c => (SP[c.sid].name.indexOf(q) >= 0) || (SP[c.sid].el.indexOf(q) >= 0));
+  return { ctx, list:list.slice().sort(S2) };
 }
 
 function mgToggle(id){
   S.mgSel = S.mgSel || [];
   S.mgSel = S.mgSel.includes(id) ? S.mgSel.filter(x => x !== id) : S.mgSel.concat(id);
   renderManage();
+}
+function mgExpand(id){
+  S.mgOpen = S.mgOpen === id ? null : id;
+  sfx("tap"); renderManage();
+}
+/* ส่งขาย / ปล่อย ทีละตัวจากในรายการจัดการ */
+function mgSellOne(id){
+  const c = S.creatures.find(x => x.id === id);
+  if(!c) return;
+  if(c.lock){ alert("ตัวนี้ล็อกอยู่ ปลดล็อก 🔒 ก่อน"); return; }
+  if(awaySet().has(id)){ alert("ตัวนี้ออกลาดตระเวนอยู่ รอกลับก่อน"); return; }
+  if(!confirm(`ส่งขาย${SP[c.sid].name} รับ 🪙 ${priceOf(c)}?\n\n${priceWhy(c)}\n` +
+    `ราคาตลาดวันนี้ ×${marketMul()}`)) return;
+  sellForCoins([id], true);
+}
+function mgReleaseOne(id){
+  const c = S.creatures.find(x => x.id === id);
+  if(!c) return;
+  if(c.lock){ alert("ตัวนี้ล็อกอยู่ ปลดล็อก 🔒 ก่อน"); return; }
+  if(awaySet().has(id)){ alert("ตัวนี้ออกลาดตระเวนอยู่ รอกลับก่อน"); return; }
+  if(!confirm(`ปล่อย${SP[c.sid].name}กลับป่า? ได้ผงตุ้ยนุ้ย 💠 ${dustOf(c)}`)) return;
+  if(c.stage === "adult"){
+    if(c.stars >= 6) addMat("star", 5); else if(c.stars >= 5) addMat("star", 2);
+    if(SP[c.sid].legend || c.myth) addMat("shard", 3);
+  }
+  const gain = dustOf(c);
+  S.creatures = S.creatures.filter(x => x.id !== id);
+  S.team = (S.team || []).filter(x => x !== id);
+  S.mgSel = (S.mgSel || []).filter(x => x !== id);
+  if(S.selId === id) S.selId = null;
+  if(S.brA === id) S.brA = null;
+  if(S.brB === id) S.brB = null;
+  S.dust = (S.dust || 0) + gain;
+  S.mgOpen = null;
+  logf(`ปล่อย${SP[c.sid].name}กลับป่า — ได้ 💠 ${gain}`, "");
+  sfx("coin"); save(); render();
+}
+/* กล่องรายละเอียดเต็มของตัวนั้น */
+function mgDetail(c, ctx){
+  const sp = SP[c.sid], adult = c.stage === "adult";
+  const b = adult ? ensureBattle(c) : null;
+  const iv = ivOf(c), ev = evOf(c), bd = buildOf(c), it = heldOf(c);
+  const away = ctx.away.has(c.id);
+  const B = typeof bossToday === "function" ? bossToday() : null;
+  const row = (n, v) => `<div class="d1"><span>${n}</span><b>${v}</b></div>`;
+  return `<div class="mgdet">
+    <div class="dgrid">
+      ${row("สายพันธุ์", `${sp.name}${c.myth ? " ✧" : ""}`)}
+      ${row("ดาว", adult ? `${starStr(c.stars).slice(0, c.stars)} (${c.stars}/5)`
+        : `ยังไม่รู้ · แนวโน้ม ${(STAR_BASE + (c.starPull||0)).toFixed(1)}`)}
+      ${row("ธาตุ", sp.el + (c.el2 ? " / " + c.el2 : ""))}
+      ${row("เพศ", sexOf(c).name || sexOf(c).sym)}
+      ${row("นิสัย", `${NT[c.nature].emoji} ${NT[c.nature].name}`)}
+      ${row("พรสวรรค์", talOf(c) ? `${talOf(c).emoji} ${talOf(c).name}` : "—")}
+      ${row("ระดับหายาก", c.myth ? "✧ อมตะ" : sp.legend ? "✦ ตำนาน"
+        : sp.prize ? "◈ ล้ำค่า" : sp.collab ? "✧ collab" : RAR_NAME[sp.rarity])}
+      ${row("ปลุกพลัง", awkOf(c) ? `ระดับ ${awkOf(c)}` : "—")}
+      ${row("อยู่ที่", penName(c.pen) + (away ? " · 🧭 ออกเดินทาง" : ""))}
+      ${row("หาเงิน", adult ? `🪙 ${Math.round(rateOf(c))}/นาที` : "ยังไม่หาเงิน")}
+      ${row("ผสมพันธุ์", !adult ? "ยังเด็ก" : c.myth ? "อมตะผสมไม่ได้"
+        : breedReady(c) ? "พร้อมผสม" : `พักอีก ${hhmm(breedLeft(c))}`)}
+      ${row("กลุ่มไข่", eggGroups(c.sid).join(" · "))}
+      ${row("ของถือ", it ? `${it.emoji} ${it.name}` : "—")}
+      ${row("สถานะ", [c.lock ? "🔒 ล็อก" : null, c.shiny ? "✨ " + shinyName(c) : null,
+        ctx.dupe.has(c.id) ? "ตัวซ้ำ" : "ตัวดีที่สุดของสายพันธุ์"].filter(Boolean).join(" · "))}
+      ${row("มูลค่า", `🪙 ${priceOf(c)} · 💠 ${dustOf(c)}`)}
+    </div>
+    ${bd ? `<h5>${bd.emoji} ${bd.name} · เด่น ${topStats(c,2).map(t => t.short).join(" + ")}</h5>
+      <div class="d1" style="display:block;color:var(--dim)">${bd.note}</div>` : ""}
+    <h5>ค่าพลัง ${adult ? `· รวม ${b.total}` : "· ยังไม่มีจนกว่าจะโตเต็มวัย"}
+      <span style="float:right;font-family:inherit;color:var(--dim);font-weight:400">🧬 ${ivSum(c)}/${IV_MAX*6} · 💪 ${evSum(c)}/${EV_TOTAL}</span></h5>
+    ${BSTATS.map(t => `<div class="mgst"><span>${t.short}</span>
+      <div class="mt"><i style="width:${adult ? clamp(b[t.k]/190*100, 3, 100) : 0}%;background:${t.color}"></i></div>
+      <b>${adult ? b[t.k] : "—"}</b>
+      <u>🧬${iv[t.k]}${ev[t.k] ? " 💪" + ev[t.k] : ""}</u></div>`).join('')}
+    ${adult ? `<h5>⚔️ ท่าที่ใช้</h5>
+      <div class="d1" style="display:block;color:var(--dim)">${mvOf(c).map(id => {
+        const m = MV[id];
+        return `${m.n} <i style="font-style:normal">(${m.el || "ไร้ธาตุ"} ·
+          ${m.pw ? (m.k === "s" ? "พิเศษ " : "กายภาพ ") + m.pw : "สถานะ"})</i>`;
+      }).join(" · ")}</div>` : ""}
+    ${adult && B ? `<div class="d1"><span>เจอบอสวันนี้ (${foeEls(B).join("+")})</span>
+      <b>${multTag(unitMult(c, B))}</b></div>` : ""}
+    <div class="dact">
+      <button class="sell" data-mgsell1="${c.id}" ${c.lock || away ? "disabled" : ""}>🏷 ส่งขาย 🪙 ${priceOf(c)}</button>
+      <button class="rel" data-mgrel1="${c.id}" ${c.lock || away ? "disabled" : ""}>ปล่อยกลับป่า 💠 ${dustOf(c)}</button>
+      <button data-mglock2="${c.id}">${c.lock ? "🔓 ปลดล็อก" : "🔒 ล็อกกันเผลอ"}</button>
+      <button data-mgsel2="${c.id}">${(S.mgSel||[]).indexOf(c.id) >= 0 ? "☑️ เอาออกจากที่เลือก" : "⬜ เพิ่มในที่เลือก"}</button>
+      <button data-mggo2="${c.id}" ${away ? "disabled" : ""}>👁 ดูในทุ่ง</button>
+    </div>
+  </div>`;
 }
 function mgLock(id){
   const c = S.creatures.find(x => x.id === id);
@@ -6896,8 +7097,15 @@ function renderManage(){
   $('#mgTools').innerHTML =
     `<select class="dsel" id="mgSortSel">${MG_SORTS.map(s =>
       `<option value="${s.id}" ${(S.mgSort || 'star') === s.id ? 'selected' : ''}>เรียง: ${s.name}</option>`).join('')}</select>` +
+    `<input class="dsel" id="mgQ" placeholder="🔎 ค้นชื่อหรือธาตุ" value="${S.mgQ || ""}"
+       style="min-width:118px">` +
     `<button class="dtab" data-mgall="1">เลือกทั้งหมดในรายการ (${list.length})</button>` +
-    `<button class="dtab" data-mgnone="1">ล้างที่เลือก</button>`;
+    `<button class="dtab" data-mgnone="1">ล้างที่เลือก</button>` +
+    `<button class="dtab" data-mgexpall="1">${S.mgOpen ? "▲ ปิดที่กางอยู่" : "▼ กางตัวแรก"}</button>`;
+  const qi = $('#mgQ');
+  if(qi) qi.onchange = e => { S.mgQ = e.target.value; renderManage(); };
+  const xa = $('#mgTools').querySelector('[data-mgexpall]');
+  if(xa) xa.onclick = () => { S.mgOpen = S.mgOpen ? null : (list[0] && list[0].id) || null; renderManage(); };
   $('#mgSortSel').onchange = e => { S.mgSort = e.target.value; renderManage(); };
   $('#mgTools').querySelector('[data-mgall]').onclick = () => {
     S.mgSel = list.map(c => c.id); renderManage(); };
@@ -6951,13 +7159,31 @@ function renderManage(){
         <button class="ic" data-mggo="${c.id}" title="ดูในทุ่ง" ${isAway ? 'disabled' : ''}>👁</button>
         <small>🪙${priceOf(c)}</small>
         <small>💠${dustOf(c)}</small>
-      </div></div>`;
+      </div>
+      <button class="mgexp" data-mgexp="${c.id}">${S.mgOpen === c.id ? "▲ ย่อ" : "▼ ดูละเอียด"}</button>
+      ${S.mgOpen === c.id ? mgDetail(c, ctx) : ""}</div>`;
   }).join('') : `<p class="empty">ไม่มีตุ้ยนุ้ยตัวไหนตรงเงื่อนไขนี้</p>`;
 
   $('#mgList').querySelectorAll('[data-mgsel]').forEach(b =>
     b.onclick = () => mgToggle(+b.dataset.mgsel));
   $('#mgList').querySelectorAll('[data-mglock]').forEach(b =>
     b.onclick = () => mgLock(+b.dataset.mglock));
+  $('#mgList').querySelectorAll('[data-mgexp]').forEach(b =>
+    b.onclick = () => mgExpand(+b.dataset.mgexp));
+  $('#mgList').querySelectorAll('[data-mgsell1]').forEach(b =>
+    b.onclick = () => mgSellOne(+b.dataset.mgsell1));
+  $('#mgList').querySelectorAll('[data-mgrel1]').forEach(b =>
+    b.onclick = () => mgReleaseOne(+b.dataset.mgrel1));
+  $('#mgList').querySelectorAll('[data-mglock2]').forEach(b =>
+    b.onclick = () => mgLock(+b.dataset.mglock2));
+  $('#mgList').querySelectorAll('[data-mgsel2]').forEach(b =>
+    b.onclick = () => mgToggle(+b.dataset.mgsel2));
+  $('#mgList').querySelectorAll('[data-mggo2]').forEach(b => b.onclick = () => {
+    const c = S.creatures.find(x => x.id === +b.dataset.mggo2);
+    if(!c) return;
+    S.curPen = c.pen; S.selId = c.id;
+    sfx("tap"); save(); render(); switchTab("field");
+  });
   $('#mgList').querySelectorAll('[data-mggo]').forEach(b => b.onclick = () => {
     const c = S.creatures.find(x => x.id === +b.dataset.mggo);
     if(!c) return;

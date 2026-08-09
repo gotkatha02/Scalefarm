@@ -704,6 +704,65 @@ h2 + h2{margin-top:20px}
 .mv1 select{flex:1;font-family:inherit;font-size:11.5px;padding:4px 6px;border-radius:9px;
   border:1.5px solid #D9CEF0;background:#fff;color:#4A4030}
 .mvnote{font-size:10.5px;color:var(--dim);line-height:1.55}
+.bxbar{display:flex;align-items:center;gap:6px;margin:0 0 8px}
+.bxbar b{flex:1;text-align:center;font-family:var(--display);font-size:14px}
+.bxnav{width:38px;height:34px;flex:none;border-radius:11px;border:1.5px solid #DED3F3;
+  background:#F3F0FF;color:#57459A;font-size:15px;cursor:pointer}
+.bxgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;background:#F3F0FF;
+  border:1.5px solid #DCD3F3;border-radius:14px;padding:6px}
+.bxcell{position:relative;aspect-ratio:1/1;border-radius:10px;border:1.5px solid transparent;
+  background:#fff;padding:0;cursor:pointer;overflow:hidden}
+.bxcell.empty{background:#EDE8FA;border-style:dashed;border-color:#DCD3F3;cursor:default}
+.bxcell img{width:100%;height:100%;object-fit:contain}
+.bxcell.on{border-color:#7C6ADF;box-shadow:0 0 0 2px #CFC5F5}
+.bxcell .bxk{position:absolute;top:1px;right:2px;font-size:9px;line-height:1}
+.bxcell .bxlv{position:absolute;bottom:0;left:0;right:0;font-size:8px;text-align:center;
+  color:#6A5F52;background:rgba(255,255,255,.75)}
+.bxcell.sh{background:linear-gradient(150deg,#FFF8E1,#FFE9F3)}
+.bxdet{background:#FFFDF6;border:1.5px solid #EADFC6;border-radius:14px;padding:10px 12px;margin-top:8px}
+.bxdet h4{font-family:var(--display);font-size:15px;margin:0 0 2px}
+.bxdet .bxsub{font-size:11px;color:var(--dim);display:block;margin-bottom:7px}
+.ivjudge{display:flex;align-items:center;gap:6px;font-size:11.5px;margin-bottom:3px}
+.ivjudge span{width:34px;flex:none;font-weight:700;color:var(--dim)}
+.ivjudge i{flex:1;font-style:normal}
+.ivjudge b{width:52px;text-align:right}
+.jv31{color:#2E6B4C;font-weight:700}.jv30{color:#3B6E96;font-weight:700}
+.jv26{color:#6A5F9A}.jv16{color:#8A7A5A}.jv1{color:#A08A7A}.jv0{color:#C05A4A}
+.bxacts{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px}
+.bxacts button{font-family:inherit;font-size:12px;padding:7px 8px;border-radius:11px;cursor:pointer;
+  border:1.5px solid #E3D9C4;background:#fff;color:#4A4030}
+.bxacts button:disabled{opacity:.45;cursor:not-allowed}
+.bxmove{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11.5px}
+.bxmove select{flex:1;font-family:inherit;font-size:12px;padding:5px 7px;border-radius:9px;
+  border:1.5px solid #E2D6B8;background:#fff}
+.lbarena{max-width:520px}
+.lbme{display:flex;align-items:center;gap:8px;position:relative;background:#FFFDF6;
+  border:1.5px solid #EADFC6;border-radius:14px;padding:8px 10px;margin-top:8px}
+.lbme>img{width:64px;height:64px;object-fit:contain;flex:none}
+.lbme .lbinfo{flex:1;min-width:0}
+.lbme .lbinfo b{display:block;font-size:13px}
+.lbme .lbinfo small{display:block;font-size:10.5px;color:var(--dim);line-height:1.5}
+.stg{display:inline-block;font-style:normal;background:#EDE6FA;color:#5B4A8A;border-radius:6px;
+  padding:0 4px;font-size:9.5px;margin-left:3px}
+.lblog{background:#2E2A26;color:#F4EEE2;border-radius:12px;padding:8px 10px;margin:8px 0;
+  font-size:11.5px;line-height:1.6;max-height:92px;overflow-y:auto;touch-action:pan-y}
+.lblog p{margin:0 0 2px}
+.lbmoves{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lbmv{text-align:left;font-family:inherit;padding:7px 9px;border-radius:12px;cursor:pointer;
+  border:1.5px solid #DDD3BE;background:#fff;color:#4A4030;line-height:1.4}
+.lbmv b{display:block;font-size:12.5px}
+.lbmv small{display:block;font-size:9.5px;color:var(--dim)}
+.lbmv.ph{border-color:#E8B9A0;background:#FFF6F1}
+.lbmv.sp{border-color:#A9C6E8;background:#F2F7FD}
+.lbmv.st{border-color:#C9BEE8;background:#F7F4FD}
+.lbmv:disabled{opacity:.45;cursor:not-allowed}
+.lbteam{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.lbsw{width:52px;padding:4px;border-radius:11px;border:1.5px solid #E3D9C4;background:#fff;cursor:pointer}
+.lbsw img{width:36px;height:36px;object-fit:contain;display:block;margin:0 auto}
+.lbsw small{display:block;font-size:9px;color:var(--dim);text-align:center}
+.lbsw.on{border-color:#7FD3A6;background:#F2FCF6}
+.lbsw.down img{filter:grayscale(1);opacity:.5}
+.lbsw:disabled{opacity:.55}
 .buildchip{display:block;background:#EEF6FF;border:1.5px solid #CFE2F5;border-radius:12px;
   padding:7px 10px;margin:8px 0 0;font-size:11.5px;color:#2F5A7A;line-height:1.55}
 .buildchip b{font-family:var(--display);font-size:13px;display:block;color:#24506E}
@@ -1053,6 +1112,27 @@ h2 + h2{margin-top:20px}
     <button class="btn sm" id="btnAutoHatch">ฟักลงทุ่งให้เต็ม</button>
     <button class="btn ghost sm" id="btnWarmAll">ใส่ช่องอุ่นให้เต็ม</button>
   </div>
+  <div class="holdbox">
+    <h4>🧰 ตัวช่วยจัดการไข่</h4>
+    <div class="sellrow" style="flex-wrap:wrap">
+      <button class="dtab" id="btnPeekAll">🔍 ส่องยกรัง</button>
+      <button class="dtab" id="btnHatchBox">📦 ฟักที่พร้อมเข้าตู้ฝาก</button>
+      <button class="dtab" id="btnCullNow">🗑 คัดไข่เดี๋ยวนี้</button>
+    </div>
+    <div class="holdrow"><span>กฎคัด</span>
+      <select id="cullTh"></select></div>
+    <div class="sellrow" style="align-items:center">
+      <button class="dtab" id="cullOn"></button>
+      <span class="sl2" id="cullNote"></span>
+    </div>
+    <h4 style="margin-top:10px">📜 สั่งทำไข่</h4>
+    <div class="holdrow"><span>สายพันธุ์</span>
+      <select id="orderSid"></select></div>
+    <div class="sellrow" style="align-items:center">
+      <button class="dtab" id="btnOrder">📜 สั่งทำ</button>
+      <span class="sl2" id="orderNote"></span>
+    </div>
+  </div>
   <div class="shop" id="eggList"></div>
   <h2 style="margin-top:18px">🔄 แท่นแลกไข่</h2>
   <p class="note" style="margin:0 0 10px">ตุ้ยนุ้ยระดับ <b>ล้ำค่า</b> เจ็ดตัวนี้หาไม่ได้จากที่อื่นเลย
@@ -1070,6 +1150,11 @@ h2 + h2{margin-top:20px}
     <button class="dtab big" data-bmode="tower">🗼 หอคอยไต่ชั้น</button>
     <button class="dtab big" data-bmode="dg">🕳 ดันเจี้ยน</button>
     <button class="dtab big" data-bmode="abyss">🌀 ถ้ำไร้ที่สิ้นสุด</button>
+    <button class="dtab big" data-bmode="gate">🚪 ประตูโลก</button>
+  </div>
+  <div id="paneGate">
+    <h2>🚪 ประตูสู่โลกที่สอง</h2>
+    <div id="gateBox"></div>
   </div>
   <div id="paneAbyss">
     <h2>🌀 ถ้ำไร้ที่สิ้นสุด</h2>
@@ -1088,6 +1173,25 @@ h2 + h2{margin-top:20px}
   <div id="bossCard"></div>
   <h2>เลือกทีม (สูงสุด 3 ตัว)</h2>
   <div class="team" id="teamList"></div>
+  <div class="holdbox">
+    <h4>🧰 ตัวช่วยฟาร์ม</h4>
+    <div class="sellrow" style="flex-wrap:wrap">
+      <button class="dtab" id="btnManual"></button>
+      <button class="dtab" id="btnSkip"></button>
+      <button class="dtab" id="btnB5">⚡ ตีรัว ×5</button>
+      <button class="dtab" id="btnB10">⚡ ตีรัว ×10</button>
+    </div>
+    <span class="sl2" id="manualNote"></span>
+    <div class="holdrow"><span>🧟 บอส</span><select id="bossPick"></select></div>
+    <div class="sellrow" style="align-items:center">
+      <button class="dtab" id="btnPickUnlock"></button>
+      <span class="sl2" id="pickNote"></span>
+    </div>
+    <div class="holdrow"><span>🎯 เล็ง</span><select id="legTarget"></select></div>
+    <span class="sl2" id="pityNote"></span>
+    <h4 style="margin-top:10px">🧪 ยาบัฟ</h4>
+    <div class="holdshop" id="buffList"></div>
+  </div>
   <button class="btn" id="btnFight" style="width:100%">ออกไปสู้</button>
   <p class="note" id="bossNote"></p>
   </div>
@@ -1098,11 +1202,17 @@ h2 + h2{margin-top:20px}
     <button class="dtab big" data-mode="dex">📔 สมุดภาพ</button>
     <button class="dtab big" data-mode="manage">🗂 จัดการตุ้ยนุ้ย</button>
     <button class="dtab big" data-mode="stats">📊 สถิติ</button>
+    <button class="dtab big" data-mode="boxes">📦 กล่องเก็บ</button>
     <button class="dtab big" data-mode="collect">🏆 รางวัลสะสม</button>
     <button class="dtab big" data-mode="guide">📖 คู่มือ</button>
   </div>
 
   <div id="paneGuide"><h2>📖 คู่มือฟาร์ม</h2><div id="guideBox"></div></div>
+
+  <div id="paneBoxes"><h2>📦 กล่องเก็บตุ้ยนุ้ย</h2>
+    <p class="note" style="margin:0 0 10px">เห็นทุกตัวเป็นช่องเรียงเหมือนกล่องโปเกม่อน ${BOX_COUNT} กล่อง กล่องละ ${BOX_PER} ตัว
+      · แตะตัวไหนก็ได้เพื่อดูค่าแฝงรายช่อง แล้วสั่งขาย ย้ายกล่อง หรือล็อกได้จากตรงนั้นเลย</p>
+    <div id="boxViewBox"></div></div>
 
   <div id="paneCollect"><h2>🏆 รางวัลสะสม</h2>
     <p class="note" style="margin:0 0 10px">โบนัสทุกอย่างในหน้านี้เป็นของถาวรและติดกับฟาร์ม
@@ -1557,7 +1667,15 @@ function packSave(){
     HELD.map(x => c36(heldOwn(x.id))).join(".") + "," +
     (S.bossTryDay === todayKey() ? c36(S.bossTry || 0) : "0") + "," +
     SHRINE.map(x => c36(shLv(x.id))).join(".") + "," +
-    c36(S.abBest || 0);
+    c36(S.abBest || 0) + "," + (S.manualBattle ? "1" : "0") + "," +
+    (S.cullOn ? "1" : "0") + "." + c36(S.cullTh || 100) + "," +
+    (nannyOn() ? [c36(S.nanny.a), c36(S.nanny.b),
+      c36(Math.round((Date.now() - (S.nanny.at || Date.now()))/60000))].join(".") : "") + "," +
+    [S.skipArena ? 1 : 0, S.bossPickUnlocked ? 1 : 0, S.bossPick != null ? S.bossPick : "",
+     c36(pityNow()), S.legTarget && SIDX[S.legTarget] != null ? c36(SIDX[S.legTarget]) : "",
+     c36(S.farmRounds || 0)].join(".") + "," +
+    BUFFS.map(u => c36(Math.max(0, Math.round(buffLeft(u.id)/60000)))).join(".") + "," +
+    [c36(gateStep()), c36(S.godWin || 0), S.w2 ? 1 : 0, c36(S.manualWins || 0)].join(".");
 
   let bits = "";                                     // สมุดภาพ = 1 บิตต่อสายพันธุ์
   SPECIES.forEach(s => bits += (S.seen && S.seen[s.id]) ? "1" : "0");
@@ -1591,7 +1709,9 @@ function packSave(){
     c.box ? 1 : "",
     c.box && c.penBack != null ? c36(c.penBack) : "",
     (c.lv || 1) > 1 ? c36(c.lv) : "",
-    c.xp ? c36(c.xp) : ""
+    c.xp ? c36(c.xp) : "",
+    c.ped ? c.ped.map(x => x && SIDX[x] != null ? c36(SIDX[x]) : "").join(".") : "",
+    c.box && c.bx ? c36(c.bx) : ""
   ].join(",")).join(";");
 
   const eggs = (S.eggs || []).map(e => [
@@ -1608,7 +1728,9 @@ function packSave(){
     e.collab ? 1 : "",
     e.masu ? 1 : "",
     e.peek ? 1 : "",
-    e.mvEgg && MV[e.mvEgg] ? c36(MOVES.findIndex(m => m.id === e.mvEgg) + 1) : ""
+    e.mvEgg && MV[e.mvEgg] ? c36(MOVES.findIndex(m => m.id === e.mvEgg) + 1) : "",
+    e.off ? c36(Math.max(1, Math.round((Date.now() - e.off)/60000))) : "",
+    e.ped ? e.ped.map(x => x && SIDX[x] != null ? c36(SIDX[x]) : "").join(".") : ""
   ].join(",")).join(";");
 
   const IDX = {}; (S.creatures || []).forEach((c, i) => IDX[c.id] = i);
@@ -1682,6 +1804,25 @@ function unpackSave(txt){
   if(m[24]){ const v = m[24].split(".");
     SHRINE.forEach((x, i) => { const n = p36(v[i] || "0"); if(n) S2.shrine[x.id] = n; }); }
   if(m[25]) S2.abBest = p36(m[25]);
+  if(m[26] === "1") S2.manualBattle = true;
+  if(m[27]){ const v = m[27].split(".");
+    S2.cullOn = v[0] === "1"; S2.cullTh = p36(v[1] || "0") || 100; }
+  if(m[28]){ const v = m[28].split(".");
+    if(v.length >= 2) S2.nanny = { on:true, a:p36(v[0]), b:p36(v[1]),
+      at: Date.now() - p36(v[2] || "0")*60000 }; }
+  if(m[29]){ const v = m[29].split(".");
+    S2.skipArena = v[0] === "1";
+    S2.bossPickUnlocked = v[1] === "1";
+    if(v[2] !== "" && v[2] != null) S2.bossPick = +v[2];
+    S2.pity = p36(v[3] || "0");
+    if(v[4]) S2.legTarget = (SPECIES[p36(v[4])] || {}).id || null;
+    S2.farmRounds = p36(v[5] || "0"); }
+  if(m[31]){ const v = m[31].split(".");
+    S2.gateStep = p36(v[0] || "0"); S2.godWin = p36(v[1] || "0");
+    S2.w2 = v[2] === "1"; S2.manualWins = p36(v[3] || "0"); }
+  if(m[30]){ const v = m[30].split("."); S2.buffs = {};
+    BUFFS.forEach((u, i) => { const mn = p36(v[i] || "0");
+      if(mn) S2.buffs[u.id] = Date.now() + mn*60000; }); }
   S2.incMigrated = true;
 
   S2.seen = {};
@@ -1731,6 +1872,9 @@ function unpackSave(txt){
     if(c.box && f[29]) c.penBack = p36(f[29]);
     if(f[30]) c.lv = Math.min(LV_MAX, Math.max(1, p36(f[30])));
     if(f[31]) c.xp = p36(f[31]);
+    if(f[32]){ const v = f[32].split(".");
+      c.ped = v.map(x => x === "" ? "" : ((SPECIES[p36(x)] || {}).id || "")); }
+    if(f[33]) c.bx = p36(f[33]);
     return c;
   });
 
@@ -1752,6 +1896,9 @@ function unpackSave(txt){
     if(f[14] === "1") e.masu = true;
     if(f[15] === "1") e.peek = true;
     if(f[16]){ const m = MOVES[p36(f[16]) - 1]; if(m) e.mvEgg = m.id; }
+    if(f[17]) e.off = Date.now() - p36(f[17])*60000;
+    if(f[18]){ const v = f[18].split(".");
+      e.ped = v.map(x => x === "" ? "" : ((SPECIES[p36(x)] || {}).id || "")); }
     return e;
   });
   S2.trips = (trips ? trips.split(";") : []).filter(Boolean).map(row => {
@@ -2073,8 +2220,11 @@ function elDone(){                                  // ธาตุที่เ�
 }
 const collabDone = () => COLLAB_LIST.length > 0 && COLLAB_LIST.every(s => (S.seen || {})[s.id]);
 const legendDone = () => LEGEND_LIST.length > 0 && LEGEND_LIST.every(s => (S.seen || {})[s.id]);
-const crowned = () => S.creatures.filter(c => BSTATS.every(b => ivOf(c)[b.k] >= IV_MAX));
-const isCrown = c => BSTATS.every(b => ivOf(c)[b.k] >= IV_MAX);
+const perfCount = c => BSTATS.filter(b => ivOf(c)[b.k] >= IV_MAX).length;
+const crowned = () => S.creatures.filter(c => perfCount(c) >= BSTATS.length);
+const isCrown = c => perfCount(c) >= BSTATS.length;
+const crownTag = c => { const n = perfCount(c);
+  return n >= BSTATS.length ? "👑 มงกุฎ 6/6" : n >= 3 ? `👑 ${n}/6` : n ? `✧ ${n}/6` : ""; };
 function dexTier(){
   const n = dexSeen();
   let t = null;
@@ -2092,6 +2242,123 @@ const elBonus = c => {
   const mine = [SP[c.sid].el, c.el2].filter(Boolean);
   return 1 + 0.05 * mine.filter(el => done.indexOf(el) >= 0).length;
 };
+/* ================= 📦 หน้ากล่องเก็บแบบโปเกม่อน ================= */
+function bxList(){
+  const mode = S.bxMode || "box";
+  if(mode === "pen") return S.creatures.filter(c => !c.box)
+    .sort((a, b) => (a.pen - b.pen) || (a.id - b.id));
+  return boxIn(S.bxPage || 0).sort((a, b) => a.id - b.id);
+}
+function renderBoxView(){
+  const box = $('#boxViewBox');
+  if(!box) return;
+  const mode = S.bxMode || "box";
+  const page = S.bxPage || 0;
+  const list = bxList();
+  const per = mode === "box" ? BOX_PER : 36;
+  const pages = mode === "box" ? BOX_COUNT : Math.max(1, Math.ceil(list.length / per));
+  const show = mode === "box" ? list : list.slice(page * per, page * per + per);
+  const sel = S.creatures.find(c => c.id === S.bxSel);
+  const cells = [];
+  for(let i = 0; i < per; i++){
+    const c = show[i];
+    if(!c){ cells.push(`<button class="bxcell empty" disabled></button>`); continue; }
+    cells.push(`<button class="bxcell ${c.shiny ? 'sh' : ''} ${S.bxSel === c.id ? 'on' : ''}"
+      data-bxc="${c.id}">
+      <img src="${ART[c.sid]}" alt="${SP[c.sid].name}" style="${shinyFilter(c)}">
+      <i class="bxk">${c.lock ? "🔒" : ""}${isCrown(c) ? "👑" : ""}${c.shiny ? "✨" : ""}</i>
+      <i class="bxlv">${c.stage === "baby" ? "🍼" : "Lv" + lvOf(c)}</i></button>`);
+  }
+  box.innerHTML = `
+    <div class="dexbar">
+      <button class="dtab" aria-pressed="${mode === "box"}" data-bxm="box">📦 ในตู้ฝาก ${boxList().length}</button>
+      <button class="dtab" aria-pressed="${mode === "pen"}" data-bxm="pen">🌿 ในทุ่ง ${outOfBox().length}</button>
+    </div>
+    <div class="bxbar">
+      <button class="bxnav" data-bxp="-1">◀</button>
+      <b>${mode === "box" ? `กล่อง ${page + 1} / ${BOX_COUNT} · ${list.length}/${BOX_PER}`
+        : `หน้า ${page + 1} / ${pages} · ${list.length} ตัว`}</b>
+      <button class="bxnav" data-bxp="1">▶</button>
+    </div>
+    <div class="bxgrid">${cells.join('')}</div>
+    ${sel ? bxDetail(sel) : `<p class="note" style="margin:8px 0 0">แตะตัวไหนก็ได้เพื่อดูค่าแฝงรายช่อง
+      พลัง ท่า และเลือกว่าจะขาย ย้ายกล่อง หรือล็อก</p>`}`;
+
+  box.querySelectorAll('[data-bxm]').forEach(b => b.onclick = () => {
+    S.bxMode = b.dataset.bxm; S.bxPage = 0; sfx("tap"); renderBoxView(); });
+  box.querySelectorAll('[data-bxp]').forEach(b => b.onclick = () => {
+    S.bxPage = (page + (+b.dataset.bxp) + pages) % pages; sfx("tap"); renderBoxView(); });
+  box.querySelectorAll('[data-bxc]').forEach(b => b.onclick = () => {
+    S.bxSel = +b.dataset.bxc; sfx("tap"); renderBoxView(); });
+  const q = id => box.querySelector('#' + id);
+  if(sel){
+    const away = awaySet().has(sel.id);
+    if(q('bxSell')) q('bxSell').onclick = () => { S.selId = sel.id; sellOne(); };
+    if(q('bxLock')) q('bxLock').onclick = () => { sel.lock = !sel.lock; sfx("tap"); save(); renderBoxView(); };
+    if(q('bxStore')) q('bxStore').onclick = () => {
+      if(sel.box) boxTake([sel.id]); else boxPut([sel.id]);
+      renderBoxView();
+    };
+    if(q('bxRel')) q('bxRel').onclick = () => { S.selId = sel.id; release(); };
+    if(q('bxTeam')) q('bxTeam').onclick = () => {
+      S.team = S.team || [];
+      if(S.team.includes(sel.id)) S.team = S.team.filter(x => x !== sel.id);
+      else if(S.team.length < 3) S.team.push(sel.id);
+      sfx("tap"); save(); renderBoxView();
+    };
+    if(q('bxBreed')) q('bxBreed').onclick = () => {
+      if(isMale(sel)) S.brA = sel.id; else S.brB = sel.id;
+      logf(`ตั้ง${SP[sel.sid].name}เป็น${isMale(sel) ? "พ่อ" : "แม่"}พันธุ์แล้ว`, "");
+      sfx("tap"); save(); render();
+    };
+    const mv = q('bxMoveTo');
+    if(mv) mv.onchange = () => moveToBox(sel.id, +mv.value);
+  }
+}
+function bxDetail(c){
+  const sp = SP[c.sid], b = c.stage === "adult" ? statsOf(c) : null;
+  const iv = ivOf(c), ev = evOf(c);
+  const away = awaySet().has(c.id);
+  const bd = buildOf(c);
+  return `<div class="bxdet">
+    <h4>${sp.name} ${sexTag(c)} ${c.lock ? "🔒" : ""}${c.shiny ? "✨" : ""}${isCrown(c) ? "👑" : ""}</h4>
+    <span class="bxsub">${sp.el}${c.el2 ? " / " + c.el2 : ""} · ${
+      c.stage === "baby" ? "ลูกตุ้ยนุ้ย · โตแล้ว " + Math.floor(clamp(c.exp/EXP_NEED*100,0,100)) + "%"
+      : `${starStr(c.stars).slice(0, c.stars)} · 📈 Lv ${lvOf(c)} · พลังรวม ${b.total}`}
+      · ${NT[c.nature] ? NT[c.nature].emoji + " " + NT[c.nature].name : ""}
+      ${talOf(c) ? " · " + talOf(c).emoji + " " + talOf(c).name : ""}
+      ${bd ? " · " + bd.emoji + " " + bd.name : ""}
+      <br>${c.box ? `📦 กล่อง ${boxOf(c) + 1}` : penName(c.pen)}${away ? " · 🧭 ออกเดินทาง" : ""}
+      · 🏷 ${priceOf(c)} · 💠 ${dustOf(c)}</span>
+    ${BSTATS.map(x => { const j = ivWordOf(iv[x.k]);
+      return `<div class="ivjudge"><span>${x.short}</span>
+        <i class="${j.cls}">${j.w}</i>
+        <b>${b ? b[x.k] : "—"}</b>
+        <b style="color:var(--dim);font-size:10.5px">${iv[x.k]}/${IV_MAX}${ev[x.k] ? " 💪" + ev[x.k] : ""}</b></div>`;
+    }).join('')}
+    <span class="bxsub" style="margin:6px 0 0">${ivVerdict(c)} · ค่าแฝงรวม ${ivSum(c)}/${IV_MAX*6}
+      · 👑 ช่องเต็ม ${perfCount(c)}/6
+      ${c.stage === "adult" ? `<br>⚔️ ${mvOf(c).map(id => MV[id].n).join(" · ")}` : ""}
+      ${heldOf(c) ? `<br>${heldOf(c).emoji} ${heldOf(c).name}` : ""}
+      ${pedShort(c)}</span>
+    <div class="bxacts">
+      <button id="bxStore" ${away ? "disabled" : ""}>${c.box ? "📤 ดึงออกจากตู้" : "📦 เก็บเข้าตู้"}</button>
+      <button id="bxLock">${c.lock ? "🔓 ปลดล็อก" : "🔒 ล็อกกันเผลอ"}</button>
+      <button id="bxSell" ${c.lock || away ? "disabled" : ""}>🏷 ส่งขาย 🪙 ${priceOf(c)}</button>
+      <button id="bxRel" ${c.lock || away ? "disabled" : ""}>ปล่อยกลับป่า 💠 ${dustOf(c)}</button>
+      ${c.stage === "adult" && !c.box ? `<button id="bxTeam">${(S.team||[]).includes(c.id)
+        ? "− ออกจากทีมบอส" : "+ เข้าทีมบอส"}</button>` : ''}
+      ${c.stage === "adult" && !c.box && breedReady(c) ? `<button id="bxBreed">💞 ตั้งเป็นพ่อ/แม่พันธุ์</button>` : ''}
+    </div>
+    ${c.box ? `<div class="bxmove"><span>ย้ายไป</span>
+      <select id="bxMoveTo">${Array.from({length:BOX_COUNT}, (_, n) =>
+        `<option value="${n}" ${n === boxOf(c) ? "selected" : ""}>กล่อง ${n+1} (${boxIn(n).length}/${BOX_PER})</option>`
+      ).join('')}</select></div>` : ''}
+  </div>`;
+}
+const pedShort = c => (c && c.ped && c.ped.some(Boolean))
+  ? `<br>🌳 พ่อ ${SP[c.ped[1]] ? SP[c.ped[1]].name : "—"} · แม่ ${SP[c.ped[0]] ? SP[c.ped[0]].name : "—"}` : "";
+
 function renderCollect(){
   const box = $('#collectBox');
   if(!box) return;
@@ -2332,6 +2599,7 @@ function tick(){
       if(!lightSel()) renderSel();       // วาดใหม่ทั้งใบเฉพาะตอนที่อัปเดตเบาๆ ไม่ได้
     }
   }
+  nannyTick();
   $('#hCoin').textContent = Math.floor(S.coins);
   tickNest();
   maybeChest();
@@ -2462,6 +2730,40 @@ function penCount(i){ return S.creatures.filter(c => c.pen === i && !c.box).leng
    ตัวที่อยู่ในตู้ไม่กินที่ในทุ่ง ไม่หาเงิน ไม่โต ไม่ไปสู้ ไม่ผสม
    แต่เก็บทุกอย่างไว้ครบ ดึงออกมาเมื่อไหร่ก็ได้ ไม่มีวันหมดอายุ */
 const BOX_MAX = 600;
+const BOX_PER  = 30;                                  // 6 ช่อง × 5 แถว เหมือนกล่องโปเกม่อน
+const BOX_COUNT = Math.ceil(BOX_MAX / BOX_PER);
+const boxOf   = c => Math.max(0, Math.min(BOX_COUNT - 1, c.bx || 0));
+const boxIn   = n => S.creatures.filter(c => c.box && boxOf(c) === n);
+const boxSpace = n => Math.max(0, BOX_PER - boxIn(n).length);
+function boxFirstFree(){
+  for(let n = 0; n < BOX_COUNT; n++) if(boxSpace(n) > 0) return n;
+  return -1;
+}
+function moveToBox(id, n){
+  const c = S.creatures.find(x => x.id === id);
+  if(!c || !c.box) return;
+  if(n === boxOf(c)) return;
+  if(boxSpace(n) <= 0){ alert(`กล่อง ${n+1} เต็มแล้ว`); return; }
+  c.bx = n;
+  logf(`ย้าย${SP[c.sid].name}ไปกล่อง ${n+1}`, "");
+  sfx("tap"); save(); render();
+}
+/* คำตัดสินค่าแฝงแบบโปเกม่อน */
+const IV_JUDGE = [
+  { min:31, w:"สุดยอด",      cls:"jv31" },
+  { min:30, w:"เยี่ยมยอด",   cls:"jv30" },
+  { min:26, w:"ดีมาก",       cls:"jv26" },
+  { min:16, w:"ค่อนข้างดี",  cls:"jv16" },
+  { min:1,  w:"พอใช้",       cls:"jv1"  },
+  { min:0,  w:"ไม่ได้เลย",   cls:"jv0"  }
+];
+const ivWordOf = v => IV_JUDGE.find(x => v >= x.min) || IV_JUDGE[IV_JUDGE.length - 1];
+const ivVerdict = c => {
+  const n = perfCount(c), s = ivSum(c);
+  return n >= 6 ? "ค่าแฝงสมบูรณ์แบบ!" : n >= 4 ? "ค่าแฝงยอดเยี่ยม!"
+    : s >= IV_MAX*6*0.75 ? "ค่าแฝงดีมาก" : s >= IV_MAX*6*0.55 ? "ค่าแฝงพอใช้ได้"
+    : "ค่าแฝงยังไม่ดีนัก";
+};
 const inBox   = c => !!(c && c.box);
 const boxList = () => S.creatures.filter(inBox);
 const boxRoom = () => Math.max(0, BOX_MAX - boxList().length);
@@ -2473,8 +2775,10 @@ function boxPut(ids, quiet){
   if(!list.length){ if(!quiet) alert("ไม่มีตัวไหนเก็บเข้าตู้ได้ (ตัวที่ออกเดินทางอยู่เก็บไม่ได้)"); return 0; }
   if(list.length > boxRoom()){ alert(`ตู้เหลือที่ ${boxRoom()} ตัว แต่จะเก็บ ${list.length} ตัว`); return 0; }
   list.forEach(c => {
+    const n = boxFirstFree();                           // หาที่ว่างก่อนแล้วค่อยเก็บ
     c.box = true;
     c.penBack = c.pen;                                  // จำทุ่งเดิมไว้ ดึงออกมาจะกลับที่เดิม
+    c.bx = n < 0 ? BOX_COUNT - 1 : n;
   });
   const set = new Set(list.map(c => c.id));
   S.team    = (S.team || []).filter(id => !set.has(id));
@@ -2535,9 +2839,13 @@ function rollHatchSid(e){
   if(!e.boss || !e.bossId) return e.sid;
   const pool = LEGEND_BY_BOSS[e.bossId];
   if(!pool || !pool.length) return e.sid;
-  if(Math.random() >= LEGEND_CHANCE) return e.sid;
-  const fresh = pool.filter(s => !S.seen[s.id]);          // ตัวที่ยังไม่เคยได้ ออกก่อน
-  return pick(fresh.length ? fresh : pool).id;
+  const forced = pityNow() >= PITY_NEED;                  // 🎫 ซวยครบโควตา ได้ตำนานแน่นอน
+  if(!forced && Math.random() >= LEGEND_CHANCE){
+    S.pity = pityNow() + 1;
+    return e.sid;
+  }
+  S.pity = 0;
+  return rollLegendSid(pool, forced);
 }
 
 /* สร้างลูกตุ้ยนุ้ยหนึ่งตัวจากไข่ใบหนึ่ง (ไข่แฝดจะเรียกซ้ำอีกรอบ สุ่มใหม่หมดทั้งสายพันธุ์และพรสวรรค์) */
@@ -2552,6 +2860,7 @@ function makeBaby(e, target){
   c.iv = e.iv ? Object.assign({}, e.iv) : rollIV();     // ค่าแฝงล็อกตั้งแต่ฟัก
   if(e.masu) c.masu = true;                            // คู่ต่างถิ่น ดันโอกาสไชนี่ตอนแปลงร่าง
   if(e.mvEgg && MV[e.mvEgg]) c.mvEgg = e.mvEgg;        // ท่าไข่ที่สืบมาจากพ่อแม่
+  if(e.ped) c.ped = e.ped.slice();                     // ผังสายเลือด
   c.ev = zeroEV();
   c.sex = rollSex(sid);                                 // เพศรู้ตอนไข่แตก ไม่รู้ก่อน
   S.creatures.push(c);
@@ -2749,6 +3058,188 @@ function hhmm(ms){
   const m = Math.ceil(ms/60000);
   return m >= 60 ? `${Math.floor(m/60)} ชม. ${m%60} น.` : `${m} นาที`;
 }
+/* ===== 🔍 หาคู่ที่ดีที่สุด · คะแนน = ค่าแฝงที่ดีกว่าของสองฝ่ายรวมกัน ===== */
+function pairScore(a, b){
+  let s = 0, perf = 0;
+  BSTATS.forEach(x => {
+    const v = Math.max(ivOf(a)[x.k], ivOf(b)[x.k]);
+    s += v;
+    if(v >= IV_MAX) perf++;
+  });
+  return { score: s + perf * 14, best: s, perf };
+}
+function findPairs(limit){
+  const pool = S.creatures.filter(c => c.stage === "adult" && !c.box && breedReady(c))
+    .sort((a, b) => ivSum(b) - ivSum(a)).slice(0, 70);
+  const out = [];
+  for(let i = 0; i < pool.length; i++)
+    for(let j = i + 1; j < pool.length; j++){
+      const a = pool[i], b = pool[j];
+      if(!canPair(a, b)) continue;
+      if(!isLegendPair(a, b) && (SP[a.sid].legend || SP[b.sid].legend)) continue;
+      const g = S.brGoal;
+      let bonus = 0;
+      if(g && g.sid && (a.sid === g.sid || b.sid === g.sid || isDitto(a) || isDitto(b))) bonus += 10;
+      if(g && g.keys && g.keys.length)
+        g.keys.forEach(k => { if(Math.max(ivOf(a)[k], ivOf(b)[k]) >= IV_MAX) bonus += 12; });
+      const sc = pairScore(a, b);
+      out.push({ a, b, s:sc.score + bonus, best:sc.best, perf:sc.perf });
+    }
+  out.sort((x, y) => y.s - x.s);
+  return out.slice(0, limit || 6);
+}
+function pairWhy(p){
+  const strongA = BSTATS.filter(x => ivOf(p.a)[x.k] > ivOf(p.b)[x.k]).map(x => x.short);
+  const strongB = BSTATS.filter(x => ivOf(p.b)[x.k] > ivOf(p.a)[x.k]).map(x => x.short);
+  const bits = [];
+  if(strongA.length) bits.push(`♂ เก่ง ${strongA.join("/")}`);
+  if(strongB.length) bits.push(`♀ เก่ง ${strongB.join("/")}`);
+  bits.push(`ช่องที่ลุ้น 31 ได้ ${p.perf} ช่อง`);
+  bits.push(`ค่าแฝงที่ดีกว่ารวม ${p.best}/${IV_MAX*6}`);
+  if(isDitto(p.a) || isDitto(p.b)) bits.push("มีตัวลอกเลียน ผสมได้ทุกกลุ่ม");
+  return bits.join(" · ");
+}
+/* ===== ♾ ผสมวนจนรังเต็ม ===== */
+function breedLoop(){
+  const a = S.creatures.find(x => x.id === S.brA), b = S.creatures.find(x => x.id === S.brB);
+  if(!a || !b || !canPair(a, b)){ alert("เลือกคู่ที่ผสมกันได้ก่อน"); return; }
+  const room = NEST_MAX - S.eggs.length;
+  if(room <= 0){ alert("รังเต็มแล้ว"); return; }
+  const cost = breedCost(a, b) * room;
+  if(!confirm(`ผสมคู่นี้วนจนรังเต็ม?\n\nจะได้ไข่อีกไม่เกิน ${room} ฟอง\nค่าใช้จ่ายไม่เกิน 🪙 ${cost}`)) return;
+  let n = 0;
+  while(S.eggs.length < NEST_MAX && n < 80){
+    const before = S.eggs.length;
+    breed();
+    if(S.eggs.length === before) break;
+    n++;
+  }
+  logf(`♾ ผสมวน — ได้ไข่ ${S.eggs.length ? n : 0} ครั้ง · รังตอนนี้ ${S.eggs.length}/${NEST_MAX}`, "good");
+  save(); render();
+}
+/* ===== 👩‍🌾 พี่เลี้ยง · ผสมคู่ที่ตั้งไว้ให้เองทุกช่วงเวลา (เดินหน้าตอนปิดเกมด้วย) ===== */
+const NANNY_MIN = 12, NANNY_WAGE = 2500;
+const nannyOn = () => !!(S.nanny && S.nanny.on);
+function nannyToggle(){
+  if(nannyOn()){ S.nanny.on = false; logf("👩‍🌾 เลิกจ้างพี่เลี้ยงแล้ว", ""); save(); render(); return; }
+  const a = S.creatures.find(x => x.id === S.brA), b = S.creatures.find(x => x.id === S.brB);
+  if(!a || !b || !canPair(a, b)){ alert("เลือกคู่ที่ผสมกันได้ก่อนจ้างพี่เลี้ยง"); return; }
+  if(S.coins < NANNY_WAGE){ alert(`ค่าจ้างล่วงหน้า 🪙 ${NANNY_WAGE}`); return; }
+  S.coins -= NANNY_WAGE;
+  S.nanny = { on:true, a:a.id, b:b.id, at:Date.now() };
+  logf(`👩‍🌾 จ้างพี่เลี้ยงแล้ว — ผสม ${SP[a.sid].name} × ${SP[b.sid].name} ทุก ${NANNY_MIN} นาที`, "good");
+  sfx("buy"); save(); render();
+}
+function nannyTick(){
+  if(!nannyOn()) return;
+  const a = S.creatures.find(x => x.id === S.nanny.a), b = S.creatures.find(x => x.id === S.nanny.b);
+  if(!a || !b || !canPair(a, b)){ S.nanny.on = false; return; }
+  const step = NANNY_MIN * 60000;
+  let rounds = Math.floor((Date.now() - (S.nanny.at || Date.now())) / step);
+  if(rounds <= 0) return;
+  rounds = Math.min(rounds, 40);
+  const keepA = S.brA, keepB = S.brB;
+  S.brA = a.id; S.brB = b.id;
+  let n = 0;
+  for(let i = 0; i < rounds; i++){
+    if(S.eggs.length >= NEST_MAX) break;
+    if(S.coins < breedCost(a, b)) break;
+    const before = S.eggs.length;
+    breed();
+    if(S.eggs.length === before) break;
+    n++;
+  }
+  S.brA = keepA; S.brB = keepB;
+  S.nanny.at = Date.now();
+  if(n) logf(`👩‍🌾 พี่เลี้ยงผสมให้ ${n} ครั้งระหว่างที่ไม่อยู่`, "good");
+}
+/* ===== 🔍 ส่องยกรัง + กฎคัดไข่ ===== */
+function peekAll(){
+  const list = S.eggs.filter(e => !e.peek);
+  if(!list.length){ alert("ส่องครบทุกฟองแล้ว"); return; }
+  const cost = list.length * PEEK_COST;
+  if((S.dust || 0) < cost){ alert(`ต้องใช้ 💠 ${cost} (ฟองละ ${PEEK_COST})`); return; }
+  if(!confirm(`ส่องไข่ ${list.length} ฟองพร้อมกัน? ใช้ 💠 ${cost}`)) return;
+  S.dust -= cost;
+  list.forEach(e => e.peek = true);
+  logf(`🔍 ส่องไข่ ${list.length} ฟอง — ดูค่าแฝงได้ทุกฟองแล้ว`, "");
+  sfx("tap"); save(); render();
+  if(S.cullOn) cullEggs(true);
+}
+function cullEggs(quiet){
+  const th = S.cullTh || 100;
+  const bad = [];
+  S.eggs.forEach((e, i) => {
+    if(!e.peek || !e.iv) return;
+    if(e.lgEgg || e.collab || e.boss) return;             // ไข่พิเศษไม่แตะ
+    if(BSTATS.reduce((a, x) => a + e.iv[x.k], 0) < th) bad.push(i);
+  });
+  if(!bad.length){ if(!quiet) alert(`ไม่มีไข่ที่ค่าแฝงรวมต่ำกว่า ${th}`); return 0; }
+  const gain = bad.reduce((a, i) => { const e = S.eggs[i];
+    return a + Math.round(30 + (e.rar || 1) * 40 + (e.starPull || 0) * 60); }, 0);
+  if(!quiet && !confirm(`ทิ้งไข่ ${bad.length} ฟองที่ค่าแฝงรวมต่ำกว่า ${th}?\n\nได้คืน 💠 ${gain}`)) return 0;
+  bad.reverse().forEach(i => S.eggs.splice(i, 1));
+  S.dust = (S.dust || 0) + gain;
+  logf(`🗑 คัดไข่ออก ${bad.length} ฟอง (ค่าแฝงรวมต่ำกว่า ${th}) — คืน 💠 ${gain}`, "");
+  sfx("coin"); save(); render();
+  return bad.length;
+}
+/* ===== 🥚 ฟักที่พร้อมเข้าตู้ฝากทั้งหมด ===== */
+function hatchToBox(){
+  const ready = S.eggs.map((e, i) => i).filter(i => eggReady(S.eggs[i]));
+  if(!ready.length){ alert("ยังไม่มีไข่ที่พร้อมแตก"); return; }
+  if(boxRoom() < ready.length){ alert(`ตู้ฝากเหลือที่ ${boxRoom()} ตัว`); return; }
+  let n = 0, ids = [];
+  for(let k = ready.length - 1; k >= 0; k--){
+    let room = -1;
+    for(let p = 0; p < S.penCount; p++) if(penCount(p) < penCap()){ room = p; break; }
+    if(room < 0) room = 0;
+    const before = S.creatures.length;
+    hatchSilent(ready[k], room);
+    for(let z = before; z < S.creatures.length; z++) ids.push(S.creatures[z].id);
+    n++;
+  }
+  boxPut(ids, true);
+  logf(`🥚 ฟัก ${n} ฟองแล้วเก็บเข้าตู้ฝากทันที ${ids.length} ตัว`, "good");
+  sfx("egg"); save(); render();
+}
+/* ===== 📜 สั่งทำไข่ · เลือกสายพันธุ์ที่เคยเจอแล้วเอง ===== */
+const ORDER_COST = { coins:18000, dust:900, mats:{ pollen:12, core:2 } };
+function orderLack(){
+  const out = [], c = ORDER_COST;
+  if(S.coins < c.coins) out.push(`🪙 ขาด ${c.coins - Math.floor(S.coins)}`);
+  if((S.dust || 0) < c.dust) out.push(`💠 ขาด ${c.dust - Math.floor(S.dust||0)}`);
+  for(const k in c.mats) if(matOf(k) < c.mats[k]) out.push(`${MAT[k].emoji} ขาด ${c.mats[k] - matOf(k)}`);
+  return out;
+}
+function orderEgg(){
+  const sid = S.orderSid;
+  if(!sid || !SP[sid]){ alert("เลือกสายพันธุ์ก่อน"); return; }
+  const sp = SP[sid];
+  if(sp.legend || sp.prize || sp.collab){ alert("ตัวตำนาน ล้ำค่า และชุด collab สั่งทำไม่ได้"); return; }
+  if(S.eggs.length >= NEST_MAX){ alert("รังเต็มแล้ว"); return; }
+  const lack = orderLack();
+  if(lack.length){ alert("ยังขาด " + lack.join(" · ")); return; }
+  const c = ORDER_COST;
+  if(!confirm(`สั่งทำไข่${sp.name}?\n\nใช้ 🪙 ${c.coins} · 💠 ${c.dust} · ` +
+    Object.keys(c.mats).map(k => `${MAT[k].emoji} ${c.mats[k]}`).join(" · ") +
+    `\n\nได้ไข่สายพันธุ์นี้แน่นอน · ค่าแฝงสุ่มปกติ`)) return;
+  S.coins -= c.coins; S.dust -= c.dust;
+  for(const k in c.mats) S.mats[k] = matOf(k) - c.mats[k];
+  S.eggs.push({ sid, tier:2, rar:sp.rarity, starPull:0.6, bred:true, iv:rollIV(), off:Date.now() });
+  logf(`📜 สั่งทำไข่${sp.name} สำเร็จ — เข้ารังแล้ว`, "good");
+  sfx("egg"); save(); render();
+}
+/* ===== 🌳 ผังสายเลือด ===== */
+function pedHtml(c){
+  if(!c || !c.ped || !c.ped.some(Boolean)) return "";
+  const nm = id => id && SP[id] ? SP[id].name : "—";
+  return `<div class="dl"><span>🌳 สายเลือด</span><b>
+    พ่อ ${nm(c.ped[1])} · แม่ ${nm(c.ped[0])}
+    <br><i style="font-style:normal;color:var(--dim)">รุ่นปู่ย่า — ฝั่งแม่ ${nm(c.ped[2])}/${nm(c.ped[3])}
+    · ฝั่งพ่อ ${nm(c.ped[4])}/${nm(c.ped[5])}</i></b></div>`;
+}
+
 function breed(){
   const a = S.creatures.find(x => x.id === S.brA);
   const b = S.creatures.find(x => x.id === S.brB);
@@ -2834,7 +3325,18 @@ function breed(){
     const f = heldOf(par) && heldOf(par).force;
     if(f) iv[f] = ivOf(par)[f];
   });
+  /* ⛓ โซ่ล่าม: ช่องไหนที่พ่อหรือแม่มี 31 ส่งให้ลูกทั้งหมด */
+  if(hasHeld(a, b, "chain")){
+    BSTATS.forEach(bt => {
+      const pa = ivOf(a)[bt.k], pb = ivOf(b)[bt.k];
+      if(pa >= IV_MAX || pb >= IV_MAX) iv[bt.k] = IV_MAX;
+    });
+  }
   const egg = { sid, tier:2, rar:SP[sid].rarity, starPull:pull, nature, bred:true, iv };
+  /* 🌳 ผังสายเลือด: จำพ่อแม่ กับพ่อแม่ของพ่อแม่ ย้อนได้สามรุ่น */
+  egg.ped = [mom.sid, dad.sid,
+    (mom.ped && mom.ped[0]) || "", (mom.ped && mom.ped[1]) || "",
+    (dad.ped && dad.ped[0]) || "", (dad.ped && dad.ped[1]) || ""];
   /* 🥚 ท่าไข่: ลูกลุ้นสืบท่าจากพ่อแม่ที่มันเรียนได้ แต่ไม่มีอยู่ในชุดเริ่มต้น */
   {
     const ok = learnable({ sid, el2 });
@@ -2962,6 +3464,45 @@ function renderBreed(){
     </div>
 
     <div class="holdbox">
+      <h4>🧰 ตัวช่วยผสมพันธุ์</h4>
+      ${(() => {
+        const g = S.brGoal || {};
+        const sp = g.sid && SP[g.sid] ? SP[g.sid] : null;
+        const mine = sp ? S.creatures.filter(c => c.sid === g.sid && c.stage === "adult") : [];
+        const bestPer = {};
+        BSTATS.forEach(x => bestPer[x.k] = mine.reduce((m, c) => Math.max(m, ivOf(c)[x.k]), 0));
+        const keys = g.keys || [];
+        return `
+        <div class="sellrow" style="align-items:center;flex-wrap:wrap">
+          <button class="dtab" id="brFind">🔍 หาคู่ที่ดีที่สุด</button>
+          <button class="dtab" id="brLoop" ${a && b && canPair(a,b) ? '' : 'disabled'}>♾ ผสมวนจนรังเต็ม</button>
+          <button class="dtab" aria-pressed="${nannyOn()}" id="brNanny">
+            ${nannyOn() ? "👩‍🌾 พี่เลี้ยง: กำลังทำงาน" : `👩‍🌾 จ้างพี่เลี้ยง 🪙 ${NANNY_WAGE}`}</button>
+        </div>
+        ${nannyOn() ? `<p class="grptag">พี่เลี้ยงผสม ${SP[(S.creatures.find(x=>x.id===S.nanny.a)||{sid:"?"}).sid] ?
+          SP[S.creatures.find(x=>x.id===S.nanny.a).sid].name : "?"} × ${
+          S.creatures.find(x=>x.id===S.nanny.b) ? SP[S.creatures.find(x=>x.id===S.nanny.b).sid].name : "?"}
+          ทุก ${NANNY_MIN} นาที · เดินหน้าตอนปิดเกมด้วย · หักค่าผสมตามปกติ</p>` : ''}
+        <div id="brFound"></div>
+        <div class="holdrow"><span>🎯 เป้า</span>
+          <select id="brGoalSid">
+            <option value="">— ยังไม่ตั้งเป้าสายเลือด —</option>
+            ${S.creatures.filter(c => c.stage === "adult")
+              .map(c => c.sid).filter((x,i,arr) => arr.indexOf(x) === i)
+              .map(id => `<option value="${id}" ${g.sid === id ? "selected" : ""}>${SP[id].name}</option>`).join('')}
+          </select></div>
+        <p class="grptag">ช่องที่อยากได้ 31:
+          ${BSTATS.map(x => `<button class="dtab" data-brk="${x.k}"
+            aria-pressed="${keys.indexOf(x.k) >= 0}">${x.short}</button>`).join(' ')}</p>
+        ${sp ? `<p class="grptag">🎯 ${sp.name} — มีอยู่ ${mine.length} ตัว ·
+          ค่าแฝงดีสุดต่อช่องที่มีในฟาร์ม ${BSTATS.map(x =>
+            `${x.short} ${bestPer[x.k]}${bestPer[x.k] >= IV_MAX ? "✅" : ""}`).join(" · ")}
+          <br>${keys.length ? `ช่องเป้าหมายที่ยังไม่มีตัวไหนถึง 31: ${
+            keys.filter(k => bestPer[k] < IV_MAX).map(k => BSTATS.find(x=>x.k===k).short).join(" ") || "ครบแล้ว 🎉"}`
+            : "เลือกช่องที่อยากได้ด้วยจะแนะนำคู่ได้ตรงขึ้น"}</p>` : ''}
+      `; })()}
+    </div>
+    <div class="holdbox">
       <h4>🎒 ของถือ <span class="grptag">สวมให้พ่อแม่ก่อนกดผสม · ถอดสลับได้ไม่จำกัด</span></h4>
       ${a || b ? (holdSel(a, "A") + holdSel(b, "B")) : `<p class="grptag">เลือกพ่อแม่ก่อนถึงจะสวมของถือได้</p>`}
       ${a && b ? `<p class="grptag">กำลังใช้:
@@ -3061,6 +3602,35 @@ function renderBreed(){
       · ตำนานผสมได้เฉพาะกับตำนานด้วยกัน และต้องมีวัสดุ${
       nMyth ? `<br>✧ อมตะ ${nMyth} ตัวไม่อยู่ในรายการ เพราะเป็นปลายทางของสายเลือดแล้ว` : ""}</p>`;
 
+  const bf = box.querySelector('#brFind');
+  if(bf) bf.onclick = () => {
+    const list = findPairs(6);
+    const el = box.querySelector('#brFound');
+    if(!list.length){ el.innerHTML = `<p class="grptag">ยังไม่มีคู่ที่ผสมกันได้เลย</p>`; return; }
+    el.innerHTML = `<p class="grptag">คู่ที่แนะนำ เรียงจากดีสุด — แตะเพื่อเลือกเป็นพ่อแม่ทันที</p>` +
+      list.map((p, i) => `<button class="hsb" data-brpair="${i}" style="width:100%;margin-bottom:5px">
+        <b>${i+1}. ${SP[p.a.sid].name} ${sexTag(p.a)} × ${SP[p.b.sid].name} ${sexTag(p.b)}</b>
+        ${pairWhy(p)}</button>`).join('');
+    el.querySelectorAll('[data-brpair]').forEach(b2 => b2.onclick = () => {
+      const p = list[+b2.dataset.brpair];
+      S.brA = isMale(p.a) || isDitto(p.b) ? p.a.id : p.b.id;
+      S.brB = S.brA === p.a.id ? p.b.id : p.a.id;
+      sfx("tap"); renderBreed();
+    });
+  };
+  const bl = box.querySelector('#brLoop');
+  if(bl) bl.onclick = breedLoop;
+  const bn = box.querySelector('#brNanny');
+  if(bn) bn.onclick = nannyToggle;
+  const bg = box.querySelector('#brGoalSid');
+  if(bg) bg.onchange = () => { S.brGoal = Object.assign({}, S.brGoal, { sid:bg.value || null }); save(); renderBreed(); };
+  box.querySelectorAll('[data-brk]').forEach(b2 => b2.onclick = () => {
+    const k = b2.dataset.brk;
+    const g = S.brGoal = Object.assign({ keys:[] }, S.brGoal);
+    g.keys = g.keys || [];
+    g.keys = g.keys.indexOf(k) >= 0 ? g.keys.filter(x => x !== k) : g.keys.concat([k]);
+    sfx("tap"); save(); renderBreed();
+  });
   box.querySelectorAll('[data-hold]').forEach(el =>
     el.onchange = () => setHeld(+el.dataset.hold, el.value || null));
   box.querySelectorAll('[data-buyheld]').forEach(el =>
@@ -3474,10 +4044,16 @@ const hatchMs = e => {
     * (1 - warmCut()) * (1 - patrolCut());
   return Math.max(Math.min(base, HATCH_FLOOR), cut);   // ลดได้ถึงหนึ่งชั่วโมง ไข่ที่สั้นกว่านั้นอยู่แล้วไม่ถูกดึงยาว
 };
-const incProg = e => e.inc ? clamp((Date.now() - e.inc) / hatchMs(e), 0, 1) : 0;
-const incLeft = e => e.inc ? Math.max(0, hatchMs(e) - (Date.now() - e.inc)) : hatchMs(e);
-const eggReady = e => !!e.inc && incProg(e) >= 1;
+/* ไข่ที่ไม่ได้อยู่ในช่องอุ่นก็คืบหน้าเองช้าๆ 25% ไม่ต้องมานั่งสลับ */
+const PASSIVE_WARM = 0.25;
+const eggMs = e => e.inc ? (Date.now() - e.inc)
+  : (Date.now() - (e.off || (e.off = Date.now()))) * PASSIVE_WARM;
+const incProg = e => clamp(eggMs(e) / hatchMs(e), 0, 1);
+const incLeft = e => Math.max(0, hatchMs(e) - eggMs(e));
+const eggReady = e => incProg(e) >= 1;
 const incCount = () => S.eggs.filter(e => e.inc && !eggReady(e)).length;
+const eggWarmNote = e => e.inc ? "" :
+  `คืบหน้าเองอยู่ ${Math.round(PASSIVE_WARM*100)}% ของความเร็วปกติ — ใส่ช่องอุ่นจะเร็วขึ้นสี่เท่า`;
 const readyCount = () => S.eggs.filter(eggReady).length;
 function tleft(ms){
   const m = Math.ceil(ms/60000);
@@ -3523,7 +4099,7 @@ function incubate(i){
   const e = S.eggs[i];
   if(!e || e.inc) return;
   if(incCount() + readyCount() >= slotsOf()){ alert("ช่องอุ่นไข่เต็มแล้ว"); return; }
-  e.inc = Date.now();
+  e.inc = Date.now() - Math.min(hatchMs(e) * 0.999, eggMs(e));   // ยกความคืบหน้าที่สะสมเองมาให้
   logf(`เอาไข่เข้าช่องอุ่น — อีก ${tleft(hatchMs(e))} จะแตก`, "");
   save(); render();
 }
@@ -3531,7 +4107,8 @@ function fillSlots(){
   let n = 0;
   for(let i = 0; i < S.eggs.length; i++){
     if(incCount() + readyCount() >= slotsOf()) break;
-    if(!S.eggs[i].inc){ S.eggs[i].inc = Date.now(); n++; }
+    if(!S.eggs[i].inc){ const e2 = S.eggs[i];
+      e2.inc = Date.now() - Math.min(hatchMs(e2) * 0.999, eggMs(e2)); n++; }
   }
   if(n) logf(`ใส่ไข่เข้าช่องอุ่น ${n} ฟอง`, "");
   save(); render();
@@ -4209,6 +4786,8 @@ function statBlocks(){
     { t:"การผจญภัย", rows:[
       ["ชนะบอส", `${S.bossWins || 0} ครั้ง`],
       ["นรกที่ผ่าน", `${hellTier()} ชั้น`],
+      ["⚡ ฟาร์มมาแล้ว", `${S.farmRounds || 0} รอบ (ตีรัว) · บอสวันนี้ ${bossTries()} รอบ`
+        + ` · 🎫 ไม่ได้ตำนานติดกัน ${pityNow()}/${PITY_NEED}`],
       ["🕳 ดันเจี้ยน", DUNGEONS.map(x => `${x.name} ชั้นลึก ${dgLv(x.id)}`).join(" · ") +
         ` · ผ่านมาแล้ว ${S.dgWins || 0} ครั้ง`],
       ["🗼 หอคอยสูงสุด", `ชั้น ${towerBest() || "—"}` +
@@ -4814,6 +5393,17 @@ COLLAB4.forEach((l, i) => {
     shiny:{ h:(l.id.length*31 + i*79 + 250) % 360, s:1.32, b:1.05 } });
   SPECIES.push(s); SP[s.id] = s; ART[s.id] = CB4_ART[s.id];
 });
+/* ---- 🌟 เทพเจ้าปฐมกาล · บอสปิดโลกและตุ้ยนุ้ยระดับเทพ ---- */
+const GOD_ART = {"godprime": "data:image/webp;base64,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"};
+const GOD_SP = { id:"godprime", name:"เทพเจ้าปฐมกาล", el:"ประกาย", form:"wing",
+  c1:"#F0DC8A", c2:"#C0304A", legend:true, god:true, rarity:4,
+  hint:"ไข่เรืองแสงทองจนมองตรงๆ ไม่ได้",
+  cap:{ pw:210, sp:190, en:200 } };
+(() => {
+  const s = Object.assign({}, GOD_SP, { shiny:{ h:210, s:1.4, b:1.08 } });
+  SPECIES.push(s); SP[s.id] = s; ART[s.id] = GOD_ART[s.id];
+  LEGEND_LIST.push(s);
+})();
 const COLLAB_LIST = SPECIES.filter(s => s.collab);
 const isCollab = sid => !!(SP[sid] && SP[sid].collab);
 const COLLAB_EGG_HRS = 24;                 // ไข่ collab อุ่นนานที่สุดในเกม
@@ -4906,6 +5496,8 @@ const HELD = [
     note:"ลูกได้นิสัยเดียวกับตัวที่ถือแน่นอน 100%" },
   { id:"oval",    emoji:"🥚", name:"เครื่องรางไข่", dust:1600,
     note:"ผสมครั้งนั้นลุ้นไข่แฝดเพิ่มอีก 20%" },
+  { id:"chain",   emoji:"⛓", name:"โซ่ล่าม",       dust:3200,
+    note:"ส่งทุกช่องที่มีค่าแฝงเต็ม 31 ให้ลูกแน่นอน (แรงกว่าผ้าพันธะ)" },
   { id:"incense", emoji:"🌸", name:"ธูปหอม",        dust:900,
     note:"ถ้าพ่อแม่คนละธาตุ ลูกได้ 🌗 สองธาตุแน่นอน" },
 ].concat(BSTATS.map(b => ({
@@ -5094,6 +5686,18 @@ const ACHV = [
   { id:"a13", name:"ของล้ำค่า",         note:"แลกตุ้ยนุ้ยล้ำค่าตัวแรก",   f:() => (S.pzBought||0) >= 1,  r:{ dust:1500 } },
   { id:"a14", name:"นักสำรวจ",          note:"เจอสายพันธุ์ครบ 60 ชนิด",  f:() => Object.keys(S.seen||{}).length >= 60, r:{ dust:1800, pollen:10 } },
   { id:"a15", name:"เจ้าที่ดิน",         note:"เปิดทุ่งครบ 5 ผืน",        f:() => S.penCount >= 5,       r:{ dust:1000 } },
+  { id:"a17", name:"ผู้ถือมงกุฎ",      note:"มีตุ้ยนุ้ยค่าแฝงเต็ม 31 ทั้ง 6 ช่อง",
+    f:() => crowned().length >= 1, r:{ dust:1500, star:5 } },
+  { id:"a18", name:"ผู้หยั่งลึก",       note:"ลงถ้ำไร้ที่สิ้นสุดถึงชั้น 25",
+    f:() => (S.abBest||0) >= 25, r:{ dust:2000, shard:3 } },
+  { id:"a19", name:"ครูฝึกตัวจริง",     note:"ปั้นตุ้ยนุ้ยถึงเลเวล 100",
+    f:() => S.creatures.some(c => lvOf(c) >= LV_MAX), r:{ dust:2000, core:5 } },
+  { id:"a20", name:"ผู้บูชาศาลเจ้า",     note:"อัปศาลเจ้าใหญ่รวม 40 ระดับ",
+    f:() => shTotal() >= 40, r:{ dust:2500, star:8 } },
+  { id:"a21", name:"ปรมาจารย์สมุดภาพ",  note:"เจอสายพันธุ์ครบ 200 ชนิด",
+    f:() => dexSeen() >= 200, r:{ dust:3000, shard:4 } },
+  { id:"a22", name:"จอมยุทธ์สั่งเอง",    note:"ชนะโหมดสั่งเอง (เทิร์นเบส) 10 ครั้ง",
+    f:() => (S.manualWins||0) >= 10, r:{ dust:2500, core:6 } },
   { id:"a16", name:"นักตกแต่ง",         note:"มีของตกแต่งครบ 20 ชิ้น",   f:() => Object.keys(S.dec||{}).length >= 20, r:{ dust:1600 } }
 ];
 const aTaken = id => (S.achv || []).indexOf(id) >= 0;
@@ -5201,6 +5805,36 @@ function renderGuide(){
       <div class="dl"><span>ผสมรัวได้แค่ไหน</span><b>ไม่มีเวลาพัก ติดแค่รัง ${NEST_MAX} ฟองและช่องอุ่น</b></div>
       <div class="dl"><span>นิสัย</span><b>คูณค่าพลังบางช่องขึ้น บางช่องลง เลือกไม่ได้ตอนเกิด แต่เปลี่ยนได้ด้วยชาเปลี่ยนนิสัย</b></div>
     </div>
+    <div class="gbox"><h4>🧰 ตัวช่วยผสมพันธุ์ · อยู่ในแท็บผสมพันธุ์</h4>
+      <div class="dl"><span>🔍 หาคู่ที่ดีที่สุด</span><b>สแกนทุกตัวในฟาร์มแล้วเสนอ 6 คู่ที่ลูกมีโอกาสค่าแฝงดีสุด
+        บอกเหตุผลด้วยว่าพ่อเก่งช่องไหน แม่เก่งช่องไหน แตะแล้วตั้งเป็นพ่อแม่ทันที</b></div>
+      <div class="dl"><span>🎯 ตั้งเป้าสายเลือด</span><b>เลือกสายพันธุ์ + ช่องที่อยากได้ 31
+        ระบบจะบอกว่าช่องไหนยังไม่มีตัวไหนถึง 31 และดันคะแนนคู่ที่ช่วยเป้านั้นขึ้นมาก่อน</b></div>
+      <div class="dl"><span>♾ ผสมวนจนรังเต็ม</span><b>กดครั้งเดียวผสมคู่เดิมจนรังไข่ครบ ${NEST_MAX} ฟอง
+        หักเหรียญตามจำนวนครั้งจริง</b></div>
+      <div class="dl"><span>👩‍🌾 จ้างพี่เลี้ยง</span><b>ค่าจ้าง 🪙 ${NANNY_WAGE} แล้วผสมคู่ที่ตั้งไว้ให้เองทุก
+        ${NANNY_MIN} นาที · <b>เดินหน้าตอนปิดเกมด้วย</b> · หักค่าผสมตามปกติ หยุดเองถ้ารังเต็มหรือเงินหมด</b></div>
+      <div class="dl"><span>⛓ โซ่ล่าม 💠 3200</span><b>ของถือชิ้นใหม่ · ช่องไหนที่พ่อหรือแม่มี 31
+        <b>ส่งให้ลูกครบทุกช่องแน่นอน</b> แรงกว่าผ้าพันธะ — ตัวหลักของสาย 6×31</b></div>
+      <div class="dl"><span>👑 ป้ายช่อง 31</span><b>ทุกตัวขึ้นป้ายว่ามีกี่ช่องที่เต็ม เช่น 👑 4/6
+        · กรอง "👑 มีช่อง 31" กับ "👑 มงกุฎ 6/6" และเรียงตามจำนวนช่องได้ในแท็บจัดการ</b></div>
+      <div class="dl"><span>🌳 ผังสายเลือด</span><b>ลูกทุกตัวจำพ่อแม่และรุ่นปู่ย่าตายายไว้
+        ดูได้ในกล่องดูละเอียดของแท็บจัดการ</b></div>
+    </div>
+    <div class="gbox"><h4>🧰 ตัวช่วยจัดการไข่ · อยู่ในแท็บฟักไข่</h4>
+      <div class="dl"><span>🔍 ส่องยกรัง</span><b>ส่องทุกฟองพร้อมกัน ฟองละ 💠 ${PEEK_COST} เห็นค่าแฝงครบทั้งรัง</b></div>
+      <div class="dl"><span>🗑 กฎคัดไข่</span><b>ตั้งเกณฑ์ค่าแฝงรวม (80–180) แล้วเปิด "คัดอัตโนมัติ"
+        ส่องยกรังเสร็จจะทิ้งไข่ที่ต่ำกว่าเกณฑ์คืนผงให้ทันที · หรือกด 🗑 คัดไข่เดี๋ยวนี้เอง</b></div>
+      <div class="dl"><span>ไข่ที่ไม่ถูกคัด</span><b>ไข่ตำนาน ไข่บอส ไข่ collab จะไม่ถูกแตะเลย</b></div>
+      <div class="dl"><span>📦 ฟักเข้าตู้ฝาก</span><b>ฟักไข่ที่พร้อมทั้งหมดแล้วเก็บเข้าตู้ทันที ทุ่งไม่ล้น</b></div>
+      <div class="dl"><span>📜 สั่งทำไข่</span><b>🪙 ${ORDER_COST.coins} · 💠 ${ORDER_COST.dust} · ${
+        Object.keys(ORDER_COST.mats).map(k => MAT[k].emoji + ORDER_COST.mats[k]).join(" ")}
+        เลือกสายพันธุ์ที่เคยเจอแล้วได้เลย แก้ปัญหาอยากผสมสายพันธุ์นั้นแต่ในฟาร์มไม่มี</b></div>
+      <div class="dl"><span>🪺 ไข่นอกช่องอุ่น</span><b>คืบหน้าเองที่ ${Math.round(PASSIVE_WARM*100)}% ของความเร็วปกติ
+        ไม่ต้องมานั่งสลับ · ใส่ช่องอุ่นแล้วความคืบหน้าที่สะสมมาถูกยกไปให้ ไม่เสียเปล่า</b></div>
+      <div class="dl"><span>ลูปที่แนะนำ</span><b>♾ ผสมวน → 🔍 ส่องยกรัง (คัดอัตโนมัติเปิด) → 📦 ฟักที่เหลือเข้าตู้
+        → กรอง 👑 ช่อง 31 มากสุด เอาตัวดีขึ้นมาทำพ่อแม่รุ่นต่อไป</b></div>
+    </div>
     <div class="gbox"><h4>💞 ผสมพันธุ์ให้ได้ลูกดี · วิธีอ่านตารางพ่อแม่</h4>
       <div class="dl"><span>ตารางอยู่ไหน</span><b>แท็บผสมพันธุ์ เลือกพ่อกับแม่ครบสองช่อง แล้วเลื่อนดูกล่อง "ลูกที่จะออกมา"</b></div>
       <div class="dl"><span>🧬 ตัวเลข x/${IV_MAX}</span><b>ค่าแฝงของช่องนั้น ยิ่งใกล้ ${IV_MAX} ยิ่งดี · ตัวเลขสีเขียวคือฝ่ายที่ชนะช่องนั้น</b></div>
@@ -5296,6 +5930,46 @@ function renderGuide(){
       <div class="dl"><span>ลดเพิ่มได้อีก</span><b>🔥 กายอบอุ่นในฟาร์ม −50% · 🧭 ลาดตระเวน −20% · ของแต่งทุ่งบางชิ้น
         (แต่ก็ยังไม่ต่ำกว่า 1 ชม.)</b></div>
     </div>
+    <div class="gbox"><h4>🚪 ประตูสู่โลกที่สอง</h4>
+      <div class="dl"><span>อยู่ไหน</span><b>แท็บบอส → 🚪 ประตูโลก · มีแถบความคืบหน้าบอกว่าเหลืออะไร</b></div>
+      <div class="dl"><span>ด่านที่ 1</span><b>เก็บภารกิจถาวรให้ครบทั้ง ${ACHV.length} ข้อ (ดูในแท็บภารกิจ)</b></div>
+      <div class="dl"><span>ภารกิจปิดโลก 6 ข้อใหม่</span><b>👑 มีตัวมงกุฎ 1 ตัว · 🌀 ถ้ำไร้ที่สิ้นสุดชั้น 25
+        · 📈 ปั้นถึงเลเวล ${LV_MAX} · 🕯 ศาลเจ้ารวม 40 ระดับ · 🏆 สายพันธุ์ 200 ชนิด
+        · ⚔️ ชนะโหมดสั่งเอง 10 ครั้ง</b></div>
+      <div class="dl"><span>ด่านที่ 2</span><b>ดันเจี้ยนชั้นลึก ${GATE_DG_LV} ทุกถ้ำ</b></div>
+      <div class="dl"><span>ด่านที่ 3</span><b>ล้มผู้พิทักษ์ประตู 3 ตัวตามลำดับ —
+        เลือด 90,000 → 170,000 → 300,000 · ชนะได้วัสดุก้อนใหญ่</b></div>
+      <div class="dl"><span>ด่านสุดท้าย</span><b>🌟 ${GOD_SP.name} · เลือด ${GOD_HP} · พลัง ${GOD_PW}
+        · ธาตุประกาย + มังกร</b></div>
+      <div class="dl"><span>เฟส 1</span><b>ปีกทองเปล่งแสง ธาตุประกาย + มังกร</b></div>
+      <div class="dl"><span>เฟส 2 (เหลือ 66%)</span><b>เปลี่ยนธาตุเป็นรัตติกาล + วิญญาณ
+        และล้างสถานะกับค่าที่ขึ้นลงทั้งสนาม — ทีมที่พึ่งสถานะอย่างเดียวจะพัง</b></div>
+      <div class="dl"><span>เฟส 3 (เหลือ 33%)</span><b>ปีกสี่ปีกเปิดเต็ม โจมตีสองครั้งต่อยก
+        และกดเกราะทีมลง 1 ขั้นทุกยก</b></div>
+      <div class="dl"><span>ทีม</span><b>เลือกได้ไม่จำกัดจำนวน แนะนำ 6 ตัว · แพ้ไม่เสียอะไร ลองใหม่ได้ไม่จำกัด
+        · ยาบัฟใช้กับด่านนี้ไม่ได้</b></div>
+      <div class="dl"><span>ชนะครั้งแรกได้</span><b>🌟 ${GOD_SP.name} มาอยู่ในฟาร์ม (6 ดาว เลเวล 50)
+        + เปิดโลกที่สองถาวร · ล้มซ้ำได้ 🔮 ×8 · 🌟 ×10 ทุกครั้ง</b></div>
+    </div>
+    <div class="gbox"><h4>🧰 ตัวช่วยฟาร์ม · อยู่ในแท็บบอส</h4>
+      <div class="dl"><span>⚡ ตีรัว ×5 / ×10</span><b>กดเดียวตีวนให้เลย ไม่โชว์ฉากระหว่างทาง
+        สรุปผลรวมทีเดียวว่าได้เหรียญ ไข่ วัสดุเท่าไหร่ · มีทั้งบอสรายวันและดันเจี้ยน</b></div>
+      <div class="dl"><span>⏭ ข้ามฉากถาวร</span><b>สวิตช์จำค่า เปิดแล้วไปหน้าสรุปทันทีทุกครั้ง
+        ไม่ต้องกดข้ามเองอีก (ใช้กับทุกโหมด)</b></div>
+      <div class="dl"><span>🧟 แท่นเรียกบอส</span><b>ปลดล็อกครั้งเดียวด้วย ${MAT.core.emoji} ${BOSS_PICK_COST.core}
+        แล้วเลือกเจอบอสวันไหนก็ได้ฟรีตลอด — ตัวตำนานผูกกับบอสแต่ละตัว ไม่ต้องรอ 7 วันเพื่อไล่ตัวเดียวอีก</b></div>
+      <div class="dl"><span>🎯 เล็งตัวตำนาน</span><b>เลือกตัวที่อยากได้จากรายการตำนานของบอสตัวนั้น
+        เวลาไข่ให้ตำนาน โอกาสออกตัวที่เล็งไว้ 55%</b></div>
+      <div class="dl"><span>🎫 การันตีกันซวย</span><b>ไข่บอสที่ไม่ให้ตำนานติดกันครบ ${PITY_NEED} ฟอง
+        ฟองถัดไปได้ตำนานแน่นอน · ตัวนับโชว์อยู่ใต้ช่องเล็ง และในหน้าสถิติ</b></div>
+      <div class="dl"><span>🧪 ยาบัฟ</span><b>${BUFFS.map(u =>
+        `${u.emoji} ${u.name} 💠${u.dust} (${u.note})`).join(" · ")} — อย่างละ ${BUFFS[0].min} นาที ซ้อนเวลาได้</b></div>
+      <div class="dl"><span>🔥 นรกขึ้นทุกรอบ</span><b>เดิมขึ้นชั้นได้วันละครั้ง ตอนนี้ชนะกี่รอบก็ขึ้นชั้นได้ทุกรอบ</b></div>
+      <div class="dl"><span>🕳 ชั้นลึกดันเจี้ยน</span><b>ชั้น 10+ ได้ 💎 เพิ่มกับ 🍃 ×4
+        · ชั้น 20+ ได้ 🌟 ทุกชั้นคู่ · ชั้น 30+ ได้ 🔮 ×2 ทุก 5 ชั้น</b></div>
+      <div class="dl"><span>📊 ดูสถิติ</span><b>แท็บสมุดภาพ → 📊 สถิติ บอกจำนวนรอบที่ฟาร์มมา
+        รอบบอสวันนี้ และตัวนับการันตี</b></div>
+    </div>
     <div class="gbox"><h4>👹 บอสรายวัน ตีซ้ำได้ไม่จำกัด</h4>
       <div class="dl"><span>จำนวนรอบ</span><b>ตีกี่รอบก็ได้ ไม่มีลิมิตต่อวันแล้ว</b></div>
       <div class="dl"><span>รอบแรกของวัน</span><b>รางวัลเต็ม 100% · ได้ไข่บอส 💠 ผงตุ้ยนุ้ย 💎 แกนพลัง
@@ -5306,6 +5980,21 @@ function renderGuide(){
       <div class="dl"><span>ฟาร์มไข่บอส</span><b>ตีวนได้ทั้งวัน ไข่บอสมีโอกาสออกทุกรอบ
         ยิ่งความยากสูงโอกาสยิ่งเยอะ · ตัวตำนานประจำบอสตัวนั้นออกจากไข่ทุกฟองได้เท่ากัน</b></div>
       <div class="dl"><span>แพ้ก็ยังได้</span><b>ได้รางวัลตามดาเมจที่ทำได้เหมือนเดิม และนับเป็นรอบซ้ำด้วย</b></div>
+    </div>
+    <div class="gbox"><h4>📦 หน้ากล่องเก็บ (แบบโปเกม่อน)</h4>
+      <div class="dl"><span>อยู่ไหน</span><b>แท็บสมุดภาพ → 📦 กล่องเก็บ</b></div>
+      <div class="dl"><span>หน้าตา</span><b>ช่องเรียง 6×5 = ${BOX_PER} ตัวต่อกล่อง ทั้งหมด ${BOX_COUNT} กล่อง
+        · กดลูกศร ◀ ▶ เปลี่ยนกล่อง</b></div>
+      <div class="dl"><span>สลับดู</span><b>📦 ในตู้ฝาก กับ 🌿 ในทุ่ง ดูได้ทั้งสองฝั่งในหน้าเดียว</b></div>
+      <div class="dl"><span>สัญลักษณ์บนช่อง</span><b>🔒 ล็อกไว้ · 👑 ค่าแฝงเต็มทุกช่อง · ✨ ไชนี่
+        · เลขล่างคือเลเวล (🍼 = ยังเป็นลูกตุ้ยนุ้ย) · ตัวไชนี่พื้นช่องจะเป็นสีทอง</b></div>
+      <div class="dl"><span>แตะแล้วเห็นอะไร</span><b>คำตัดสินค่าแฝงรายช่องแบบโปเกม่อน —
+        ${IV_JUDGE.map(j => j.w).join(" → ")} · พร้อมค่าพลังจริง ค่าแฝงตัวเลข ค่าฝึก
+        นิสัย พรสวรรค์ โครงตัว ท่าทั้ง 4 ของถือ ผังสายเลือด และราคาขาย</b></div>
+      <div class="dl"><span>สั่งได้เลยจากตรงนั้น</span><b>📤 ดึงออก/📦 เก็บเข้าตู้ · 🔒 ล็อก · 🏷 ส่งขาย
+        · ปล่อยกลับป่า · เข้าทีมบอส · ตั้งเป็นพ่อ/แม่พันธุ์</b></div>
+      <div class="dl"><span>ย้ายกล่อง</span><b>เลือกจากช่อง "ย้ายไป" ท้ายกล่องรายละเอียด
+        บอกจำนวนที่มีในแต่ละกล่องให้เห็นก่อนย้าย</b></div>
     </div>
     <div class="gbox"><h4>📦 ตู้ฝากตุ้ยนุ้ย</h4>
       <div class="dl"><span>อยู่ไหน</span><b>แท็บจัดการตุ้ยนุ้ย กล่องสีม่วงบนสุด · จุได้ ${BOX_MAX} ตัว</b></div>
@@ -5348,6 +6037,23 @@ function renderGuide(){
       <div class="dl"><span>ยังได้วัสดุไหม</span><b>ส่งขายตัวดาว 5 ได้ 🌟 ×1 · ดาว 6 ได้ 🌟 ×3
         (น้อยกว่าปล่อยกลับป่า เพราะแลกมาเป็นเหรียญแล้ว)</b></div>
       <div class="dl"><span>ตัวที่ล็อกไว้</span><b>ล็อก 🔒 แล้วส่งขายไม่ได้เลย กันเผลอ</b></div>
+    </div>
+    <div class="gbox"><h4>🎮 โหมดสั่งเอง (เทิร์นเบส)</h4>
+      <div class="dl"><span>เปิดที่ไหน</span><b>แท็บบอส → ปุ่มบนสุดเหนือปุ่มออกไปสู้ · สลับได้ทุกเมื่อ
+        ใช้กับบอสรายวัน ดันเจี้ยน หอคอย และถ้ำไร้ที่สิ้นสุดทั้งหมด</b></div>
+      <div class="dl"><span>เล่นยังไง</span><b>ตุ้ยนุ้ยออกสนามทีละตัว เลือกท่าเองทุกเทิร์นจาก 4 ช่อง
+        ปุ่มบอกธาตุ พลังท่า PP และป้ายว่าท่านั้นได้เปรียบศัตรูตัวนี้แค่ไหน</b></div>
+      <div class="dl"><span>สลับตัว</span><b>แตะรูปตัวสำรองด้านล่าง · สลับแล้ว<b>เสียเทิร์น</b>
+        ศัตรูได้ตีฟรีหนึ่งครั้ง (เหมือนโปเกม่อน)</b></div>
+      <div class="dl"><span>ลำดับก่อนหลัง</span><b>ตัวที่เร็วกว่าออกก่อน · ท่าออกก่อน (จี้ก่อน) ชนะความเร็วเสมอ
+        · อัมพาตทำให้ความเร็วครึ่งเดียว</b></div>
+      <div class="dl"><span>ตัวหมดแรง</span><b>ส่งตัวถัดไปลงให้อัตโนมัติ · หมดทั้งทีมถือว่าแพ้</b></div>
+      <div class="dl"><span>⚡ ปล่อยออโต้ที่เหลือ</span><b>กลางศึกกดได้ ให้ระบบเล่นต่อจากสถานะปัจจุบันจนจบ
+        (เลือด สถานะ PP ค่าที่ขึ้นลง ยกไปทั้งหมด)</b></div>
+      <div class="dl"><span>🏃 ยอมแพ้</span><b>จบศึกทันที ได้รางวัลตามดาเมจที่ทำได้</b></div>
+      <div class="dl"><span>กติกาเหมือนกันหมด</span><b>ธาตุคูณซ้อน สถานะ ค่าที่ขึ้นลง ของถือ อากาศ เฟสบอส
+        คริต และ EXP ใช้สูตรเดียวกับโหมดออโต้เป๊ะ ไม่ได้ง่ายหรือยากกว่า</b></div>
+      <div class="dl"><span>ต่างกันจุดเดียว</span><b>โหมดออโต้บอสสุ่มตีใครก็ได้ในทีม · โหมดสั่งเองบอสตีตัวที่อยู่หน้าสนามเท่านั้น</b></div>
     </div>
     <div class="gbox"><h4>⚔️ ท่าต่อสู้ 4 ช่อง</h4>
       <div class="dl"><span>ดูที่ไหน</span><b>แตะตัวโตเต็มวัยในทุ่ง เลื่อนลงถึงกล่อง ⚔️ ท่าที่ใช้ตอนต่อสู้</b></div>
@@ -5794,11 +6500,12 @@ function dgFight(){
   if(!team.length) return;
   const F = dgFoe(x);
 
-  const R0 = runBattle(team, { name:x.boss.name, el:F.el, hp:F.hp, pw:F.pw }, { maxRound:20 });
+  battleGo(team, { name:x.boss.name, el:F.el, hp:F.hp, pw:F.pw, id:F.id, sp:F.sp }, { maxRound:20 }, R0 => {
   const units = R0.units, boss = R0.boss, log = R0.log, ev = R0.ev;
-  const win = R0.win, dealt = R0.dealt;
-  showArena({ id:F.id, name:F.name }, { name:x.name }, log, ev, units, boss,
-    { win, dealt }, { art:F.art, onEnd: () => dgResult(x, F, win, dealt, team) });
+    const win = R0.win, dealt = R0.dealt;
+    showArena({ id:F.id, name:F.name }, { name:x.name }, log, ev, units, boss,
+      { win, dealt }, { art:F.art, onEnd: () => dgResult(x, F, win, dealt, team) });
+  });
 }
 function dgResult(x, F, win, dealt, team){
   const now = Date.now();
@@ -5806,11 +6513,15 @@ function dgResult(x, F, win, dealt, team){
   S.dgTeam = [];
   const lv = dgLv(x.id), got = [];
   if(win){
-    const coins = Math.round((900 + lv*420) * decGlobal("bossCoin", "mul") * festFx("bossCoin", 1));
+    const coins = Math.round((900 + lv*420) * decGlobal("bossCoin", "mul") * festFx("bossCoin", 1) * buffMul("coin"));
     S.coins += coins; got.push(`🪙 ${coins}`);
-    const dust = Math.round(60 + lv*26); S.dust = (S.dust || 0) + dust; got.push(`💠 ${dust}`);
-    addMat("core", 1); got.push("💎 ×1");
+    const dust = Math.round((60 + lv*26) * buffMul("drop")); S.dust = (S.dust || 0) + dust; got.push(`💠 ${dust}`);
+    const nCore = 1 + (lv >= 10 ? 1 : 0) + (lv >= 20 ? 1 : 0);
+    addMat("core", nCore); got.push(`💎 ×${nCore}`);
     if(lv % 3 === 0){ addMat("shard", 1); got.push("🔮 ×1"); }
+    if(lv >= 10){ addMat("pollen", 4); got.push("🍃 ×4"); }
+    if(lv >= 20 && lv % 2 === 0){ addMat("star", 1); got.push("🌟 ×1"); }
+    if(lv >= 30 && lv % 5 === 0){ addMat("shard", 2); got.push("🔮 ×2 (โบนัสชั้นลึก)"); }
     if(S.eggs.length < NEST_MAX){
       S.eggs.push({ sid:pickByRarity(3), tier:2, rar:3, boss:true, bossId:x.id });
       got.push(`✦ ${x.egg} · ลุ้นตำนาน ${Math.round(LEGEND_CHANCE*100)}%`);
@@ -5884,7 +6595,11 @@ function renderDungeon(){
     <div class="foot" style="margin:10px 0 0">
       <button class="btn sun" id="btnDgGo" ${team.length ? '' : 'disabled'}>
         ${team.length ? `${x.emoji} บุก${x.name}` : "เลือกทีมก่อน"}</button>
+      <button class="btn ghost sm" id="btnDg5" ${team.length ? '' : 'disabled'}>⚡ ×5</button>
+      <button class="btn ghost sm" id="btnDg10" ${team.length ? '' : 'disabled'}>⚡ ×10</button>
     </div>
+    <p class="note" style="margin:8px 0 0">⚡ ตีรัวจะเก็บทีมเดิมไว้ให้ ไม่ต้องเลือกใหม่ทุกรอบ
+      · ชั้นลึกขึ้นทุกครั้งที่ชนะ ยิ่งลึกยิ่งได้ของเยอะ (ชั้น 10+ ได้ 💎 เพิ่มกับ 🍃 · ชั้น 20+ ได้ 🌟 · ชั้น 30+ ได้ 🔮 โบนัส)</p>
     `;
 
   box.querySelectorAll('[data-dgsel]').forEach(b =>
@@ -5896,6 +6611,9 @@ function renderDungeon(){
     sfx("tap"); renderDungeon();
   });
   const g = $('#btnDgGo'); if(g) g.onclick = dgFight;
+  const g5 = box.querySelector('#btnDg5'), g10 = box.querySelector('#btnDg10');
+  if(g5) g5.onclick = () => batchRun("dg", 5);
+  if(g10) g10.onclick = () => batchRun("dg", 10);
 }
 
 /* ================= 🌀 ถ้ำไร้ที่สิ้นสุด =================
@@ -5964,32 +6682,33 @@ function abDive(){
     .filter(c => c && (r.hp[c.id] || 0) > 0);
   if(!team.length){ abWipe(); return; }
   const F = abFoe(r.depth), rule = abRule(r.depth);
-  const R = runBattle(team, F, Object.assign({ maxRound:20, note:rule.note }, rule.opt));
+  battleGo(team, F, Object.assign({ maxRound:20, note:rule.note }, rule.opt), R => {
   r.hp = Object.assign({}, r.hp, R.hpFrac);
-  let got = [];
-  if(R.win){
-    const L = abLoot(r.depth, rule.loot || 1);
-    for(const k in L) r.bag[k] = (r.bag[k] || 0) + L[k];
-    r.cleared++;
-    r.depth++;
-    S.abBest = Math.max(S.abBest || 0, F.depth);
-    got = [`🪙 ${L.coins}`, `💠 ${L.dust}`, L.pollen ? `🍃 ×${L.pollen}` : null,
-           L.core ? `💎 ×${L.core}` : null, L.star ? `🌟 ×${L.star}` : null,
-           L.shard ? `🔮 ×${L.shard}` : null].filter(Boolean);
-    R.log.push({ t:`เก็บของชั้น ${F.depth} — ${got.join(" · ")}`, c:"good" });
-  }
-  const alive = team.filter(c => (r.hp[c.id] || 0) > 0).length;
-  showArena(
-    { name:F.name, art:ART[F.sp.id], el:F.el },
-    { name:`🌀 ถ้ำไร้ที่สิ้นสุด ชั้น ${F.depth}` },
-    R.log, R.ev, R.units, R.boss,
-    R.win ? { win:true, title:`ผ่านชั้น ${F.depth}`,
-              detail: got.join(" · ") + `<br>ของในกองรวม 🪙 ${r.bag.coins} · 💠 ${r.bag.dust}` +
-                `<br>ทีมที่ยังยืนอยู่ ${alive}/${team.length} ตัว` }
-            : { win:false, title:`ตกรอบที่ชั้น ${F.depth}`,
-                detail:`ของทั้งกองหายไปหมด — ผ่านมาได้ ${r.cleared} ชั้น` });
-  if(!R.win || !alive) abWipe(true);
-  save(); render();
+    let got = [];
+    if(R.win){
+      const L = abLoot(r.depth, rule.loot || 1);
+      for(const k in L) r.bag[k] = (r.bag[k] || 0) + L[k];
+      r.cleared++;
+      r.depth++;
+      S.abBest = Math.max(S.abBest || 0, F.depth);
+      got = [`🪙 ${L.coins}`, `💠 ${L.dust}`, L.pollen ? `🍃 ×${L.pollen}` : null,
+             L.core ? `💎 ×${L.core}` : null, L.star ? `🌟 ×${L.star}` : null,
+             L.shard ? `🔮 ×${L.shard}` : null].filter(Boolean);
+      R.log.push({ t:`เก็บของชั้น ${F.depth} — ${got.join(" · ")}`, c:"good" });
+    }
+    const alive = team.filter(c => (r.hp[c.id] || 0) > 0).length;
+    showArena(
+      { name:F.name, art:ART[F.sp.id], el:F.el },
+      { name:`🌀 ถ้ำไร้ที่สิ้นสุด ชั้น ${F.depth}` },
+      R.log, R.ev, R.units, R.boss,
+      R.win ? { win:true, title:`ผ่านชั้น ${F.depth}`,
+                detail: got.join(" · ") + `<br>ของในกองรวม 🪙 ${r.bag.coins} · 💠 ${r.bag.dust}` +
+                  `<br>ทีมที่ยังยืนอยู่ ${alive}/${team.length} ตัว` }
+              : { win:false, title:`ตกรอบที่ชั้น ${F.depth}`,
+                  detail:`ของทั้งกองหายไปหมด — ผ่านมาได้ ${r.cleared} ชั้น` });
+    if(!R.win || !alive) abWipe(true);
+    save(); render();
+  });
 }
 function abBank(){
   const r = abRun();
@@ -6140,12 +6859,13 @@ function towerFight(){
   if(!team.length) return;
   const F = towerFoe(r.floor);
 
-  const R0 = runBattle(team, { name:F.sp.name, el:F.el, hp:F.hp, pw:F.pw }, { maxRound:20 });
+  battleGo(team, { name:F.sp.name, el:F.el, hp:F.hp, pw:F.pw, id:F.id, sp:F.sp }, { maxRound:20 }, R0 => {
   const units = R0.units, boss = R0.boss, log = R0.log, ev = R0.ev;
-  const win = R0.win, dealt = R0.dealt;
-
-  showArena({ id:F.id, name:F.name }, { name:"หอคอย" }, log, ev, units, boss,
-    { win, dealt }, { art: ART[F.sp.id], onEnd: () => towerResult(F, win, dealt, team) });
+    const win = R0.win, dealt = R0.dealt;
+  
+    showArena({ id:F.id, name:F.name }, { name:"หอคอย" }, log, ev, units, boss,
+      { win, dealt }, { art: ART[F.sp.id], onEnd: () => towerResult(F, win, dealt, team) });
+  });
 }
 
 function towerResult(F, win, dealt, team){
@@ -6454,7 +7174,382 @@ function bestAgainst(foe){
 }
 const CRIT_MUL   = 1.5;
 
+/* =========================================================
+   🎮 โหมดสั่งเอง · เทิร์นเบสแบบโปเกม่อน
+   ตัวเราออกสนามทีละตัว เลือกท่าเองทุกเทิร์น สลับตัวได้ (เสียเทิร์น)
+   ========================================================= */
+const manualOn = () => !!S.manualBattle;
+let LB = null;
+
+function lbStart(team, foe, opt, resolve){
+  const seed = runBattleSides(team, foe, opt);
+  LB = { units:seed.units, boss:seed.boss, foe, opt:opt || {}, resolve,
+         act:seed.units.findIndex(u => u.hp > 0), round:0, log:[], busy:false, over:false,
+         xpBase:Math.max(4, Math.round(foe.pw * 0.9 + foe.hp * 0.02)) };
+  if(LB.act < 0){ LB = null; resolve(runBattle(team, foe, opt)); return; }
+  FOE_IMMUNE = !!(opt && opt.foeImmune);
+  lbSay(`${foe.name} ปรากฏตัว!`);
+  if(LB.boss.el2) lbSay(`ธาตุ${LB.boss.el} + ${LB.boss.el2} — ท่าที่ได้เปรียบทั้งสองฝั่งจะแรงคูณกัน`);
+  const wxn = (WX_BATTLE[weatherNow().id] || WX_BATTLE.clear).note;
+  if(wxn) lbSay(wxn);
+  if(opt && opt.note) lbSay(opt.note);
+  lbOpen();
+}
+const lbSay = t => { if(LB){ LB.log.push(t); if(LB.log.length > 40) LB.log.shift(); } };
+const lbAct = () => LB && LB.units[LB.act];
+const lbAlive = () => LB ? LB.units.filter(u => u.hp > 0) : [];
+
+function lbOpen(){
+  const m = document.createElement('div');
+  m.className = 'mask arenamask';
+  m.id = 'lbMask';
+  m.innerHTML = `<div class="arena lbarena">
+    <div class="abossbar"><b id="lbFoeName"></b>
+      <div class="hpbar big"><i id="lbFoeHp" style="width:100%"></i></div>
+      <small id="lbFoeNum"></small></div>
+    <div class="astage">
+      <div class="aboss" id="lbFoe"><img id="lbFoeArt" src="" alt="">
+        <div class="ahitfx" id="lbFoeFx"></div></div>
+      <div class="lbme" id="lbMe"></div>
+    </div>
+    <div class="lblog" id="lbLog"></div>
+    <div class="lbmoves" id="lbMoves"></div>
+    <div class="lbteam" id="lbTeam"></div>
+    <div class="foot" style="margin:6px 0 0">
+      <button class="btn ghost sm" id="lbAuto">⚡ ปล่อยออโต้ที่เหลือ</button>
+      <button class="btn ghost sm" id="lbFlee">🏃 ยอมแพ้</button></div>
+  </div>`;
+  document.body.appendChild(m);
+  m.querySelector('#lbAuto').onclick = lbAutoRest;
+  m.querySelector('#lbFlee').onclick = () => {
+    if(confirm("ยอมแพ้ศึกนี้? จะได้รางวัลตามดาเมจที่ทำได้")) lbEnd(false);
+  };
+  lbDraw();
+}
+function lbDraw(){
+  const m = document.getElementById('lbMask');
+  if(!m || !LB) return;
+  const q = id => m.querySelector('#' + id);
+  const B = LB.boss, u = lbAct();
+  q('lbFoeName').innerHTML = `${LB.foe.name} ${B.st ? STATUS[B.st].emoji : ""}` +
+    BSTATS.map(x => B.stg[x.k] ? ` <i class="stg">${x.short}${B.stg[x.k] > 0 ? "+" : ""}${B.stg[x.k]}</i>` : "").join("");
+  q('lbFoeHp').style.width = Math.max(0, B.hp / B.max * 100) + '%';
+  q('lbFoeNum').textContent = `${Math.max(0, B.hp)} / ${B.max}`;
+  q('lbFoeArt').src = LB.opt.foeArt || ART[LB.foe.sp ? LB.foe.sp.id : LB.foe.id] || BOSS_ART[LB.foe.id] || "";
+  q('lbMe').innerHTML = u ? `
+    <img src="${ART[u.c.sid]}" alt="" style="${shinyFilter(u.c)}">
+    <div class="lbinfo">
+      <b>${u.sp.name} ${u.st ? STATUS[u.st].emoji + " " + STATUS[u.st].name : ""}</b>
+      <div class="hpbar big"><i style="width:${Math.max(0, u.hp/u.max*100)}%"></i></div>
+      <small>${Math.max(0, u.hp)} / ${u.max} · 📈 Lv ${lvOf(u.c)} · ${multTag(u.mult)}
+        ${BSTATS.map(x => u.stg[x.k] ? `<i class="stg">${x.short}${u.stg[x.k] > 0 ? "+" : ""}${u.stg[x.k]}</i>` : "").join("")}
+        ${u.item ? `<i class="stg">${HELDMAP[u.c.it].emoji}</i>` : ""}</small>
+    </div>
+    <div class="ahitfx" id="lbMeFx"></div>` : '';
+  q('lbLog').innerHTML = LB.log.slice(-4).map(t => `<p>${t}</p>`).join('');
+  q('lbLog').scrollTop = 9999;
+  const ready = !LB.busy && !LB.over && u && u.hp > 0;
+  const list = u ? mvOf(u.c).map(id => MV[id]) : [];
+  const usable = m2 => !(u.item === "band" && m2.k === "s" && m2.pw > 0)
+    && !(u.item === "specs" && m2.k === "p" && m2.pw > 0);
+  const anyPp = list.some(m2 => u.pp[m2.id] > 0 && usable(m2));
+  q('lbMoves').innerHTML = !u ? '' : (anyPp ? list.map((m2, i) => {
+    const pp = u.pp[m2.id] || 0, ok = pp > 0 && usable(m2);
+    const mu = m2.pw ? elMult2(m2.el, B.el, B.el2) * wxMul(m2.el) : 1;
+    return `<button class="lbmv ${m2.k === "s" ? 'sp' : m2.pw ? 'ph' : 'st'}"
+      data-lbmv="${i}" ${ready && ok ? '' : 'disabled'}>
+      <b>${m2.n}</b>
+      <small>${m2.el ? m2.el : "ไร้ธาตุ"} · ${m2.pw ? (m2.k === "s" ? "พิเศษ " : "กายภาพ ") + m2.pw : "สถานะ"}
+        ${m2.pri ? " · ออกก่อน" : ""}</small>
+      <small>PP ${pp}/${m2.pp}${m2.pw ? ` · ${effWord(mu) || "×1.00"}` : ""}</small>
+    </button>`;
+  }).join('') : `<button class="lbmv st" data-lbmv="-1" ${ready ? '' : 'disabled'}>
+      <b>ดิ้นรน</b><small>PP หมดทุกท่า · เสียเลือดตัวเอง</small></button>`);
+  q('lbTeam').innerHTML = LB.units.map((x, i) => `
+    <button class="lbsw ${i === LB.act ? 'on' : ''} ${x.hp <= 0 ? 'down' : ''}"
+      data-lbsw="${i}" ${ready && x.hp > 0 && i !== LB.act ? '' : 'disabled'}>
+      <img src="${ART[x.c.sid]}" alt="" style="${shinyFilter(x.c)}">
+      <small>${x.hp <= 0 ? "หมดแรง" : Math.round(x.hp/x.max*100) + "%"}</small></button>`).join('');
+  m.querySelectorAll('[data-lbmv]').forEach(b =>
+    b.onclick = () => lbUse(+b.dataset.lbmv));
+  m.querySelectorAll('[data-lbsw]').forEach(b =>
+    b.onclick = () => lbSwitch(+b.dataset.lbsw));
+}
+const lbPop = (id, txt, cls) => {
+  const m = document.getElementById('lbMask');
+  if(!m) return;
+  const el = m.querySelector('#' + id);
+  if(!el) return;
+  const s = document.createElement('span');
+  s.className = 'dmg ' + (cls || '');
+  s.textContent = txt;
+  el.appendChild(s);
+  setTimeout(() => s.remove(), 900);
+};
+
+function lbSwitch(i){
+  if(!LB || LB.busy || LB.over) return;
+  const x = LB.units[i];
+  if(!x || x.hp <= 0 || i === LB.act) return;
+  LB.busy = true;
+  lbSay(`สลับ ${lbAct().sp.name} ออก ส่ง ${x.sp.name} ลงสนาม`);
+  LB.act = i;
+  lbDraw();
+  setTimeout(() => lbFoeTurn(true), 420);
+}
+function lbUse(i){
+  if(!LB || LB.busy || LB.over) return;
+  const u = lbAct();
+  if(!u || u.hp <= 0) return;
+  const m = i < 0 ? STRUGGLE : MV[mvOf(u.c)[i]];
+  if(!m) return;
+  LB.busy = true;
+  LB.round++;
+  const foeFirst = spdOf(u) * (m.pri ? 100 : 1) < LB.boss.spe * stMul(LB.boss.stg.spe) *
+    (LB.boss.st === "par" ? 0.5 : 1);
+  const steps = foeFirst ? [() => lbFoeTurn(), () => lbMyTurn(u, m)]
+                         : [() => lbMyTurn(u, m), () => lbFoeTurn()];
+  let k = 0;
+  const run = () => {
+    if(LB.over) return;
+    if(k < steps.length){ steps[k++](); lbDraw(); setTimeout(run, 620); return; }
+    lbEndTurn();
+  };
+  run();
+}
+function lbMyTurn(u, m){
+  if(LB.over || u.hp <= 0 || LB.boss.hp <= 0) return;
+  const B = LB.boss, S_ = u.st ? STATUS[u.st] : null;
+  if(S_ && S_.skip && Math.random() < S_.skip){ lbSay(`${u.sp.name} ติด${S_.name} ขยับไม่ได้`); return; }
+  if(S_ && S_.self && Math.random() < S_.self){
+    const d = Math.max(2, Math.round(u.max*0.08));
+    u.hp -= d; lbSay(`${u.sp.name} 💫 สับสน ตีใส่ตัวเอง −${d}`); lbPop('lbMeFx', '−' + d, 'crit'); return;
+  }
+  u.pp[m.id] = Math.max(0, (u.pp[m.id] || 0) - 1);
+  if(Math.random() > m.acc){ lbSay(`${u.sp.name} ใช้${m.n} แต่พลาด!`); return; }
+  if(m.heal){
+    const g = Math.min(u.max - u.hp, Math.round(u.max*m.heal));
+    u.hp += g; lbSay(`${u.sp.name} ใช้${m.n} ฟื้นพลัง +${g}`); lbPop('lbMeFx', '+' + g, 'good'); return;
+  }
+  if(m.stg && m.pw === 0){
+    const tgt = m.stg.self ? u.stg : B.stg, parts = [];
+    BSTATS.forEach(bt => { if(m.stg[bt.k]){
+      tgt[bt.k] = clamp(tgt[bt.k] + m.stg[bt.k], -6, 6);
+      parts.push(`${bt.short}${m.stg[bt.k] > 0 ? "+" : ""}${m.stg[bt.k]}`); } });
+    lbSay(`${u.sp.name} ใช้${m.n} — ${m.stg.self ? "ตัวเอง" : LB.foe.name} ${parts.join(" ")}`);
+    lbPop(m.stg.self ? 'lbMeFx' : 'lbFoeFx', parts.join(" "), m.stg.self ? 'good' : '');
+    return;
+  }
+  if(m.st && m.pw === 0){
+    if(B.st) lbSay(`${LB.foe.name} ติดสถานะอยู่แล้ว`);
+    else if(!canStatus(B.el, B.el2, m.st)) lbSay(`${LB.foe.name} ไม่ติด${STATUS[m.st].name}`);
+    else { B.st = m.st; B.stT = STATUS[m.st].turns;
+      lbSay(`${u.sp.name} ใช้${m.n} — ${LB.foe.name} ติด${STATUS[m.st].emoji} ${STATUS[m.st].name}!`);
+      lbPop('lbFoeFx', STATUS[m.st].emoji + STATUS[m.st].name, 'crittag'); }
+    return;
+  }
+  const { raw, mu } = calcDmg(u, m, B);
+  let dmg = raw;
+  const crit = Math.random() < 0.10 + u.b.spe/1400 + (m.crit || 0)
+    + talG(u.c, "crit", 0) + decGlobal("bossCrit", "add");
+  if(crit) dmg = Math.round(dmg * CRIT_MUL);
+  if(B.st === "frz" && m.el === "ไฟ"){ B.st = null; lbSay(`${LB.foe.name} ละลายจากน้ำแข็ง`); }
+  B.hp -= dmg;
+  lbSay(`${u.sp.name} ใช้${m.n} ${crit ? "เข้าเต็มแรง! " : ""}−${dmg} ${effWord(mu)}`);
+  lbPop('lbFoeFx', '−' + dmg, crit ? 'crit' : '');
+  sfx(crit ? "crit" : "hit");
+  if(m.el && EL_MOVE[m.el] && EL_MOVE[m.el].st && !B.st &&
+     canStatus(B.el, B.el2, EL_MOVE[m.el].st) && Math.random() < 0.10){
+    const k2 = EL_MOVE[m.el].st;
+    B.st = k2; B.stT = STATUS[k2].turns;
+    lbSay(`${LB.foe.name} ติด${STATUS[k2].emoji} ${STATUS[k2].name} จาก${m.n}`);
+  }
+  if(m.recoil || u.item === "orb"){
+    const r = Math.max(1, Math.round(u.max * (m.recoil || 0.08)));
+    u.hp -= r; lbSay(`${u.sp.name} เสียพลังตอบกลับ −${r}`);
+  }
+  lbSash(u);
+}
+function lbFoeTurn(freeHit){
+  if(LB.over || LB.boss.hp <= 0) return;
+  const B = LB.boss, t = lbAct();
+  if(!t || t.hp <= 0) return;
+  if(LB.opt.phases) bossPhase(B, LB.units, lbSay);
+  else if(!B.raged && B.hp <= B.max*0.5){
+    B.raged = true; B.stg.atk = Math.min(6, B.stg.atk + 2);
+    lbSay(`⚠️ ${LB.foe.name} โกรธจัด! พลังโจมตีพุ่งขึ้น`);
+  }
+  const bS = B.st ? STATUS[B.st] : null;
+  if(bS && bS.skip && Math.random() < bS.skip){ lbSay(`${LB.foe.name} ติด${bS.name} ขยับไม่ได้`); return; }
+  const bmu = elMult2(B.el, SP[t.c.sid].el, t.c.el2 || null);
+  const A = B.atk * stMul(B.stg.atk) * (B.st === "burn" ? 0.5 : 1);
+  const swings = B.twice ? 2 : 1;
+  let dm = 0;
+  for(let sw = 0; sw < swings; sw++)
+    dm += Math.max(5, Math.round((A*0.7 - (t.b.def*stMul(t.stg.def) + t.b.spd*stMul(t.stg.spd))*0.16)
+      * bmu * (0.85 + Math.random()*0.3)));
+  t.hp -= dm;
+  lbSay(`${LB.foe.name} โจมตี${t.sp.name} −${dm}${bmu > 1.3 ? " (ทะลุเกราะ)" : bmu < 1 ? " (ต้านไว้ได้)" : ""}`);
+  lbPop('lbMeFx', '−' + dm, 'crit');
+  sfx("hurt");
+  const bk = EL_MOVE[B.el] && EL_MOVE[B.el].st;
+  if(bk && t.hp > 0 && !t.st && canStatus(SP[t.c.sid].el, t.c.el2, bk) && Math.random() < 0.15){
+    t.st = bk; t.stT = STATUS[bk].turns;
+    lbSay(`${t.sp.name} ติด${STATUS[bk].emoji} ${STATUS[bk].name}`);
+  }
+  lbSash(t);
+}
+function lbSash(u){
+  if(u.hp <= 0 && u.item === "sash" && !u.usedSash){
+    u.usedSash = true; u.hp = 1;
+    lbSay(`🎗️ ${u.sp.name} รอดมาได้ด้วยผ้าคาดกันน็อก`);
+  }
+}
+function lbEndTurn(){
+  if(!LB || LB.over) return;
+  const B = LB.boss;
+  if(B.st){
+    const s = STATUS[B.st];
+    if(s.dot){ const d = Math.max(1, Math.round(B.max*s.dot)); B.hp -= d;
+      lbSay(`${s.emoji} ${LB.foe.name} เสียพลังจาก${s.name} −${d}`); }
+    if(--B.stT <= 0){ lbSay(`${LB.foe.name} หายจาก${s.name}`); B.st = null; }
+  }
+  LB.units.forEach(u => {
+    if(u.hp <= 0) return;
+    if(u.st){
+      const s = STATUS[u.st];
+      if(s.dot){ const d = Math.max(1, Math.round(u.max*s.dot)); u.hp -= d;
+        lbSay(`${s.emoji} ${u.sp.name} เสียพลังจาก${s.name} −${d}`); }
+      if(--u.stT <= 0){ lbSay(`${u.sp.name} หายจาก${s.name}`); u.st = null; }
+    }
+    if(u.hp > 0 && u.item === "berry" && !u.usedBerry && u.hp < u.max*0.3){
+      u.usedBerry = true;
+      const g = Math.min(u.max - u.hp, Math.round(u.max*0.30));
+      u.hp += g; lbSay(`🍓 ${u.sp.name} กินเบอร์รี่ ฟื้น +${g}`);
+    }
+  });
+  LB.units.forEach(u => { if(u.hp <= 0 && !u.fainted){ u.fainted = true; lbSay(`${u.sp.name} หมดแรงแล้ว`); } });
+  LB.busy = false;
+  if(B.hp <= 0){ lbEnd(true); return; }
+  if(!lbAlive().length){ lbEnd(false); return; }
+  if(lbAct().hp <= 0){
+    const nx = LB.units.findIndex(u => u.hp > 0);
+    LB.act = nx;
+    lbSay(`ส่ง ${LB.units[nx].sp.name} ลงสนามต่อ`);
+  }
+  lbDraw();
+}
+/* ปล่อยให้ระบบเล่นต่อเองจนจบ (ใช้สูตรเดิมของโหมดออโต้) */
+function lbAutoRest(){
+  if(!LB || LB.over) return;
+  const hpFrac = {};
+  LB.units.forEach(u => hpFrac[u.c.id] = Math.max(0, u.hp) / u.max);
+  const team = LB.units.map(u => u.c);
+  const foe = Object.assign({}, LB.foe, { hp:Math.max(1, LB.boss.hp) });
+  const opt = Object.assign({}, LB.opt, { hpFrac });
+  const resolve = LB.resolve, dealtBefore = 1 - LB.boss.hp / LB.boss.max;
+  const maxHp = LB.boss.max;
+  LB.over = true;
+  const mm = document.getElementById('lbMask');
+  if(mm) mm.remove();
+  LB = null;
+  FOE_IMMUNE = false;
+  const R = runBattle(team, foe, opt);
+  R.dealt = clamp(dealtBefore + R.dealt * (foe.hp / maxHp), 0, 1);
+  resolve(R);
+}
+function lbEnd(win){
+  if(!LB || LB.over) return;
+  LB.over = true;
+  const B = LB.boss, units = LB.units, foe = LB.foe, resolve = LB.resolve;
+  const dealt = clamp(1 - Math.max(0, B.hp) / B.max, 0, 1);
+  const xp = Math.max(4, Math.round(LB.xpBase * (win ? 1 : 0.35 + dealt * 0.4)));
+  const log = LB.log.map(t => ({ t, c:"" }));
+  units.forEach(u => {
+    const up = giveXp(u.c, xp);
+    if(up){ u.c.bs = null; ensureBattle(u.c);
+      log.push({ t:`📈 ${u.sp.name} ขึ้นเป็นเลเวล ${lvOf(u.c)}!`, c:"big" }); }
+  });
+  log.push({ t:`ทุกตัวได้ประสบการณ์ +${xp}`, c:"" });
+  const hpFrac = {};
+  units.forEach(u => hpFrac[u.c.id] = Math.max(0, u.hp) / u.max);
+  const m = document.getElementById('lbMask');
+  if(m) m.remove();
+  LB = null;
+  FOE_IMMUNE = false;
+  sfx(win ? "win" : "lose");
+  if(win) S.manualWins = (S.manualWins || 0) + 1;
+  resolve({ units, boss:B, log, ev:[], win, dealt, sfxq:[], xp, hpFrac, manual:true });
+}
+/* ตัวกลาง: ออโต้หรือสั่งเองก็ได้ ปลายทางเข้าโค้ดแจกรางวัลชุดเดียวกัน */
+function battleGo(team, foe, opt, resolve){
+  if(manualOn() && team.length) lbStart(team, foe, opt || {}, resolve);
+  else resolve(runBattle(team, foe, opt || {}));
+}
+
+/* ---- สูตรดาเมจกลาง ใช้ทั้งโหมดออโต้และโหมดสั่งเอง ---- */
+function calcDmg(u, m, boss){
+  const spec = m.k === "s";
+  const A = (spec ? u.b.spa : u.b.atk) * stMul(spec ? u.stg.spa : u.stg.atk)
+    * (u.st === "burn" && !spec ? 0.5 : 1);
+  const D = (spec ? boss.spd : boss.def) * stMul(spec ? boss.stg.spd : boss.stg.def);
+  let mu = elMult2(m.el, boss.el, boss.el2) * wxMul(m.el);
+  if(m.el && !u.c.el2 && (m.el === u.sp.el)) mu *= MONO_BONUS;
+  mu *= (1 + shVal("power") + colPower()) * elBonus(u.c);
+  if(u.item === "orb")   mu *= 1.30;
+  if(u.item === "band"  && !spec) mu *= 1.25;
+  if(u.item === "specs" &&  spec) mu *= 1.25;
+  return { raw:Math.max(4, Math.round((A*0.62*(m.pw/60) - D*0.22) * mu * (0.86 + Math.random()*0.28))), mu };
+}
+const effWord = mu => mu >= 1.9 ? "แรงมาก!" : mu >= 1.3 ? "ได้เปรียบ"
+  : mu <= 0.4 ? "แทบไม่ระคาย" : mu < 1 ? "เสียเปรียบ" : "";
+const spdOf = u => u.b.spe * stMul(u.stg.spe) * (u.st === "par" ? 0.5 : 1);
+/* เฟสของบอสปิดโลก · ใช้ร่วมกันทั้งโหมดออโต้และโหมดสั่งเอง */
+function bossPhase(boss, units, say){
+  const fr = boss.hp / boss.max;
+  if(fr <= 0.66 && !boss.p2){
+    boss.p2 = true;
+    boss.el = "รัตติกาล"; boss.el2 = "วิญญาณ";
+    boss.st = null; boss.stT = 0;
+    BSTATS.forEach(x => boss.stg[x.k] = 0);
+    (units || []).forEach(u => { u.st = null; u.stT = 0; BSTATS.forEach(x => u.stg[x.k] = 0); });
+    say("🌑 เฟส 2 — ปีกหุบลง ธาตุเปลี่ยนเป็นรัตติกาล + วิญญาณ · สถานะและค่าที่ขึ้นลงทั้งสนามถูกล้าง");
+  }
+  if(fr <= 0.33 && !boss.p3){
+    boss.p3 = true;
+    boss.twice = true;
+    boss.stg.atk = Math.min(6, boss.stg.atk + 2);
+    say("✨ เฟส 3 — ปีกทองสี่ปีกเปิดเต็ม! โจมตีสองครั้งต่อยก และกดเกราะทีมลงทุกยก");
+  }
+  if(boss.p3 && units){
+    units.forEach(u => { if(u.hp > 0) u.stg.def = clamp(u.stg.def - 1, -6, 6); });
+  }
+}
+
 /* ---- เครื่องต่อสู้กลาง ใช้ร่วมกันทั้งบอสประจำวัน ดันเจี้ยน และหอคอย ---- */
+/* สร้างสองฝ่ายจากทีมกับศัตรู · ใช้ร่วมกันทั้งสองโหมด */
+function runBattleSides(team, foe, opt){
+  opt = opt || {};
+  const fel = foe.el, fel2 = foe.el2 !== undefined ? foe.el2 : bossEl2(foe.el);
+  const units = team.map(c => {
+    const b = statsOf(c);
+    const hp = Math.round(b.hp * 2.2 * talG(c, "bossHp", 1) * decGlobal("bossHp", "mul"));
+    let mult = elMult2(SP[c.sid].el, fel, fel2);
+    if(c.el2) mult = Math.max(mult, elMult2(c.el2, fel, fel2));
+    const pp = {};
+    mvOf(c).forEach(id => pp[id] = MV[id].pp);
+    const frac = opt.hpFrac && opt.hpFrac[c.id] != null ? Math.max(0, opt.hpFrac[c.id]) : 1;
+    return { c, sp:SP[c.sid], hp:Math.max(frac > 0 ? 1 : 0, Math.round(hp * frac)), max:hp, b, mult, pp,
+             st:null, stT:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 },
+             item: opt.noItem ? null : battleItem(c),
+             usedBerry:false, usedSash:false };
+  });
+  const boss = { hp:foe.hp, max:foe.hp, atk:Math.round(foe.pw * (opt.atkMul || 1)),
+                 def:Math.round(foe.pw*0.62), spd:Math.round(foe.pw*0.58), spe:Math.round(foe.pw*0.8),
+                 el:fel, el2:fel2, st:null, stT:0,
+                 stg:{ atk:0, def:0, spa:0, spd:0, spe:0 }, raged:false };
+  return { units, boss, fel, fel2 };
+}
 function runBattle(team, foe, opt){
   opt = opt || {};
   const maxRound = opt.maxRound || 18;
@@ -6491,19 +7586,7 @@ function runBattle(team, foe, opt){
   if(wxn) say(wxn);
   if(fel2) say(`${foe.name} เป็นธาตุ${fel} + ${fel2} — ท่าที่ได้เปรียบทั้งสองฝั่งจะแรงคูณกัน`);
 
-  const dmgOf = (u, m) => {
-    const spec = m.k === "s";
-    const A = (spec ? u.b.spa : u.b.atk) * stMul(spec ? u.stg.spa : u.stg.atk)
-      * (u.st === "burn" && !spec ? 0.5 : 1);
-    const D = (spec ? boss.spd : boss.def) * stMul(spec ? boss.stg.spd : boss.stg.def);
-    let mu = elMult2(m.el, boss.el, boss.el2) * wxMul(m.el);
-    if(m.el && !u.c.el2 && (m.el === u.sp.el)) mu *= MONO_BONUS;
-    mu *= (1 + shVal("power") + colPower()) * elBonus(u.c);   // 🕯 พร + 🏆 รางวัลสะสม
-    if(u.item === "orb")   mu *= 1.30;
-    if(u.item === "band"  && !spec) mu *= 1.25;
-    if(u.item === "specs" &&  spec) mu *= 1.25;
-    return { raw:Math.max(4, Math.round((A*0.62*(m.pw/60) - D*0.22) * mu * (0.86 + Math.random()*0.28))), mu };
-  };
+  const dmgOf = (u, m) => calcDmg(u, m, boss);
   const pickMove = (u, round) => {
     const list = mvOf(u.c).map(id => MV[id]).filter(m => u.pp[m.id] > 0);
     const usable = list.filter(m =>
@@ -6545,8 +7628,9 @@ function runBattle(team, foe, opt){
     round++;
     ev.push({ k:"round", n:round });
 
+    if(opt.phases) bossPhase(boss, units, say);
     /* บอสมีเฟส: เหลือครึ่งแล้วโกรธ */
-    if(!boss.raged && boss.hp <= boss.max*0.5){
+    if(!opt.phases && !boss.raged && boss.hp <= boss.max*0.5){
       boss.raged = true;
       boss.stg.atk = Math.min(6, boss.stg.atk + 2);
       say(`⚠️ ${foe.name} โกรธจัด! พลังโจมตีพุ่งขึ้น`);
@@ -6653,6 +7737,8 @@ function runBattle(team, foe, opt){
       ev.push({ k:"say", t:`${foe.name} ${bS.emoji} ${bS.name} — ขยับไม่ได้` });
       log.push({ t:`${foe.name} ติด${bS.name} ขยับไม่ได้`, c:"" });
     } else {
+      const swings = boss.twice ? 2 : 1;
+      for(let sw = 0; sw < swings; sw++){
       const alive = units.filter(u => u.hp > 0);
       if(alive.length){
         const t = alive[Math.floor(Math.random()*alive.length)];
@@ -6678,6 +7764,7 @@ function runBattle(team, foe, opt){
           ev.push({ k:"st", on:units.indexOf(t), s:bk });
           log.push({ t:`${t.sp.name} ติด${STATUS[bk].emoji} ${STATUS[bk].name}`, c:"hit" });
         }
+      }
       }
     }
 
@@ -6743,7 +7830,7 @@ const BOSS_POOL = [
     loot:{ coin:1.5, foodMult:2 } }
 ];
 const bossFor = dow => BOSS_POOL.find(b => b.day === dow) || BOSS_POOL[0];
-const bossToday = () => bossFor(new Date().getDay());
+const bossToday = () => bossFor(bossDay());
 const DIFFS = [
   { id:0, name:"ง่าย",  hp:700,  pw:52, coins:350,  foods:2, eggCh:0.15 },
   { id:1, name:"ปกติ",  hp:1400, pw:78, coins:900,  foods:4, eggCh:0.45 },
@@ -6767,6 +7854,90 @@ function diffOf(i){
 }
 const todayKey = () => { const d = new Date();
   return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
+/* ==== ⏭ ข้ามฉากถาวร · ⚡ ตีรัวหลายรอบ · 🧪 ยาบัฟ · 🎯 เล็งตำนาน · 🎫 การันตี ==== */
+const skipArena = () => !!S.skipArena;
+let BATCH = null;                       // { left, acc:{...} } ตอนตีรัว
+const inBatch = () => !!BATCH;
+
+/* 🧪 ยาบัฟชั่วคราว */
+const BUFFS = [
+  { id:"coin", emoji:"🪙", name:"ยาเรียกทรัพย์", dust:900,  min:30, note:"เหรียญจากบอสและดันเจี้ยน +50%" },
+  { id:"egg",  emoji:"🥚", name:"ยาเรียกไข่",    dust:1500, min:30, note:"โอกาสได้ไข่บอส +40%" },
+  { id:"drop", emoji:"💠", name:"ยาเรียกของ",    dust:1200, min:30, note:"ผงตุ้ยนุ้ยกับวัสดุ +50%" }
+];
+const BUFFMAP = Object.fromEntries(BUFFS.map(x => [x.id, x]));
+const buffLeft = id => Math.max(0, ((S.buffs && S.buffs[id]) || 0) - Date.now());
+const buffOn = id => buffLeft(id) > 0;
+const buffMul = id => buffOn(id) ? (id === "egg" ? 1.4 : 1.5) : 1;
+function buyBuff(id){
+  const u = BUFFMAP[id];
+  if(!u) return;
+  if((S.dust || 0) < u.dust){ alert("ผงตุ้ยนุ้ยไม่พอ"); return; }
+  S.dust -= u.dust;
+  S.buffs = S.buffs || {};
+  S.buffs[id] = Math.max(Date.now(), S.buffs[id] || 0) + u.min*60000;
+  logf(`🧪 ดื่ม${u.name} — ${u.note} อีก ${Math.ceil(buffLeft(id)/60000)} นาที`, "good");
+  sfx("buy"); save(); render();
+}
+
+/* 🎯 เล็งตัวตำนาน · 🎫 การันตีกันซวย */
+const PITY_NEED = 12;
+const pityNow = () => S.pity || 0;
+function rollLegendSid(pool, force){
+  const tg = S.legTarget;
+  if(tg && pool.some(s => s.id === tg) && Math.random() < 0.55) return tg;
+  const fresh = pool.filter(s => !S.seen[s.id]);
+  return pick(fresh.length ? fresh : pool).id;
+}
+
+const bossDay = () => (S.bossPick != null && S.bossPick >= 0 && S.bossPick <= 6)
+  ? S.bossPick : new Date().getDay();
+const bossPickOn = () => !!S.bossPickUnlocked;
+const BOSS_PICK_COST = { core:5 };
+function unlockBossPick(){
+  if(bossPickOn()) return;
+  if(matOf("core") < BOSS_PICK_COST.core){ alert(`ต้องใช้ ${MAT.core.emoji} ${BOSS_PICK_COST.core}`); return; }
+  if(!confirm(`ปลดล็อกการเรียกบอสวันอื่น?\n\nใช้ ${MAT.core.emoji} ${BOSS_PICK_COST.core} ครั้งเดียว\n` +
+    `หลังจากนี้เลือกเจอบอสวันไหนก็ได้ฟรีตลอด — ไม่ต้องรอ 7 วันเพื่อไล่ตัวตำนานตัวเดียวอีก`)) return;
+  S.mats.core = matOf("core") - BOSS_PICK_COST.core;
+  S.bossPickUnlocked = true;
+  logf("🧟 ปลดล็อกแท่นเรียกบอส — เลือกบอสวันไหนก็ได้แล้ว", "good");
+  sfx("buy"); save(); render();
+}
+
+/* ================= 🚪 ประตูสู่โลกที่สอง =================
+   ต้องผ่านภารกิจถาวรทุกข้อ · ดันเจี้ยนชั้นลึก 15 ทุกถ้ำ
+   ล้มผู้พิทักษ์ประตูสามตัว แล้วค่อยได้สู้เทพเจ้าปฐมกาล */
+const GATE_DG_LV = 15;
+const gateStep = () => S.gateStep || 0;                 // ล้มผู้พิทักษ์ไปแล้วกี่ตัว
+const godDone  = () => !!S.godWin;
+const world2   = () => !!S.w2;
+function guardians(){
+  const pool = LEGEND_LIST.filter(s => !s.god);
+  const pk = i => pool[Math.floor((i + 1) * pool.length / 4) % pool.length] || pool[0];
+  return [
+    { i:0, sp:pk(0), name:"ผู้พิทักษ์ประตูที่หนึ่ง", hp:90000,  pw:520, mats:{ core:6, star:6 } },
+    { i:1, sp:pk(1), name:"ผู้พิทักษ์ประตูที่สอง",  hp:170000, pw:700, mats:{ core:10, shard:4 } },
+    { i:2, sp:pk(2), name:"ผู้พิทักษ์ประตูที่สาม",  hp:300000, pw:900, mats:{ star:12, shard:6 } }
+  ];
+}
+const achvAll = () => ACHV.every(a => (S.achv || []).indexOf(a.id) >= 0 || a.f());
+const dgAllDeep = () => DUNGEONS.every(x => dgLv(x.id) >= GATE_DG_LV);
+function gateList(){
+  const g = guardians();
+  return [
+    { ok:achvAll(), t:`ภารกิจถาวรครบทุกข้อ (${ACHV.filter(a => (S.achv||[]).indexOf(a.id) >= 0).length}/${ACHV.length})` },
+    { ok:dgAllDeep(), t:`ดันเจี้ยนชั้นลึก ${GATE_DG_LV} ทุกถ้ำ (` +
+        DUNGEONS.map(x => `${x.name} ${dgLv(x.id)}`).join(" · ") + ")" },
+    { ok:gateStep() >= 1, t:`ล้ม${g[0].name}` },
+    { ok:gateStep() >= 2, t:`ล้ม${g[1].name}` },
+    { ok:gateStep() >= 3, t:`ล้ม${g[2].name}` },
+    { ok:godDone(), t:"ล้ม 🌟 เทพเจ้าปฐมกาล" }
+  ];
+}
+const gateOpen = () => achvAll() && dgAllDeep();
+const godReady = () => gateOpen() && gateStep() >= 3;
+
 const bossDone = () => S.lastBoss === todayKey();        // เคลียร์รอบแรกของวันไปแล้วหรือยัง
 /* ตีบอสรายวันได้ไม่จำกัดรอบ · รอบแรกของวันได้รางวัลเต็ม รอบต่อไปได้ลดหลั่น */
 const bossTries = () => (S.bossTryDay === todayKey() ? (S.bossTry || 0) : 0);
@@ -6775,6 +7946,189 @@ const repeatMul = () => REPEAT_CUT[Math.min(bossTries(), REPEAT_CUT.length - 1)]
 function bumpBossTry(){
   if(S.bossTryDay !== todayKey()){ S.bossTryDay = todayKey(); S.bossTry = 0; }
   S.bossTry = (S.bossTry || 0) + 1;
+}
+
+/* ⚡ ตีรัวหลายรอบ · รวมผลทีเดียว ไม่โชว์ฉากระหว่างทาง */
+function batchRun(kind, n){
+  const before = {
+    coins:S.coins, dust:S.dust || 0, eggs:S.eggs.length,
+    core:matOf("core"), star:matOf("star"), pollen:matOf("pollen"), shard:matOf("shard")
+  };
+  const keepManual = S.manualBattle;
+  S.manualBattle = false;
+  BATCH = { left:n };
+  let done = 0;
+  for(let i = 0; i < n; i++){
+    if(kind === "boss"){
+      if(!S.team.length) break;
+      fight(S.diff || 0);
+    } else {
+      if(!(S.dgTeam || []).length) break;
+      const keep = (S.dgTeam || []).slice();
+      dgFight();
+      S.dgTeam = keep;                              // ดันเจี้ยนล้างทีมทุกครั้ง เอากลับมาให้
+    }
+    done++;
+    if(S.eggs.length >= NEST_MAX && kind === "boss" && i > 2) { /* รังเต็มก็ตีต่อได้ แค่ไข่ตกหล่น */ }
+  }
+  BATCH = null;
+  S.manualBattle = keepManual;
+  const d = {
+    coins:Math.round(S.coins - before.coins), dust:Math.round((S.dust||0) - before.dust),
+    eggs:S.eggs.length - before.eggs, core:matOf("core") - before.core,
+    star:matOf("star") - before.star, pollen:matOf("pollen") - before.pollen,
+    shard:matOf("shard") - before.shard
+  };
+  S.farmRounds = (S.farmRounds || 0) + done;
+  const bits = [`🪙 ${d.coins}`, d.dust ? `💠 ${d.dust}` : null, d.eggs ? `🥚 ${d.eggs} ฟอง` : null,
+    d.core ? `💎 ${d.core}` : null, d.star ? `🌟 ${d.star}` : null,
+    d.pollen ? `🍃 ${d.pollen}` : null, d.shard ? `🔮 ${d.shard}` : null].filter(Boolean);
+  logf(`⚡ ตีรัว ${done} รอบ — ${bits.join(" · ")}`, "good");
+  sfx("win");
+  showSpin({ emoji:"⚡", title:`ตีรัว ${done} รอบจบแล้ว`,
+    detail:bits.join(" · ") + `<br>รวมทั้งหมดที่ฟาร์มมา ${S.farmRounds} รอบ`, big:true });
+  save(); render();
+}
+
+/* ---- ผู้พิทักษ์ประตู ---- */
+function gateFight(){
+  const g = guardians()[gateStep()];
+  if(!g){ alert("ล้มผู้พิทักษ์ครบแล้ว"); return; }
+  if(!gateOpen()){ alert("ยังไม่ผ่านเงื่อนไขก่อนหน้า"); return; }
+  const team = (S.gateTeam || []).map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
+  if(!team.length){ alert("เลือกทีมก่อน"); return; }
+  const foe = { name:g.name + " · " + g.sp.name, el:g.sp.el, hp:g.hp, pw:g.pw,
+                id:"gate" + g.i, sp:g.sp };
+  battleGo(team, foe, { maxRound:26 }, R => {
+    showArena({ id:foe.id, name:foe.name }, { name:"🚪 ประตูโลก" }, R.log, R.ev, R.units, R.boss,
+      { win:R.win, dealt:R.dealt }, { art:ART[g.sp.id], onEnd: () => {
+        if(R.win){
+          S.gateStep = gateStep() + 1;
+          for(const k in g.mats) addMat(k, g.mats[k]);
+          const got = Object.keys(g.mats).map(k => `${MAT[k].emoji} ×${g.mats[k]}`).join(" · ");
+          logf(`🚪 ล้ม${g.name}แล้ว — ${got}`, "good");
+          sfx("win");
+          showSpin({ emoji:"🚪", title:`ล้ม${g.name}!`,
+            detail:got + (gateStep() >= 3
+              ? "<br>ประตูสั่นสะเทือน — 🌟 เทพเจ้าปฐมกาลรออยู่ข้างหลัง"
+              : `<br>เหลือผู้พิทักษ์อีก ${3 - gateStep()} ตัว`), big:true });
+        } else {
+          logf(`ล้ม${g.name}ไม่สำเร็จ — ทำดาเมจได้ ${Math.round(R.dealt*100)}%`, "");
+          sfx("lose");
+          showSpin({ emoji:"💤", title:"ยังไม่ไหว",
+            detail:`ทำดาเมจได้ ${Math.round(R.dealt*100)}% · ลองใหม่ได้ไม่จำกัด ไม่เสียอะไร` });
+        }
+        save(); render();
+      } });
+  });
+}
+/* ---- 🌟 เทพเจ้าปฐมกาล ---- */
+const GOD_HP = 600000, GOD_PW = 1250;
+function godFight(){
+  if(!godReady()){ alert("ต้องล้มผู้พิทักษ์ครบสามตัวก่อน"); return; }
+  const team = (S.gateTeam || []).map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
+  if(!team.length){ alert("เลือกทีมก่อน"); return; }
+  const foe = { name:GOD_SP.name, el:"ประกาย", el2:"มังกร", hp:GOD_HP, pw:GOD_PW,
+                id:"godprime", sp:GOD_SP };
+  battleGo(team, foe, { maxRound:40, phases:true, note:"🌟 เฟส 1 — ปีกทองเปล่งแสง ธาตุประกาย + มังกร" },
+  R => {
+    showArena({ id:"godprime", name:GOD_SP.name }, { name:"🚪 ประตูโลก" }, R.log, R.ev, R.units, R.boss,
+      { win:R.win, dealt:R.dealt }, { art:ART.godprime, onEnd: () => {
+        if(R.win){
+          const first = !godDone();
+          S.godWin = (S.godWin || 0) + 1;
+          S.w2 = true;
+          if(first){
+            const c = makeBaby({ sid:"godprime", tier:3, rar:4, starPull:2.4 }, freePen() < 0 ? 0 : freePen());
+            c.stage = "adult"; c.stars = 6; c.lv = 50; c.bs = null; ensureBattle(c);
+            S.seen[c.sid] = 1;
+            logf(`🌟 ล้มเทพเจ้าปฐมกาลได้! เทพยอมมาอยู่ในฟาร์ม · โลกที่สองเปิดแล้ว`, "good");
+            showSpin({ emoji:"🌟", title:"ล้มเทพเจ้าปฐมกาลได้!",
+              detail:`🌟 ${GOD_SP.name} มาอยู่ในฟาร์มแล้ว (6 ดาว เลเวล 50)` +
+                `<br>🌍 ประตูสู่โลกที่สองเปิดถาวร`, big:true });
+          } else {
+            addMat("shard", 8); addMat("star", 10);
+            logf(`🌟 ล้มเทพเจ้าปฐมกาลอีกครั้ง — ได้ 🔮 ×8 · 🌟 ×10`, "good");
+            showSpin({ emoji:"🌟", title:"ล้มเทพได้อีกครั้ง", detail:"🔮 ×8 · 🌟 ×10", big:true });
+          }
+          sfx("win");
+        } else {
+          logf(`สู้เทพเจ้าปฐมกาลไม่ไหว — ทำดาเมจได้ ${Math.round(R.dealt*100)}%`, "");
+          sfx("lose");
+          showSpin({ emoji:"💤", title:"เทพยังไม่ล้ม",
+            detail:`ทำดาเมจได้ ${Math.round(R.dealt*100)}%` +
+              `<br>${R.boss.p3 ? "ไปถึงเฟส 3 แล้ว!" : R.boss.p2 ? "ไปถึงเฟส 2 แล้ว" : "ยังอยู่เฟส 1"}` +
+              `<br>ลองใหม่ได้ไม่จำกัด ไม่เสียอะไร` });
+        }
+        save(); render();
+      } });
+  });
+}
+function renderGate(){
+  const box = $('#gateBox');
+  if(!box) return;
+  const list = gateList(), g = guardians();
+  const done = list.filter(x => x.ok).length;
+  const nextG = g[gateStep()];
+  const pool = S.creatures.filter(c => c.stage === "adult" && !c.box)
+    .sort((a, b) => statsOf(b).total - statsOf(a).total);
+  const sel = new Set(S.gateTeam || []);
+  const power = (S.gateTeam || []).map(id => S.creatures.find(c => c.id === id))
+    .filter(Boolean).reduce((a, c) => a + statsOf(c).total, 0);
+  box.innerHTML = `
+    <div class="twhead"><b>🚪 ความคืบหน้าสู่โลกที่สอง ${done}/${list.length}</b>
+      <span>${world2() ? "🌍 โลกที่สองเปิดแล้ว" : "ผ่านทุกข้อแล้วประตูจะเปิด"}</span></div>
+    <div class="gbox">${list.map(x =>
+      `<div class="dl"><span>${x.ok ? "✅" : "⬜"}</span><b>${x.t}</b></div>`).join('')}</div>
+    ${!gateOpen() ? `<p class="note">ยังเปิดสู้ไม่ได้ — ต้องเก็บภารกิจถาวรให้ครบและดันเจี้ยนชั้นลึก ${GATE_DG_LV} ทุกถ้ำก่อน
+      (ดูรายการภารกิจถาวรได้ในแท็บภารกิจ)</p>` : ''}
+    ${gateOpen() ? `
+      <h2 style="margin-top:14px">เลือกทีม (ไม่จำกัดจำนวน · แนะนำ 6 ตัว)</h2>
+      <p class="note" style="margin:0 0 8px">พลังรวมทีมตอนนี้ ${power} · เลือกไว้ ${(S.gateTeam||[]).length} ตัว
+        · แพ้ไม่เสียอะไร ลองใหม่ได้ไม่จำกัด · ยาบัฟใช้กับด่านนี้ไม่ได้</p>
+      <div class="team">${pool.length ? pool.slice(0, 60).map(c => {
+        const b = statsOf(c), on = sel.has(c.id);
+        return `<button class="tm" aria-pressed="${on}" data-gt="${c.id}">
+          <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
+          <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+            <br>📈 Lv ${lvOf(c)}</small></button>`;
+      }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวโตเต็มวัย</p>`}</div>
+      ${nextG ? `
+      <div class="twfoe guard" style="margin-top:12px">
+        <img src="${ART[nextG.sp.id]}" alt="">
+        <div><h3>${nextG.name}</h3>
+          <div class="bl">${nextG.sp.name} · ธาตุ${foeEls({el:nextG.sp.el}).join(" + ")}</div>
+          <div class="bl">เลือด ${nextG.hp} · พลัง ${nextG.pw}</div>
+          <div class="bl">ชนะได้ ${Object.keys(nextG.mats).map(k => `${MAT[k].emoji} ×${nextG.mats[k]}`).join(" · ")}</div>
+        </div>
+      </div>
+      <button class="btn" id="btnGate" style="width:100%;margin-top:8px"
+        ${(S.gateTeam||[]).length ? '' : 'disabled'}>🚪 ท้า${nextG.name}</button>` : ''}
+      ${godReady() ? `
+      <div class="twfoe guard" style="margin-top:12px;background:linear-gradient(160deg,#2A2130,#4A2A3A)">
+        <img src="${ART.godprime}" alt="">
+        <div><h3 style="color:#F0DC8A">🌟 ${GOD_SP.name}</h3>
+          <div class="bl" style="color:#E8D8C0">เลือด ${GOD_HP} · พลัง ${GOD_PW} · ธาตุประกาย + มังกร</div>
+          <div class="bl" style="color:#E8D8C0">เฟส 1 ปีกทองเปล่งแสง → เหลือ 66% เปลี่ยนเป็นรัตติกาล + วิญญาณ
+            และล้างสถานะทั้งสนาม → เหลือ 33% ปีกสี่ปีกเปิด ตีสองครั้งต่อยกและกดเกราะทีมทุกยก</div>
+          <div class="bl" style="color:#E8D8C0">${godDone()
+            ? `ล้มมาแล้ว ${S.godWin} ครั้ง · ล้มซ้ำได้ 🔮 ×8 · 🌟 ×10`
+            : "ชนะครั้งแรกได้ตัวมันมาเลี้ยง + เปิดโลกที่สองถาวร"}</div>
+        </div>
+      </div>
+      <button class="btn sun" id="btnGod" style="width:100%;margin-top:8px"
+        ${(S.gateTeam||[]).length ? '' : 'disabled'}>🌟 ท้าเทพเจ้าปฐมกาล</button>` : ''}
+    ` : ''}`;
+  box.querySelectorAll('[data-gt]').forEach(b => b.onclick = () => {
+    const id = +b.dataset.gt;
+    S.gateTeam = S.gateTeam || [];
+    S.gateTeam = S.gateTeam.includes(id) ? S.gateTeam.filter(x => x !== id) : S.gateTeam.concat([id]);
+    sfx("tap"); renderGate();
+  });
+  const bg = box.querySelector('#btnGate');
+  if(bg) bg.onclick = gateFight;
+  const bgd = box.querySelector('#btnGod');
+  if(bgd) bgd.onclick = godFight;
 }
 
 function fight(diff){
@@ -6786,62 +8140,72 @@ function fight(diff){
   const rm = repeatMul();                    // ตัวคูณรางวัลรอบซ้ำ
 
   const bhp = Math.round(D.hp * (B.mul||1)), bpw = Math.round(D.pw * (B.mul||1));
-  const R0 = runBattle(team, { name:B.name, el:B.el, hp:bhp, pw:bpw }, { maxRound:18 });
+  battleGo(team, { name:B.name, el:B.el, hp:bhp, pw:bpw, id:B.id }, { maxRound:18 }, R0 => {
   const units = R0.units, boss = R0.boss, log = R0.log, ev = R0.ev, fightSfx = R0.sfxq;
-  const dealt = R0.dealt, win = R0.win;
-  const L = B.loot || {};
-  const coins = Math.round(D.coins * (L.coin || 1) * decGlobal("bossCoin", "mul") * festFx("bossCoin", 1)
-    * (win ? 1 : dealt*0.6) * rm);
-  const nFood = Math.max(rm >= 1 ? 1 : 0,
-    Math.round(D.foods * (L.foodMult || 1) * (win ? 1 : dealt*0.5) * rm));
-  const gotFood = {};
-  for(let i = 0; i < nFood; i++){
-    const f = L.foodPick || (win && Math.random() < .45 ? "cake" : Math.random() < .5 ? "fruit" : "grass");
-    gotFood[f] = (gotFood[f] || 0) + 1;
-    S.bag[f] = (S.bag[f] || 0) + 1;
-  }
-  const eggs = [];
-  if(win){                                   // รอบซ้ำก็ได้ไข่บอส แต่โอกาสน้อยลงตามตัวคูณ
-    for(let i = 0; i < (L.eggs || 1) + festAdd("bossEgg"); i++){
-      if(S.eggs.length >= NEST_MAX) break;
-      const sure = !!L.eggs && first;            // วันที่ของขวัญคือไข่ ได้แน่นอนเฉพาะรอบแรก
-      if(!sure && Math.random() >= (i === 0 ? D.eggCh : D.eggCh*0.85)
-        * (first ? 1 : rm) * (1 + shVal("egg"))) continue;
-      const e = { sid:pickByRarity(3), tier:2, rar:3, boss:true, bossId:B.id };
-      if(L.eggStar) e.starPull = L.eggStar;
-      S.eggs.push(e); eggs.push(e);
+    const dealt = R0.dealt, win = R0.win;
+    const L = B.loot || {};
+    const coins = Math.round(D.coins * (L.coin || 1) * decGlobal("bossCoin", "mul") * festFx("bossCoin", 1)
+      * (win ? 1 : dealt*0.6) * rm * buffMul("coin"));
+    const nFood = Math.max(rm >= 1 ? 1 : 0,
+      Math.round(D.foods * (L.foodMult || 1) * (win ? 1 : dealt*0.5) * rm));
+    const gotFood = {};
+    for(let i = 0; i < nFood; i++){
+      const f = L.foodPick || (win && Math.random() < .45 ? "cake" : Math.random() < .5 ? "fruit" : "grass");
+      gotFood[f] = (gotFood[f] || 0) + 1;
+      S.bag[f] = (S.bag[f] || 0) + 1;
     }
-  }
-  S.coins += coins;
-  const gotDust = Math.round((win ? (L.dust || 0) : (L.dust || 0) * dealt * 0.5) * rm);
-  if(gotDust) S.dust = (S.dust || 0) + gotDust;
-  bumpBossTry();
-  if(win) S.lastBoss = todayKey();
-  S.bossWins = (S.bossWins || 0) + (win ? 1 : 0);
-  if(win){
-    const nCore = diff >= 3 ? 3 : diff >= 2 ? 2 : 1;
-    if(first) addMat("core", nCore);
-    else if(Math.random() < rm) addMat("core", Math.max(1, Math.round(nCore * rm)));
-    if(first) qAdd("boss");
-  }
-  let climbed = false;
-  if(win && first && DIFFS[diff] && DIFFS[diff].endless){   // ชนะนรก = ชั้นถัดไปรออยู่พรุ่งนี้
-    S.bossTier = hellTier() + 1; climbed = true;
-  }
-  if(climbed) logf(`ผ่านนรกชั้น ${hellTier()} — พรุ่งนี้เจอชั้น ${hellTier() + 1} ที่โหดกว่าเดิม`, "good");
-  sfx(win ? "win" : "lose");
-  logf((win ? `ชนะ${B.name} (${D.name}) — ได้ 🪙 ${coins}`
-            : `สู้กับ${B.name}ไม่ไหว ทำดาเมจได้ ${Math.round(dealt*100)}% — ได้ 🪙 ${coins}`)
-    + (first ? "" : ` · รอบซ้ำที่ ${bossTries()} ของวันนี้ รางวัล ${Math.round(rm*100)}%`),
-    win ? "good" : "");
-  showArena(B, D, log, ev, units, boss,
-    { win, dealt, coins, gotFood, eggs, units, dust:gotDust });
-  save(); render();
+    const eggs = [];
+    if(win){                                   // รอบซ้ำก็ได้ไข่บอส แต่โอกาสน้อยลงตามตัวคูณ
+      for(let i = 0; i < (L.eggs || 1) + festAdd("bossEgg"); i++){
+        if(S.eggs.length >= NEST_MAX) break;
+        const sure = !!L.eggs && first;            // วันที่ของขวัญคือไข่ ได้แน่นอนเฉพาะรอบแรก
+        if(!sure && Math.random() >= (i === 0 ? D.eggCh : D.eggCh*0.85)
+          * (first ? 1 : rm) * (1 + shVal("egg")) * buffMul("egg")) continue;
+        const e = { sid:pickByRarity(3), tier:2, rar:3, boss:true, bossId:B.id };
+        if(L.eggStar) e.starPull = L.eggStar;
+        S.eggs.push(e); eggs.push(e);
+      }
+    }
+    S.coins += coins;
+    const gotDust = Math.round((win ? (L.dust || 0) : (L.dust || 0) * dealt * 0.5) * rm * buffMul("drop"));
+    if(gotDust) S.dust = (S.dust || 0) + gotDust;
+    bumpBossTry();
+    if(win) S.lastBoss = todayKey();
+    S.bossWins = (S.bossWins || 0) + (win ? 1 : 0);
+    if(win){
+      const nCore = diff >= 3 ? 3 : diff >= 2 ? 2 : 1;
+      if(first) addMat("core", nCore);
+      else if(Math.random() < rm) addMat("core", Math.max(1, Math.round(nCore * rm)));
+      if(first) qAdd("boss");
+    }
+    let climbed = false;
+    if(win && DIFFS[diff] && DIFFS[diff].endless){            // ชนะนรกกี่รอบก็ขึ้นชั้นได้ทุกรอบ
+      S.bossTier = hellTier() + 1; climbed = true;
+    }
+    if(climbed) logf(`ผ่านนรกชั้น ${hellTier()} — พรุ่งนี้เจอชั้น ${hellTier() + 1} ที่โหดกว่าเดิม`, "good");
+    sfx(win ? "win" : "lose");
+    logf((win ? `ชนะ${B.name} (${D.name}) — ได้ 🪙 ${coins}`
+              : `สู้กับ${B.name}ไม่ไหว ทำดาเมจได้ ${Math.round(dealt*100)}% — ได้ 🪙 ${coins}`)
+      + (first ? "" : ` · รอบซ้ำที่ ${bossTries()} ของวันนี้ รางวัล ${Math.round(rm*100)}%`),
+      win ? "good" : "");
+    showArena(B, D, log, ev, units, boss,
+      { win, dealt, coins, gotFood, eggs, units, dust:gotDust });
+    save(); render();
+  });
 }
 
 /* ฉากต่อสู้: เล่นเหตุการณ์ทีละจังหวะ แล้วค่อยโชว์สรุปผล */
 function showArena(B, D, log, ev, units, boss, R, opt){
   opt = opt || {};
+  if(inBatch()){                                   // ตีรัวอยู่ ไม่ต้องโชว์อะไรเลย
+    if(opt.onEnd) opt.onEnd();
+    return;
+  }
+  /* โหมดสั่งเองเล่นฉากไปแล้ว หรือเปิดข้ามฉากถาวร → ไปหน้าสรุปเลย */
+  if(!ev || !ev.length || skipArena()){
+    if(opt.onEnd) opt.onEnd(); else showFight(B, D, log, R);
+    return;
+  }
   const artSrc = opt.art || BOSS_ART[B.id];
   const m = document.createElement('div');
   m.className = 'mask arenamask';
@@ -7044,6 +8408,71 @@ function renderBoss(){
     save(); renderBoss();
   });
 
+  /* ตัวช่วยฟาร์ม */
+  {
+    const sk = $('#btnSkip');
+    if(sk){
+      sk.textContent = skipArena() ? "⏭ ข้ามฉาก: เปิด" : "🎬 ดูฉากต่อสู้: เปิด";
+      sk.setAttribute('aria-pressed', skipArena());
+      sk.onclick = () => { S.skipArena = !skipArena(); sfx("tap"); save(); render(); };
+    }
+    const b5 = $('#btnB5'), b10 = $('#btnB10');
+    if(b5){ b5.disabled = !S.team.length; b5.onclick = () => batchRun("boss", 5); }
+    if(b10){ b10.disabled = !S.team.length; b10.onclick = () => batchRun("boss", 10); }
+    const bp = $('#bossPick');
+    if(bp){
+      bp.disabled = !bossPickOn();
+      bp.innerHTML = [0,1,2,3,4,5,6].map(d => {
+        const x = bossFor(d);
+        return `<option value="${d}" ${bossDay() === d ? "selected" : ""}
+          >วัน${DAY_TH[d]} · ${x.name}${d === new Date().getDay() ? " (วันนี้)" : ""}</option>`;
+      }).join('');
+      bp.onchange = () => { S.bossPick = +bp.value; S.team = []; sfx("tap"); save(); render(); };
+    }
+    const pu = $('#btnPickUnlock');
+    if(pu){
+      pu.textContent = bossPickOn() ? "🧟 แท่นเรียกบอส: ปลดล็อกแล้ว"
+        : `🧟 ปลดล็อกแท่นเรียกบอส ${MAT.core.emoji}${BOSS_PICK_COST.core}`;
+      pu.disabled = bossPickOn();
+      pu.onclick = unlockBossPick;
+    }
+    const pn = $('#pickNote');
+    if(pn) pn.textContent = bossPickOn()
+      ? "เลือกเจอบอสวันไหนก็ได้ฟรีตลอด · ตัวตำนานผูกกับบอสแต่ละตัว เลือกให้ตรงตัวที่อยากไล่"
+      : "ปลดล็อกครั้งเดียว แล้วไม่ต้องรอ 7 วันเพื่อไล่ตัวตำนานตัวเดียวอีก";
+    const lt = $('#legTarget');
+    if(lt){
+      const pool = LEGEND_BY_BOSS[bossToday().id] || [];
+      lt.innerHTML = `<option value="">— ไม่เล็งตัวไหน สุ่มตามปกติ —</option>` +
+        pool.map(s => `<option value="${s.id}" ${S.legTarget === s.id ? "selected" : ""}
+          >${s.name}${S.seen[s.id] ? "" : " (ยังไม่เคยได้)"}</option>`).join('');
+      lt.onchange = () => { S.legTarget = lt.value || null; save(); render(); };
+    }
+    const pity = $('#pityNote');
+    if(pity) pity.textContent =
+      `🎯 เล็งไว้แล้วโอกาสออกตัวนั้น 55% ตอนไข่ให้ตำนาน · ` +
+      `🎫 การันตี: ไม่ได้ตำนานมา ${pityNow()}/${PITY_NEED} ฟองติด ` +
+      (pityNow() >= PITY_NEED ? "— ฟองถัดไปได้แน่นอน!" : `อีก ${PITY_NEED - pityNow()} ฟองจะการันตี`);
+    const bl = $('#buffList');
+    if(bl){
+      bl.innerHTML = BUFFS.map(u => {
+        const left = buffLeft(u.id);
+        return `<button class="hsb" data-buff="${u.id}" ${(S.dust||0) < u.dust ? 'disabled' : ''}>
+          <b>${u.emoji} ${u.name}${left ? ` · เหลือ ${Math.ceil(left/60000)} นาที` : ""}</b>
+          ${u.note} · ${u.min} นาที<br><small>💠 ${u.dust}</small></button>`;
+      }).join('');
+      bl.querySelectorAll('[data-buff]').forEach(b => b.onclick = () => buyBuff(b.dataset.buff));
+    }
+  }
+  const mb = $('#btnManual');
+  if(mb){
+    mb.textContent = manualOn() ? "🎮 โหมดสั่งเอง: เปิด" : "⚡ โหมดออโต้: เปิด";
+    mb.setAttribute('aria-pressed', manualOn());
+    mb.onclick = () => { S.manualBattle = !manualOn(); sfx("tap"); save(); render(); };
+    $('#manualNote').textContent = manualOn()
+      ? "เลือกท่าเองทุกเทิร์น สลับตัวได้ · ใช้กับบอส ดันเจี้ยน หอคอย และถ้ำทั้งหมด"
+      : "ระบบสู้ให้เองแล้วเล่นเป็นฉากย้อนหลัง · กดสลับเป็นเทิร์นเบสได้";
+  }
   const fb = $('#btnFight');
   const tries = bossTries(), rmNow = repeatMul();
   fb.disabled = !S.team.length;
@@ -7464,6 +8893,60 @@ function renderShop(){
   }
   $('#nestCount').textContent = `(${S.eggs.length}/${NEST_MAX} ฟอง) · ช่องอุ่น ${used}/${slotsOf()}` +
     (rdy ? ` · พร้อมแตก ${rdy}` : '');
+  /* ตัวช่วยจัดการไข่ */
+  {
+    const th = $('#cullTh');
+    if(th && !th.dataset.on){
+      th.dataset.on = "1";
+      th.innerHTML = [80,100,120,140,160,180].map(v =>
+        `<option value="${v}">ทิ้งไข่ที่ค่าแฝงรวมต่ำกว่า ${v}</option>`).join('');
+      th.onchange = () => { S.cullTh = +th.value; save(); renderShop(); };
+    }
+    if(th) th.value = String(S.cullTh || 100);
+    const on = $('#cullOn');
+    if(on){
+      on.textContent = S.cullOn ? "🗑 คัดอัตโนมัติ: เปิด" : "🗑 คัดอัตโนมัติ: ปิด";
+      on.setAttribute('aria-pressed', !!S.cullOn);
+      on.onclick = () => { S.cullOn = !S.cullOn; sfx("tap"); save(); renderShop(); };
+    }
+    const cn = $('#cullNote');
+    if(cn) cn.textContent = S.cullOn
+      ? `ส่องยกรังแล้วจะคัดออกให้ทันที · ไข่ตำนาน ไข่บอส ไข่ collab ไม่ถูกแตะ`
+      : `เปิดไว้แล้วกด 🔍 ส่องยกรัง ระบบจะคัดไข่ที่ค่าแฝงต่ำออกให้เลย`;
+    const pa = $('#btnPeekAll');
+    if(pa){
+      const n = S.eggs.filter(e => !e.peek).length;
+      pa.disabled = !n;
+      pa.textContent = n ? `🔍 ส่องยกรัง ${n} ฟอง · 💠 ${n*PEEK_COST}` : "🔍 ส่องครบแล้ว";
+      pa.onclick = peekAll;
+    }
+    const hb = $('#btnHatchBox');
+    if(hb){ hb.disabled = !rdy; hb.textContent = `📦 ฟักที่พร้อม ${rdy} ฟองเข้าตู้ฝาก`; hb.onclick = hatchToBox; }
+    const cnw = $('#btnCullNow');
+    if(cnw){ cnw.onclick = () => cullEggs(false); }
+    const os2 = $('#orderSid');
+    if(os2){
+      const ids = Object.keys(S.seen || {}).filter(id => SP[id]
+        && !SP[id].legend && !SP[id].prize && !SP[id].collab);
+      const cur = S.orderSid && ids.indexOf(S.orderSid) >= 0 ? S.orderSid : (ids[0] || "");
+      S.orderSid = cur;
+      os2.innerHTML = ids.length
+        ? ids.map(id => `<option value="${id}" ${id === cur ? "selected" : ""}>${SP[id].name} · ${SP[id].el}</option>`).join('')
+        : `<option value="">ยังไม่เคยเจอสายพันธุ์ไหนเลย</option>`;
+      os2.onchange = () => { S.orderSid = os2.value; save(); renderShop(); };
+    }
+    const ob = $('#btnOrder');
+    if(ob){
+      const lack = orderLack();
+      ob.disabled = !!lack.length || !S.orderSid || S.eggs.length >= NEST_MAX;
+      ob.textContent = lack.length ? "วัสดุไม่พอ" : "📜 สั่งทำ";
+      ob.onclick = orderEgg;
+    }
+    const on2 = $('#orderNote');
+    if(on2) on2.textContent = `🪙 ${ORDER_COST.coins} · 💠 ${ORDER_COST.dust} · ` +
+      Object.keys(ORDER_COST.mats).map(k => `${MAT[k].emoji}${ORDER_COST.mats[k]}`).join(" ") +
+      ` — ได้ไข่สายพันธุ์ที่เลือกแน่นอน (เฉพาะตัวที่เคยเจอแล้ว)`;
+  }
   $('#btnAutoHatch').disabled = !S.eggs.length || (!rdy && used >= slotsOf());
   $('#btnAutoHatch').textContent = rdy ? `ฟักที่พร้อม ${rdy} ฟอง + เติมช่องอุ่น` : 'ใส่ไข่เข้าช่องอุ่นให้เต็ม';
 }
@@ -7546,6 +9029,8 @@ const MG_FILTERS = [
   { id:"box",   name:"📦 ในตู้ฝาก",   f: c => !!c.box },
   { id:"out",   name:"อยู่ในทุ่ง",     f: c => !c.box },
   { id:"iv",   name:"🧬 ค่าแฝงดี",   f: c => ivPct(c) >= 0.7 },
+  { id:"perf",  name:"👑 มีช่อง 31",   f: c => perfCount(c) > 0 },
+  { id:"crown", name:"👑 มงกุฎ 6/6",  f: c => isCrown(c) },
   { id:"m",    name:"♂ ตัวผู้",       f: c => isMale(c) },
   { id:"f",    name:"♀ ตัวเมีย",      f: c => isFemale(c) }
 ];
@@ -7558,6 +9043,7 @@ const MG_SORTS = [
   { id:"new",   name:"ใหม่สุดก่อน",  f:(a,b) => b.id - a.id },
   { id:"ivs",   name:"ค่าแฝงสูงสุด", f:(a,b) => ivSum(b) - ivSum(a) },
   { id:"ivw",   name:"ค่าแฝงต่ำสุด",  f:(a,b) => ivSum(a) - ivSum(b) },
+  { id:"perf",  name:"👑 ช่อง 31 มากสุด", f:(a,b) => perfCount(b) - perfCount(a) || ivSum(b) - ivSum(a) },
   { id:"price", name:"ราคาแพงสุด",   f:(a,b) => priceOf(b) - priceOf(a) },
   { id:"cheap", name:"ราคาถูกสุด",   f:(a,b) => priceOf(a) - priceOf(b) },
   { id:"name",  name:"เรียงชื่อ ก-ฮ", f:(a,b) => SP[a.sid].name.localeCompare(SP[b.sid].name, "th") }
@@ -7655,6 +9141,7 @@ function mgDetail(c, ctx){
       ${row("ผสมพันธุ์", !adult ? "ยังเด็ก" : c.myth ? "อมตะผสมไม่ได้"
         : breedReady(c) ? "พร้อมผสม" : `พักอีก ${hhmm(breedLeft(c))}`)}
       ${row("กลุ่มไข่", eggGroups(c.sid).join(" · "))}
+      ${row("👑 ช่องที่เต็ม 31", perfCount(c) + "/6" + (isCrown(c) ? " · มงกุฎ!" : ""))}
       ${row("ของถือ", it ? `${it.emoji} ${it.name}` : "—")}
       ${row("สถานะ", [c.lock ? "🔒 ล็อก" : null, c.shiny ? "✨ " + shinyName(c) : null,
         ctx.dupe.has(c.id) ? "ตัวซ้ำ" : "ตัวดีที่สุดของสายพันธุ์"].filter(Boolean).join(" · "))}
@@ -7804,7 +9291,7 @@ function renderManage(){
     if(ctx.dupe.has(c.id)) tags.push(`<i class="tg dp">ตัวซ้ำ</i>`);
     if(isAway) tags.push(`<i class="tg aw">🧭 ออกเดินทาง</i>`);
     if(c.box) tags.push(`<i class="tg bx">📦 อยู่ในตู้ฝาก</i>`);
-    if(!baby && isCrown(c)) tags.push(`<i class="tg">👑 มงกุฎ</i>`);
+    if(perfCount(c)) tags.push(`<i class="tg">${crownTag(c)}</i>`);
     if(!baby && lvOf(c) > 1) tags.push(`<i class="tg">📈 Lv ${lvOf(c)}</i>`);
 
     return `<div class="mgrow ${sel.has(c.id) ? 'on' : ''} ${isAway ? 'away' : ''} ${c.box ? 'boxed' : ''}">
@@ -7882,9 +9369,12 @@ document.querySelectorAll('#logMode [data-lmode]').forEach(b =>
   b.onclick = () => { sfx("tap"); setLogMode(b.dataset.lmode); });
 
 function setBossMode(m){
-  S.bossMode = ["tower","dg","abyss"].indexOf(m) >= 0 ? m : "daily";
+  S.bossMode = ["tower","dg","abyss","gate"].indexOf(m) >= 0 ? m : "daily";
   const a = document.getElementById('paneDaily'), b = document.getElementById('paneTower'),
-        c = document.getElementById('paneDg'), d = document.getElementById('paneAbyss');
+        c = document.getElementById('paneDg'), d = document.getElementById('paneAbyss'),
+        e = document.getElementById('paneGate');
+  if(e) e.style.display = S.bossMode === "gate" ? "" : "none";
+  if(S.bossMode === "gate") renderGate();
   if(a) a.style.display = S.bossMode === "daily" ? "" : "none";
   if(b) b.style.display = S.bossMode === "tower" ? "" : "none";
   if(c) c.style.display = S.bossMode === "dg" ? "" : "none";
@@ -7917,6 +9407,9 @@ function setBookMode(m){
   const pc = $('#paneCollect');
   if(pc) pc.style.display = m === "collect" ? "" : "none";
   if(m === "collect") renderCollect();
+  const pb = $('#paneBoxes');
+  if(pb) pb.style.display = m === "boxes" ? "" : "none";
+  if(m === "boxes") renderBoxView();
   document.querySelectorAll('#bookMode [data-mode]').forEach(b =>
     b.setAttribute('aria-pressed', b.dataset.mode === m));
 }
@@ -7964,7 +9457,7 @@ function render(){
   const seenCb = seenIds.filter(isCollab).length;
   $('#dexCount').textContent = `${seenBase} / ${nBase} สายพันธุ์ · ✦ ${seenLg}/${LEGEND_LIST.length} · ◈ ${seenPz}/${PRIZE_LIST.length} · ✧ ${seenCb}/${COLLAB_LIST.length}`;
   S.dexTab = S.dexTab || "all";
-  renderPenTabs(); renderPenPage(); renderSel(); renderShop(); renderBreed(); renderMyth(); renderDust(); renderBoss(); renderTower(); renderAbyss(); renderDungeon(); renderTradeEgg(); renderTrip(); renderDex(); renderManage(); renderStats(); renderGuide(); renderQuests(); renderBook();
+  renderPenTabs(); renderPenPage(); renderSel(); renderShop(); renderBreed(); renderMyth(); renderDust(); renderBoss(); renderTower(); renderAbyss(); renderGate(); renderBoxView(); renderDungeon(); renderTradeEgg(); renderTrip(); renderDex(); renderManage(); renderStats(); renderGuide(); renderQuests(); renderBook();
   setBookMode(S.bookMode || 'dex');
   setShopMode(S.shopMode || 'mon');
   setBossMode(S.bossMode || 'daily');

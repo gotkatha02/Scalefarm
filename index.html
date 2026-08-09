@@ -11199,7 +11199,7 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 /* ระบบสู้ใหม่แทนโหมดออโต้/สั่งเองเดิม จึงซ่อนสวิตช์เก่า */
 #btnManual,#manualNote{display:none!important}
 
-.ajmask{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;
+.ajmask{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;
   background:#0d1512;color:#fff;font-family:inherit;overscroll-behavior:contain;
   touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .ajmask *{box-sizing:border-box}
@@ -11301,7 +11301,7 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
   75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.1)}}
 .ajdock2{background:linear-gradient(180deg,rgba(253,246,228,.96),rgba(238,226,200,.96));
   padding:8px 10px calc(env(safe-area-inset-bottom,0px) + 8px);display:flex;gap:8px;
-  justify-content:center;border-top:3px solid #cbb389}
+  justify-content:center;border-top:3px solid #cbb389;overflow-x:auto}
 .ajp{position:relative;width:60px;height:70px;border-radius:12px;border:2px solid #a9825a;
   background:#2a2118;overflow:hidden;padding:0;flex:0 0 auto}
 .ajp img{width:100%;height:100%;object-fit:cover;display:block;transition:filter .2s}
@@ -11316,7 +11316,7 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
   50%{box-shadow:0 0 14px 4px rgba(255,227,106,.75)}}
 
 /* ---------- แผ่นข้อมูลสกิล ---------- */
-.ajsheet{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;
+.ajsheet{position:fixed;inset:0;z-index:320;display:flex;align-items:flex-end;
   background:rgba(0,0,0,.55)}
 .ajsheet .in{width:100%;max-height:78%;overflow:auto;background:#fdf6e4;color:#3a2c18;
   border-radius:18px 18px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 14px)}
@@ -11384,8 +11384,9 @@ const isRanged = r => r >= 2;                  // แถวหลังยิง
 /* =====================================================================
    1) หน้าจัดทัพ
    ===================================================================== */
-function ajFormation(team, foes, foe, opt, go, back){
-  const place = ajAutoPlace(team);              // {cid:{r,c}} จากแถวที่เคยตั้งไว้
+function ajFormation(pool, picked, cap, foes, foe, opt, go, back){
+  const team = pool;                                   /* การ์ดล่าง = ทุกตัวที่เลือกได้ */
+  const place = ajAutoPlace(pool.filter(c => picked.indexOf(c.id) >= 0), false, cap);
   let sel = null, drag = null;
 
   const m = document.createElement('div');
@@ -11468,15 +11469,16 @@ function ajFormation(team, foes, foe, opt, go, back){
     q('ajFoePw').textContent = Math.round(foes.reduce((a, f) => a + f.pwShow, 0)).toLocaleString();
     const n = Object.keys(place).length;
     q('ajGo').disabled = !n;
-    q('ajHint').innerHTML = n
-      ? `ลากรูปขึ้นช่องหกเหลี่ยมเพื่อวางตำแหน่ง · แตะรูปบนสนามเพื่อดูสกิล<br>
-         <b>แถวหน้า/กลาง</b> เดินเข้าไปตีประชิด · <b>แถวหลัง</b> ยืนยิงไกล`
-      : `แตะการ์ดด้านล่างแล้วแตะช่องหกเหลี่ยม เพื่อวางตัวลงสนาม`;
+    q('ajHint').innerHTML = `<b>ลงสนาม ${n}/${cap} ตัว</b> · แตะการ์ดล่างเพื่อเพิ่ม/เอาออก
+      · ลากรูปบนสนามเพื่อย้ายช่อง (ลากทับกันคือสลับที่) · แตะรูปบนสนามเพื่อดูสกิล<br>
+      <b>แถวหน้า/กลาง</b> เดินเข้าไปตีประชิด · <b>แถวหลัง</b> ยืนยิงไกล`;
   }
   function drawRoster(){
     const ros = q('ajRos');
-    ros.classList.toggle('two', team.length > 6);
-    ros.innerHTML = team.map(c => {
+    ros.classList.toggle('two', team.length > 7);
+    const order = team.slice().sort((a, b) =>
+      (place[b.id] ? 1 : 0) - (place[a.id] ? 1 : 0) || statsOf(b).total - statsOf(a).total);
+    ros.innerHTML = order.map(c => {
       const rar = SP[c.sid].rarity || 1;
       return `<button class="ajcard r${rar} ${place[c.id] ? 'on' : ''} ${sel === c.id ? 'sel' : ''}"
         data-cid="${c.id}">
@@ -11488,7 +11490,7 @@ function ajFormation(team, foes, foe, opt, go, back){
         const cid = +b.dataset.cid;
         if(place[cid]){ delete place[cid]; sel = null; }
         else if(sel === cid){ sel = null; }
-        else if(Object.keys(place).length >= MAXTEAM){ sel = cid; }
+        else if(Object.keys(place).length >= cap){ sel = cid; }
         else { sel = cid; const f = firstFree(); if(f){ place[cid] = f; sel = null; } }
         sfx("tap"); redrawMine();
       };
@@ -11529,8 +11531,8 @@ function ajFormation(team, foes, foe, opt, go, back){
     if(tile && sel != null){ putAt(sel, +tile.dataset.r, +tile.dataset.c); sel = null; }
   });
   function putAt(cid, r, c){
-    if(!place[cid] && Object.keys(place).length >= MAXTEAM){
-      alert(`ลงสนามได้มากสุด ${MAXTEAM} ตัว — เอาตัวที่ไม่ใช้ออกก่อน`); return;
+    if(!place[cid] && Object.keys(place).length >= cap){
+      alert(`ศึกนี้ลงสนามได้มากสุด ${cap} ตัว — เอาตัวที่ไม่ใช้ออกก่อน`); return;
     }
     const other = taken(r, c);
     if(other && +other !== cid){                 // สลับที่กัน
@@ -11547,8 +11549,10 @@ function ajFormation(team, foes, foe, opt, go, back){
     m.remove(); back();
   };
   q('ajTidy').onclick = () => {
+    let now = Object.keys(place).map(cid => team.find(x => x.id === +cid)).filter(Boolean);
+    if(!now.length) now = team.slice().sort((a, b) => statsOf(b).total - statsOf(a).total).slice(0, cap);
     Object.keys(place).forEach(k => delete place[k]);
-    Object.assign(place, ajAutoPlace(team, true));
+    Object.assign(place, ajAutoPlace(now, true, cap));
     sfx("tap"); redrawMine();
   };
   q('ajGo').onclick = () => {
@@ -11569,7 +11573,7 @@ function ajFormation(team, foes, foe, opt, go, back){
 }
 
 /* วางอัตโนมัติจากบทบาทของแต่ละตัว: อึด→หน้า, ตีแรง→กลาง, พลังพิเศษ→หลัง */
-function ajAutoPlace(team, fresh){
+function ajAutoPlace(team, fresh, cap){
   const out = {};
   const used = {};
   const rank = c => {
@@ -11577,7 +11581,7 @@ function ajAutoPlace(team, fresh){
     if(bulk >= 0.56) return 0;
     return b.spa > b.atk * 1.15 ? 2 : 1;
   };
-  team.slice(0, MAXTEAM).forEach(c => {
+  team.slice(0, cap || MAXTEAM).forEach(c => {
     let r = fresh ? rank(c) : (c.row != null ? clamp2(c.row, 0, 2) : rank(c));
     let cc = fresh ? -1 : (AJ.cols[c.id] != null ? AJ.cols[c.id] : -1);
     const free = (r2, c2) => !used[r2 + ":" + c2];
@@ -12218,18 +12222,75 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
 /* =====================================================================
    5) ต่อเข้าเกมเดิม: แทน battleGo ให้ทุกโหมด (บอส/ดันเจี้ยน/หอคอย/ถ้ำ/ประตู)
    ===================================================================== */
+/* ---- ใครลงสนามได้บ้าง / ได้กี่ตัว แยกตามโหมดที่กำลังเปิดอยู่ ---- */
+const adultPool = () => (S.creatures || []).filter(c => c.stage === "adult" && !c.box);
+function modeCfg(){
+  const m = (S && S.bossMode) || "daily";
+  const safe = (f, d) => { try{ const r = f(); return (r && r.length) ? r : d; }catch(e){ return d; } };
+  if(m === "dg")
+    return { m, pool:safe(() => dgAvail(), adultPool()),
+             cap:(typeof DG_TEAM !== "undefined" ? DG_TEAM : 5),
+             get:() => S.dgTeam || [], set:v => S.dgTeam = v };
+  if(m === "tower")
+    return { m, pool:safe(() => towerAvail(), adultPool()),
+             cap:(typeof TW_TEAM !== "undefined" ? TW_TEAM : 5),
+             get:() => S.twTeam || [], set:v => S.twTeam = v };
+  if(m === "gate")
+    return { m, pool:adultPool(), cap:5,
+             get:() => S.gateTeam || [], set:v => S.gateTeam = v };
+  if(m === "abyss")                                   /* ถ้ำใช้ทีมที่ล็อกไว้ทั้งรอบ เลือกใหม่ไม่ได้ */
+    return { m, pool:null, cap:9, get:() => [], set:() => {} };
+  return { m, pool:adultPool(), cap:3, get:() => S.team || [], set:v => S.team = v };
+}
+
 const oldBattleGo = window.battleGo;
 window.battleGo = function(team, foe, opt, resolve){
   opt = opt || {};
   const batching = typeof inBatch === "function" && inBatch();
   if(!team || !team.length || batching)          /* ตีรัวหลายรอบ = คิดผลให้เลย ไม่ต้องเปิดฉาก */
     return oldBattleGo(team, foe, opt, resolve);
+  const cfg = modeCfg();
+  const cap = Math.max(team.length, cfg.pool ? cfg.cap : team.length);
+  let pool = (cfg.pool ? cfg.pool.slice() : team.slice()).filter(c => c && c.stage === "adult");
+  team.forEach(c => { if(pool.indexOf(c) < 0) pool.unshift(c); });
   const foes = ajFoes(foe, opt);
-  const start = list => ajBattle(list, foes, foe, opt, resolve);
-  /* กด ← = ไม่เสียรอบ/กุญแจฟรี · ส่งศึกนี้ต่อให้ระบบเดิมสู้ทันที */
-  ajFormation(team.slice(0, MAXTEAM), foes, foe, opt, start,
-    () => oldBattleGo(team, foe, opt, resolve));
+  ajFormation(pool, team.map(c => c.id), cap, foes, foe, opt,
+    list => {
+      team.length = 0;                            /* ทีมที่จัดจริงส่งกลับให้โค้ดเดิมใช้ต่อ */
+      list.forEach(u => team.push(u.c));
+      if(cfg.pool) cfg.set(team.map(c => c.id));
+      ajBattle(list, foes, foe, opt, resolve);
+    },
+    () => oldBattleGo(team, foe, opt, resolve));  /* ⏩ ข้ามฉาก = คิดผลให้ทันที */
 };
+
+/* ---- กดปุ่มสู้ได้เลยแม้ยังไม่ติ๊กทีม แล้วไปเลือกตัวในหน้าจัดทัพ ---- */
+function ensureTeam(){
+  const cfg = modeCfg();
+  if(!cfg.pool || !cfg.pool.length || cfg.get().length) return;
+  const best = cfg.pool.slice().sort((a, b) => statsOf(b).total - statsOf(a).total);
+  cfg.set(best.slice(0, Math.min(cfg.cap, best.length)).map(c => c.id));
+}
+["fight","dgFight","towerFight","gateFight","godFight"].forEach(n => {
+  const orig = window[n];
+  if(typeof orig !== "function") return;
+  window[n] = function(){ try{ ensureTeam(); }catch(e){} return orig.apply(this, arguments); };
+});
+const FIGHT_BTNS = ["btnFight","btnDgGo","btnTwGo","btnGate","btnGod"];
+function ajBtns(){
+  const cfg = modeCfg();
+  if(!cfg.pool || !cfg.pool.length) return;
+  FIGHT_BTNS.forEach(id => {
+    const b = document.getElementById(id);
+    if(!b || !b.disabled) return;
+    b.disabled = false;
+    if(id === "btnFight" && /เลือกทีม/.test(b.textContent)) b.textContent = "⚔️ ออกไปสู้";
+  });
+}
+const oldRender = window.render;
+if(typeof oldRender === "function")
+  window.render = function(){ const r = oldRender.apply(this, arguments);
+    try{ ajBtns(); }catch(e){} return r; };
 
 /* คำอธิบายระบบต่อสู้ในแท็บบอส (แปะเพิ่ม ไม่แตะโค้ดเดิม) */
 function ajMount(){
@@ -12242,14 +12303,18 @@ function ajMount(){
   box.innerHTML = `<b>⚔️ ระบบต่อสู้</b><br>
     ก่อนเข้าศึกจะได้จัดทัพบนช่องหกเหลี่ยมก่อน · <b>แถวหน้า/กลาง</b> เดินเข้าไปตีประชิด
     · <b>แถวหลัง</b> ยืนตีไกล<br>
+    ไม่ต้องติ๊กทีมที่นี่ก็ได้ กดปุ่มสู้แล้วเลือกตัวในหน้าจัดทัพเลย<br>
     ท่าทั้ง 4 ทำงานเองเป็นสกิลติดตัว · <b>ไม้ตาย</b> กดเองที่รูปฮีโร่ตอนพลังงานเต็ม
     · กด ⏩ เพื่อข้ามฉากให้ระบบคิดผลให้`;
   fm.after(box);
+  try{ if(typeof render === "function") render(); }catch(e){}
 }
 if(document.readyState === "loading")
   document.addEventListener('DOMContentLoaded', () => setTimeout(ajMount, 0));
 else setTimeout(ajMount, 0);
 
+window.ajEnsureTeam = ensureTeam;
+window.ajModeCfg = modeCfg;
 window.ajFormation = ajFormation;
 window.ajBattle = ajBattle;
 window.ajSheet = ajSheet;

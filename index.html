@@ -1389,7 +1389,7 @@ PRIZES.forEach((p, i) => {
 });
 const PRIZE_LIST = SPECIES.filter(s => s.prize);
 const isPrize = sid => !!(SP[sid] && SP[sid].prize);
-const PRIZE_POWER = 1.7;
+const PRIZE_POWER = 1.24;      // ปรับลงให้การปั้นตัวเองมีความหมาย
 
 const LEGEND_LIST = SPECIES.filter(s => s.legend);
 const LEGEND_BY_BOSS = {};
@@ -1579,13 +1579,13 @@ const nurOf = c => (c && c.nur) || { pull:0, pw:0, tal:0 };
 /* ร้านตุ้ยนุ้ย = ซื้อลูกตุ้ยนุ้ยได้ทันที ไม่ต้องอุ่นไข่
    (hrs ยังใช้อยู่ เพราะไข่จากผสมพันธุ์ บอส ลาดตระเวน กล่องสมบัติ ยังต้องอุ่นในรัง) */
 const SHOP = [
-  { tier:0, name:"ลูกตุ้ยนุ้ยธรรมดา", price:90,   hrs:0.35, odds:{1:78, 2:20, 3:2},   pull:0,
+  { tier:0, name:"ลูกตุ้ยนุ้ยธรรมดา", price:90,   hrs:5/60, odds:{1:78, 2:20, 3:2},   pull:0,
     desc:"ลูกตุ้ยนุ้ยจากฟาร์มข้างบ้าน ราคาถูกที่สุด" },
-  { tier:1, name:"ลูกตุ้ยนุ้ยพิเศษ",  price:420,  hrs:0.9,  odds:{1:32, 2:50, 3:18},  pull:0.25,
+  { tier:1, name:"ลูกตุ้ยนุ้ยพิเศษ",  price:420,  hrs:5/60, odds:{1:32, 2:50, 3:18},  pull:0.25,
     desc:"ครึ่งหนึ่งเป็นสายพันธุ์หายากขึ้นไป" },
-  { tier:2, name:"ลูกตุ้ยนุ้ยหายาก",  price:1300, hrs:2,    odds:{1:0,  2:55, 3:45},  pull:0.6,
+  { tier:2, name:"ลูกตุ้ยนุ้ยหายาก",  price:1300, hrs:5/60, odds:{1:0,  2:55, 3:45},  pull:0.6,
     desc:"ไม่มีสายพันธุ์ธรรมดาเลย และแนวโน้มดาวดีกว่าปกติ" },
-  { tier:3, name:"ลูกตุ้ยนุ้ยทองคำ",  price:3900, hrs:3.5,  odds:{1:0,  2:0,  3:100}, pull:1.1,
+  { tier:3, name:"ลูกตุ้ยนุ้ยทองคำ",  price:3900, hrs:5/60, odds:{1:0,  2:0,  3:100}, pull:1.1,
     desc:"หายากมากแน่นอนทุกตัว เกิดมาพร้อมแนวโน้มดาวสูงสุดในร้าน" }
 ];
 function rollEggRarity(odds){
@@ -1721,6 +1721,7 @@ function packSave(){
      c36(S.farmRounds || 0)].join(".") + "," +
     BUFFS.map(u => c36(Math.max(0, Math.round(buffLeft(u.id)/60000)))).join(".") + "," +
     [c36(gateStep()), c36(S.godWin || 0), S.w2 ? 1 : 0, c36(S.manualWins || 0)].join(".") + "," +
+    KEYS.map(k => c36(keyOf(k.id))).join(".") + "," +
     (abRun() ? [c36(S.ab.depth), c36(S.ab.cleared),
       S.ab.team.map(c36).join("-"),
       S.ab.team.map(id => c36(Math.round((S.ab.hp[id] || 0) * 100))).join("-"),
@@ -1869,7 +1870,9 @@ function unpackSave(txt){
     S2.pity = p36(v[3] || "0");
     if(v[4]) S2.legTarget = (SPECIES[p36(v[4])] || {}).id || null;
     S2.farmRounds = p36(v[5] || "0"); }
-  if(m[32]){ const p = m[32].split("~");
+  if(m[32]){ const v = m[32].split(".");
+    S2.keys = {}; KEYS.forEach((k, i) => { const n = p36(v[i] || "0"); if(n) S2.keys[k.id] = n; }); }
+  if(m[33]){ const p = m[33].split("~");
     if(p.length >= 7){
       const team = p[2] ? p[2].split("-").map(p36) : [];
       const hpv = p[3] ? p[3].split("-").map(p36) : [];
@@ -1888,6 +1891,7 @@ function unpackSave(txt){
     BUFFS.forEach((u, i) => { const mn = p36(v[i] || "0");
       if(mn) S2.buffs[u.id] = Date.now() + mn*60000; }); }
   S2.incMigrated = true;
+  if(S2.balV !== 2){ S2.balV = 2; (S2.creatures || []).forEach(c => { if(c.bs) c.bs = null; }); }
 
   S2.seen = {};
   let bits = "";
@@ -2914,6 +2918,16 @@ function rollHatchSid(e){
 }
 
 /* สร้างลูกตุ้ยนุ้ยหนึ่งตัวจากไข่ใบหนึ่ง (ไข่แฝดจะเรียกซ้ำอีกรอบ สุ่มใหม่หมดทั้งสายพันธุ์และพรสวรรค์) */
+/* ตัวตำนานขึ้นไปล็อกกุญแจให้ทันทีที่ได้มา กันเผลอขายหรือปล่อย */
+const AUTO_LOCK_WHY = "✦ ตำนาน · ◈ ล้ำค่า · ✧ อมตะ · ✧ collab · 🌟 เทพ";
+function autoLock(c){
+  if(!c) return false;
+  const sp = SP[c.sid];
+  if(!sp) return false;
+  const big = !!(sp.legend || sp.prize || sp.collab || sp.god || c.myth);
+  if(big && !c.lock){ c.lock = true; return true; }
+  return false;
+}
 function makeBaby(e, target){
   const sid = rollHatchSid(e), lg = isLegend(sid);
   S.hatched++;
@@ -2926,6 +2940,7 @@ function makeBaby(e, target){
   if(e.masu) c.masu = true;                            // คู่ต่างถิ่น ดันโอกาสไชนี่ตอนแปลงร่าง
   if(e.mvEgg && MV[e.mvEgg]) c.mvEgg = e.mvEgg;        // ท่าไข่ที่สืบมาจากพ่อแม่
   if(e.ped) c.ped = e.ped.slice();                     // ผังสายเลือด
+  autoLock(c);                                         // ตำนานขึ้นไปล็อกให้เลย
   c.ev = zeroEV();
   c.sex = rollSex(sid);                                 // เพศรู้ตอนไข่แตก ไม่รู้ก่อน
   S.creatures.push(c);
@@ -2944,6 +2959,32 @@ function rollTwin(e){
   return t < 0 ? null : makeBaby(e, t);
 }
 
+/* รางวัลจากการฟักไข่ · เน้น 💠 ผงตุ้ยนุ้ยเป็นตัวหลัก
+   คิดเป็นสัดส่วนของค่าเร่งไข่ฟองนั้น แต่ตั้งใจให้ "น้อยกว่าค่าเร่งเกินสามเท่า"
+   คือฟักเองคุ้มกว่าเร่งชัดเจน แต่ก็ไม่ถึงขั้นปั่นผงจากการฟักได้ */
+const HATCH_DUST_CUT = 0.28;                                   // ได้ราว 28% ของค่าเร่งเต็มเวลา
+function hatchDust(e){
+  const full = Math.max(15, Math.round(hatchMs(e) / 60000 * 2.2));   // ค่าเร่งถ้าเร่งตั้งแต่ต้น
+  return Math.max(4, Math.round(full * HATCH_DUST_CUT));
+}
+function hatchMats(e, c){
+  const sp = SP[c.sid] || {};
+  const got = {};
+  const add = (k, n) => { if(n){ got[k] = (got[k] || 0) + n; addMat(k, n); } };
+  const d = hatchDust(e);
+  S.dust = (S.dust || 0) + d;
+  got.dust = d;
+  add("pollen", 1 + (e.rar >= 3 ? 1 : 0));                     // ทุกฟองได้เกสร
+  if(e.rar >= 3) add("core", 1);                               // ไข่หายากมากขึ้นไปได้แก่นบอส
+  if(sp.legend || sp.god || e.collab) add("shard", 2);         // ฟักได้ตำนาน/collab
+  else if(e.lgEgg || e.boss) add("shard", 1);                  // ไข่ตำนาน/ไข่บอส
+  S.hatched = S.hatched || 0;
+  if(S.hatched % 25 === 0) add("star", 2);
+  return got;
+}
+const matLine = got => Object.keys(got).map(k =>
+  k === "dust" ? `💠 ${got[k]}` : `${MAT[k].emoji} ×${got[k]}`).join(" · ");
+
 function hatch(i){
   if(!eggReady(S.eggs[i])) return;
   let target = -1;
@@ -2952,10 +2993,14 @@ function hatch(i){
   const e = S.eggs.splice(i,1)[0];
   const c = makeBaby(e, target);
   const tw = rollTwin(e);
+  const mats = hatchMats(e, c);
+  if(tw) Object.keys(hatchMats(e, tw)).length;                 // แฝดก็ได้วัสดุอีกชุด
   const lg = isLegend(c.sid), lg2 = tw && isLegend(tw.sid);
   logf((lg ? `ไข่บอสแตกออกมาเป็นตัวตำนาน — ${SP[c.sid].name}!`
            : `ไข่แตกแล้ว — ลูก${SP[c.sid].name}วิ่งเข้าไปในทุ่งที่ ${target+1}`)
-       + (c.tal ? ` · พรสวรรค์ ${TAL[c.tal].emoji} ${TAL[c.tal].name}` : ""), "good");
+       + (c.tal ? ` · พรสวรรค์ ${TAL[c.tal].emoji} ${TAL[c.tal].name}` : "")
+       + (Object.keys(mats).length ? ` · ได้ ${matLine(mats)}` : "")
+       + (c.lock ? " · 🔒 ล็อกกุญแจให้อัตโนมัติ" : ""), "good");
   if(tw) logf(`👯 ไข่ใบนี้เป็นแฝด — ได้ลูก${SP[tw.sid].name}มาอีกตัว` +
               (tw.tal ? ` · พรสวรรค์ ${TAL[tw.tal].emoji} ${TAL[tw.tal].name}` : ""), "good");
   S.curPen = target; S.selId = c.id;
@@ -3457,7 +3502,7 @@ function brSlot(c, side, active){
     <b>${sp.name}${c.shiny ? " ✨" : ""} ${sexTag(c)}</b>
     <small>${starStr(c.stars)} · ${sp.el}${c.el2 ? "/" + c.el2 : ""}</small>
     <small>${talOf(c) ? talOf(c).emoji + " " + talOf(c).name : "ไม่มีพรสวรรค์"}</small>
-    <small>🧬 ${ivSum(c)}/${IV_MAX*6} · 💪 ${evSum(c)}/${EV_TOTAL}</small>
+    <small>🧬 ${ivSum(c)}/${IV_MAX*6} · 💪 ${evSum(c)}/${EV_TOTAL}${c.lock ? " · 🔒" : ""}</small>
     ${heldOf(c) ? `<small>${heldOf(c).emoji} ${heldOf(c).name}</small>` : ""}
     ${rest ? `<small class="rs">พักอีก ${hhmm(rest)}</small>` : ""}</button>`;
 }
@@ -3655,12 +3700,15 @@ function renderBreed(){
       return `<button class="tm" aria-pressed="${on}" data-br="${c.id}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}">
         <b>${sp.name}${c.shiny ? " ✨" : ""} ${sexTag(c)}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)}${talOf(c) ? " " + talOf(c).emoji : ""}
+        <small>${starStr(c.stars).slice(0, c.stars)}${talOf(c) ? " " + talOf(c).emoji : ""}${
+          c.lock ? " 🔒" : ""}${SP[c.sid].legend ? " ✦" : ""}${c.myth ? " ✧" : ""}
           </small>
         <small>🧬 ${ivSum(c)} · 💪 ${evSum(c)}</small></button>`;
     }).join('') : `<p class="empty" style="grid-column:1/-1">ไม่มีตัวไหนตรงเงื่อนไขนี้</p>`}</div>
 
-    <p class="note">ไม่เข้าใจตาราง 🧬 / 💪 ? อ่าน "💞 ผสมพันธุ์ให้ได้ลูกดี" ในแท็บคู่มือได้เลย
+    <p class="note">🔒 ตัวที่ล็อกไว้ (ตำนานขึ้นไปล็อกให้อัตโนมัติ) ยังเลือกมาผสมได้ปกติ
+      กุญแจกันแค่การขายกับปล่อยเท่านั้น
+      <br>ไม่เข้าใจตาราง 🧬 / 💪 ? อ่าน "💞 ผสมพันธุ์ให้ได้ลูกดี" ในแท็บคู่มือได้เลย
       · ผสมได้ติดกันไม่ต้องพัก · ขีดจำกัดจริงคือรัง ${S.eggs.length}/${NEST_MAX} ฟอง
       · ไข่สายเลือดฟัก 3 ชม. · ✦ ไข่ตำนานฟัก ${LG_EGG_HRS} ชม.
       · 💞 ไข่ดกลุ้นได้สองฟองในครั้งเดียว
@@ -3987,7 +4035,8 @@ function rollBattle(c){
   };
   const tot = Object.values(w).reduce((a,b) => a+b, 0);
   const budget = (200 + c.stars*36)
-                 * (c && c.myth ? MYTH_POWER : sp.legend ? LEGEND_POWER : sp.prize ? PRIZE_POWER : 1)
+                 * (c && c.myth ? MYTH_POWER : sp.legend ? LEGEND_POWER
+                    : sp.prize ? PRIZE_POWER : sp.collab ? COLLAB_POWER : 1)
                  * talG(c, "power", 1)           // ดาวมากได้แต้มรวมเยอะกว่า · พรสวรรค์นักสู้ดันอีก
                  * (1 + 0.09 * ((c && c.awk) || 0))    // ปลุกพลังทุกระดับดันอีก 9%
                  * (1 + nurOf(c).pw)
@@ -4045,7 +4094,7 @@ function giveXp(c, amt){
 
 /* ---- ตู้กาชา ---- */
 const NEST_MAX = 40;
-const LEGEND_POWER = 1.45;    // ตัวตำนานได้แต้มพลังรวมมากกว่าตุ้ยนุ้ยปกติ 45%
+const LEGEND_POWER = 1.20;    // เดิม 1.45 · ปรับลงให้การปั้นตัวเองมีความหมาย่าตุ้ยนุ้ยปกติ 45%
 const LEGEND_STAR  = 1.2;     // เกิดมาพร้อมแนวโน้มดาวสูง
 /* ---- การอุ่นไข่: ต้องใส่ช่องอุ่นแล้วรอเวลา ระหว่างรอเปลือกจะบอกใบ้ทีละขั้น ---- */
 /* ---- โรงฟักไข่: อัปเกรดด้วยเหรียญ เร่งเวลา เพิ่มช่อง ลุ้นไข่แฝด ---- */
@@ -4104,13 +4153,20 @@ function renderNursery(){
 const slotsOf = () => Math.min(SLOT_MAX, SLOT_BASE + (S.slotBonus || 0));
 const hatchMs = e => {
   const it = SHOP.find(s => s.tier === e.tier);
-  const hrs = e.collab ? COLLAB_EGG_HRS : e.lgEgg ? LG_EGG_HRS : e.bred ? 3 : it ? it.hrs : (e.rar === 3 ? 2 : 0.35);
+  /* ไข่ธรรมดา = ไข่ซื้อจากร้านทุกใบ + ไข่จากการผสมพันธุ์ → 5 นาที
+     ไข่พิเศษ (ไข่บอส · ไข่ดันเจี้ยน · ตำนาน · ล้ำค่า · collab) ยังใช้เวลาปกติ */
+  const hrs = e.collab ? COLLAB_EGG_HRS
+    : e.lgEgg ? LG_EGG_HRS
+    : e.boss ? 2
+    : (e.bred || it) ? NORMAL_EGG_HRS
+    : (e.rar === 3 ? 2 : NORMAL_EGG_HRS);
   const base = hrs * 3600000;
   const cut = base * incSpeed() * festFx("hatch", 1) * decGlobal("hatch", "mul")
     * (1 - warmCut()) * (1 - patrolCut());
   return Math.max(Math.min(base, HATCH_FLOOR), cut);   // ลดได้ถึงหนึ่งชั่วโมง ไข่ที่สั้นกว่านั้นอยู่แล้วไม่ถูกดึงยาว
 };
 /* ไข่ที่ไม่ได้อยู่ในช่องอุ่นก็คืบหน้าเองช้าๆ 25% ไม่ต้องมานั่งสลับ */
+const NORMAL_EGG_HRS = 5/60;       // ไข่ร้านค้ากับไข่สายเลือดฟักแค่ห้านาที
 const PASSIVE_WARM = 0.25;
 const eggMs = e => e.inc ? (Date.now() - e.inc)
   : (Date.now() - (e.off || (e.off = Date.now()))) * PASSIVE_WARM;
@@ -4208,6 +4264,8 @@ function hatchSilent(i, target){
   const e = S.eggs.splice(i,1)[0];
   const c = makeBaby(e, target);
   const tw = rollTwin(e);
+  hatchMats(e, c);
+  if(tw) hatchMats(e, tw);
   if(tw) logf(`👯 ไข่แฝด — ได้ลูก${SP[tw.sid].name}มาอีกตัว`, "good");
   if(isLegend(c.sid)) return SP[c.sid];
   return tw && isLegend(tw.sid) ? SP[tw.sid] : null;
@@ -4613,13 +4671,13 @@ function toggleEggDetail(i){
 /* ==== วัสดุ ==== */
 const MATS = [
   { id:"core",   emoji:"💎", name:"แก่นบอส",
-    from:"ชนะบอสได้ครั้งละ 1 · ยากได้ 2 · นรกได้ 3" },
+    from:"ชนะบอสได้ครั้งละ 1 · ยากได้ 2 · นรกได้ 3 · ฟักไข่หายากมากขึ้นไปได้ 1" },
   { id:"star",   emoji:"🌟", name:"ผงดาว",
     from:"ปล่อยตัว 5 ดาวได้ 2 · 6 ดาวขึ้นไปได้ 5" },
   { id:"pollen", emoji:"🍃", name:"เกสรพนา",
-    from:"ทีมลาดตระเวนเก็บกลับมาทุกครั้ง" },
+    from:"ทีมลาดตระเวนเก็บกลับมาทุกครั้ง · ฟักไข่ได้ทุกฟอง 1-2" },
   { id:"shard",  emoji:"🔮", name:"ผลึกตำนาน",
-    from:"ปล่อยตัวตำนานได้ 3 · หลอมตำนานตอนปลุกพลังได้ 2" }
+    from:"ไข่ตำนาน/ไข่บอสได้ 1 · ฟักได้ตัวตำนานหรือ collab ได้ 2 · ปล่อยตัวตำนานได้ 3 · หลอมตอนปลุกพลังได้ 2" }
 ];
 const MAT = Object.fromEntries(MATS.map(m => [m.id, m]));
 const matOf = id => (S.mats && S.mats[id]) || 0;
@@ -4632,14 +4690,15 @@ function addMat(id, n){
 /* ==== สังเคราะห์ตุ้ยนุ้ยอมตะ ==== */
 const MYTH_COST = { core:12, star:20, pollen:30, shard:6 };
 const MYTH_DUST = 5000;
-const MYTH_POWER = 2.0;          // แรงกว่าตำนานธรรมดา (ตำนาน 1.45)
+const MYTH_POWER = 1.42;         // เดิม 2.0 · ยังแรงสุดแต่ไม่ทิ้งห่างจนปั้นเองไม่มีความหมาย
 const MYTH_STARS = 6;            // เริ่มที่ 6 ดาว ปลุกพลังต่อได้ถึง 7
 const isMyth = c => !!(c && c.myth);
 
 function mythPool(){
-  const gone = awaySet();
+  /* ตัวตำนานที่ล็อกอยู่ก็เลือกได้ (ตอนกดสังเคราะห์จะเตือนอีกที)
+     แต่ตัวที่อยู่ในตู้ฝากต้องดึงออกมาก่อน */
   return S.creatures.filter(c => c.stage === "adult" && SP[c.sid].legend
-    && !gone.has(c.id) && !c.lock && !c.myth);
+    && !c.box && !c.myth);
 }
 function mythLack(){
   const out = [];
@@ -4659,9 +4718,15 @@ function synthMyth(){
   let room = -1;
   for(let p = 0; p < S.penCount; p++) if(penCount(p) < penCap()){ room = p; break; }
   if(room < 0){ alert("ทุ่งเต็มทุกผืนแล้ว"); return; }
+  const locked = [a, b].filter(x => x.lock);
+  if(awaySet().has(a.id) || awaySet().has(b.id)){
+    alert("ตัวที่ออกลาดตระเวนอยู่ใช้สังเคราะห์ไม่ได้ รอให้กลับก่อน"); return;
+  }
   if(!confirm(`สังเคราะห์ ${SP[a.sid].name} + ${SP[b.sid].name} เป็นตุ้ยนุ้ยอมตะ?\n\n` +
     `ตำนานทั้งสองตัวจะหายไปถาวร พร้อมวัสดุและผงตุ้ยนุ้ยทั้งหมดที่ใช้\n` +
-    `สิ่งที่ได้คือตัวเดียว 6 ดาว พลังรวมสูงกว่าตำนานราวเท่าตัว และมีสองธาตุ`)) return;
+    `สิ่งที่ได้คือตัวเดียว 6 ดาว พลังรวมสูงกว่าตำนานราวเท่าตัว และมีสองธาตุ` +
+    (locked.length ? `\n\n⚠️ มีตัวที่ล็อกกุญแจอยู่ ${locked.length} ตัว (${
+      locked.map(x => SP[x.sid].name).join(" · ")}) — จะถูกใช้ไปด้วย` : ""))) return;
 
   MATS.forEach(m => { S.mats[m.id] = matOf(m.id) - MYTH_COST[m.id]; });
   S.dust -= MYTH_DUST;
@@ -4685,6 +4750,7 @@ function synthMyth(){
   S.creatures.push(c);
   S.seen[c.sid] = true;
   S.myths = (S.myths || 0) + 1;
+  autoLock(c);
   S.mythSeen = S.mythSeen || {};
   S.mythSeen[c.sid] = true;
   S.myA = null; S.myB = null;
@@ -4712,12 +4778,16 @@ function renderMyth(){
     ? `<button class="brslot ${(S.myPick || 'A') === side ? 'on' : ''}" data-myslot="${side}">
          <span class="sl">${side === 'A' ? 'ตำนานที่หนึ่ง' : 'ตำนานที่สอง'}</span>
          <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}">
-         <b>${SP[c.sid].name}</b><small>${starStr(c.stars)} · ธาตุ${SP[c.sid].el}</small></button>`
+         <b>${SP[c.sid].name}</b><small>${starStr(c.stars)} · ธาตุ${SP[c.sid].el}${
+           c.lock ? " · 🔒" : ""}${awaySet().has(c.id) ? " · 🧭" : ""}</small></button>`
     : `<button class="brslot ${(S.myPick || 'A') === side ? 'on' : ''}" data-myslot="${side}">
          <span class="sl">${side === 'A' ? 'ตำนานที่หนึ่ง' : 'ตำนานที่สอง'}</span>
          <span class="ph">แตะเลือก</span></button>`;
 
   box.innerHTML = `
+    <p class="note" style="margin:0 0 8px">🔒 ตัวตำนานที่ล็อกกุญแจอยู่ขึ้นให้เลือกได้ปกติ
+      (ตอนกดสังเคราะห์จะเตือนอีกครั้งว่ามีตัวล็อกอยู่) · ตัวที่อยู่ใน 📦 ตู้ฝากต้องดึงออกมาก่อน
+      · ตัวที่ออกลาดตระเวน 🧭 ใช้ไม่ได้</p>
     <div class="matbar">${MATS.map(m => {
       const have = matOf(m.id), need = MYTH_COST[m.id];
       return `<div class="mat ${have >= need ? 'ok' : ''}" title="${m.from}">
@@ -5472,6 +5542,7 @@ const GOD_SP = { id:"godprime", name:"เทพเจ้าปฐมกาล", 
 })();
 const COLLAB_LIST = SPECIES.filter(s => s.collab);
 const isCollab = sid => !!(SP[sid] && SP[sid].collab);
+const COLLAB_POWER = 1.12;                 // ชุด collab แรงกว่าตัวปกติเล็กน้อย
 const COLLAB_EGG_HRS = 24;                 // ไข่ collab อุ่นนานที่สุดในเกม
 const COLLAB_COST = { coins:200000, dust:15000,
   mats:{ core:30, star:40, pollen:80, shard:15 } };
@@ -5990,6 +6061,54 @@ function renderGuide(){
         (กันเผลอทำตัวที่ไม่อยู่บ้านหาย)</b></div>
       <div class="dl"><span>ตัวในตู้ฝาก 📦</span><b>อันนี้ลงทีมไม่ได้ ต้องดึงออกมาก่อน</b></div>
     </div>
+    <div class="gbox"><h4>🔒 ล็อกตำนานอัตโนมัติ · 🔮 วัสดุจากการฟักไข่</h4>
+      <div class="dl"><span>ล็อกให้เอง</span><b>ตัว ${AUTO_LOCK_WHY} จะติดกุญแจ 🔒 ทันทีที่ได้มา
+        ขายหรือปล่อยไม่ได้จนกว่าจะปลดล็อกเอง</b></div>
+      <div class="dl"><span>ปลดล็อกที่ไหน</span><b>ลิสต์จัดการ (ปุ่ม 🔒 ท้ายแถว) · หน้ากล่องเก็บ · หรือกล่องดูละเอียด</b></div>
+      <div class="dl"><span>กุญแจกันแค่ไหน</span><b>กันเฉพาะ <b>ขาย · ปล่อยกลับป่า · เก็บเข้าตู้ฝาก · ส่งให้เพื่อน</b>
+        และไม่ถูกกวาดโดยขายอัตโนมัติ</b></div>
+      <div class="dl"><span>✧ สังเคราะห์อมตะ</span><b>ตัวตำนานที่ล็อกอยู่ขึ้นให้เลือกได้
+        แต่จะมีคำเตือนตอนกดยืนยันว่ามีตัวล็อกอยู่กี่ตัว เพราะสังเคราะห์แล้วตำนานทั้งสองตัวหายถาวร</b></div>
+      <div class="dl"><span>ยังทำได้ปกติ</span><b>ผสมพันธุ์ · ลงทีมบอส ดันเจี้ยน หอคอย ถ้ำ ประตูโลก
+        · ออกลาดตระเวน · ป้อนอาหารฝึก · เปลี่ยนท่า · สวมของถือ · ปลุกพลัง
+        — ตัวตำนานที่ล็อกอยู่จะขึ้นในรายการเลือกพ่อแม่พันธุ์ครบทุกตัว มี 🔒 กำกับไว้ให้รู้</b></div>
+      <div class="dl"><span>💠 ผงตุ้ยนุ้ย</span><b>ฟักครบเวลาทุกฟองได้ผงตุ้ยนุ้ย คิดจากเวลาอุ่นของไข่ฟองนั้น
+        ประมาณ ${Math.round(HATCH_DUST_CUT*100)}% ของค่าเร่ง — <b>ตั้งใจให้น้อยกว่าค่าเร่งเกินสามเท่า</b>
+        ฟักเองคุ้มกว่าเร่งชัดเจน แต่ปั่นผงจากการฟังรัวๆ ไม่ได้</b></div>
+      <div class="dl"><span>ได้เท่าไหร่</span><b>ไข่ร้านค้ากับไข่สายเลือด 5 นาที ≈ 💠 4
+        · ไข่บอส/ดันเจี้ยน 2 ชม. ≈ 💠 74 · ไข่ตำนาน 12 ชม. ≈ 💠 440
+        · ไข่ collab 24 ชม. ≈ 💠 890 (ลดลงตามระดับเร่งความร้อนที่อัปไว้)</b></div>
+      <div class="dl"><span>🍃 เกสรพนา</span><b>ทุกฟองได้ 1 · ไข่หายากมากขึ้นไปได้ 2</b></div>
+      <div class="dl"><span>💎 แก่นบอส</span><b>ฟักไข่หายากมากขึ้นไปได้ 1 ต่อฟอง</b></div>
+      <div class="dl"><span>🔮 ผลึกตำนาน</span><b>ไข่ตำนานกับไข่บอสได้ 1 · ฟักออกมาเป็นตัวตำนานหรือ collab ได้ 2</b></div>
+      <div class="dl"><span>โบนัสสะสม</span><b>ฟักครบทุก 25 ฟองแถม 🌟 ×2</b></div>
+      <div class="dl"><span>ไข่แฝด</span><b>ได้ของอีกชุดเต็ม ๆ ต่อฟองแฝด</b></div>
+    </div>
+    <div class="gbox"><h4>🗝 กุญแจลงด่าน</h4>
+      <div class="dl"><span>ทำไมต้องมี</span><b>กันการสแปมด่านรัวๆ ทำให้แต่ละรอบมีต้นทุนและต้องคิดก่อนลง</b></div>
+      ${KEYS.map(k => `<div class="dl"><span>${k.emoji} ${k.name}</span><b>🪙 ${k.coins}${
+        k.dust ? ` · 💠 ${k.dust}` : ""} ต่อดอก · เก็บได้มากสุด ${k.max} ดอก<br>${k.note}</b></div>`).join('')}
+      <div class="dl"><span>ซื้อที่ไหน</span><b>แผงซื้อขึ้นอยู่บนสุดของหน้าด่านนั้นๆ เลย ซื้อ 1 / 5 / 10 ดอกได้</b></div>
+      <div class="dl"><span>ได้ฟรีด้วย</span><b>ชนะบอสรายวันรอบแรกของวันได้ 🗝 ×2 · 🔑 ×1 · 🔓 ×1 ฟรีทุกวัน</b></div>
+      <div class="dl"><span>⚡ ตีรัวดันเจี้ยน</span><b>กินกุญแจตามจำนวนรอบจริง กุญแจหมดก็หยุดเอง
+        แล้วสรุปให้ว่าทำได้กี่รอบ</b></div>
+      <div class="dl"><span>หอคอยกับถ้ำ</span><b>ใช้ดอกเดียวต่อ "หนึ่งรอบ" ไม่ใช่ต่อชั้น
+        ไต่หรือลงลึกได้ไม่จำกัดชั้นในรอบนั้น</b></div>
+      <div class="dl"><span>บอสรายวัน</span><b>ไม่ต้องใช้กุญแจ ตีได้ไม่จำกัดเหมือนเดิม (มีรางวัลลดหลั่นคุมอยู่แล้ว)</b></div>
+    </div>
+    <div class="gbox"><h4>⚖️ บาลานซ์พลังตัวหายาก</h4>
+      <div class="dl"><span>ปรับอะไร</span><b>ตัวตำนาน ล้ำค่า อมตะ และชุด collab เคยแรงทิ้งห่างจนปั้นตัวเองไม่มีความหมาย
+        ปรับตัวคูณพลังลงทั้งหมด</b></div>
+      <div class="dl"><span>✦ ตำนาน</span><b>×${LEGEND_POWER} (เดิม ×1.45)</b></div>
+      <div class="dl"><span>◈ ล้ำค่า</span><b>×${PRIZE_POWER} (เดิม ×1.7)</b></div>
+      <div class="dl"><span>✧ อมตะ</span><b>×${MYTH_POWER} (เดิม ×2.0)</b></div>
+      <div class="dl"><span>✧ collab</span><b>×${COLLAB_POWER} (เดิมไม่มีตัวคูณแต่ค่าฐานสูง)</b></div>
+      <div class="dl"><span>สิ่งที่ยังดันพลังได้</span><b>⭐ ดาว · 📈 เลเวลถึง ${LV_MAX} (×${(1+(LV_MAX-1)*LV_STEP).toFixed(2)})
+        · 🧬 ค่าแฝง · 💪 ค่าฝึก · นิสัย · พรสวรรค์ · ✦ ปลุกพลัง · ผลการเลี้ยง · 🕯 ศาลเจ้า · 🏆 รางวัลสะสม</b></div>
+      <div class="dl"><span>ผลลัพธ์</span><b>ตัวธรรมดาที่ปั้นครบ (6 ดาว เลเวลเต็ม ค่าแฝงเต็ม ค่าฝึกเต็ม)
+        แรงกว่าตัวตำนานที่เพิ่งฟักออกมาแล้ว</b></div>
+      <div class="dl"><span>ตัวที่มีอยู่แล้ว</span><b>ระบบคิดค่าพลังใหม่ให้อัตโนมัติตอนเปิดเกม ไม่ต้องทำอะไร</b></div>
+    </div>
     <div class="gbox"><h4>🪺 โรงฟักไข่</h4>
       <div class="dl"><span>ช่องอุ่นไข่</span><b>ขยายได้ถึง ${SLOT_MAX} ฟอง = อุ่นพร้อมกันได้ทั้งรัง
         (รังจุ ${NEST_MAX} ฟอง) · ซื้อได้เรื่อยๆ ราคาขึ้นทีละ 28%</b></div>
@@ -5998,7 +6117,7 @@ function renderGuide(){
       <div class="dl"><span>เวลาต่ำสุด</span><b>เร่งเท่าไหร่ก็ไม่ต่ำกว่า 1 ชั่วโมง
         · ไข่ที่เดิมสั้นกว่า 1 ชม.อยู่แล้ว (ไข่ร้านค้า) ไม่ถูกดึงให้ยาวขึ้น</b></div>
       <div class="dl"><span>เต็มขั้นแล้วได้เท่าไหร่</span><b>ไข่ collab 24 ชม. → 1 ชม. · ไข่ตำนาน 12 ชม. → 1 ชม.
-        · ไข่สายเลือด 3 ชม. → 1 ชม.</b></div>
+        · <b>ไข่ร้านค้ากับไข่สายเลือดเร็วอยู่แล้ว 5 นาที ไม่ถูกดึงให้ยาวขึ้น</b></div>
       <div class="dl"><span>ลดเพิ่มได้อีก</span><b>🔥 กายอบอุ่นในฟาร์ม −50% · 🧭 ลาดตระเวน −20% · ของแต่งทุ่งบางชิ้น
         (แต่ก็ยังไม่ต่ำกว่า 1 ชม.)</b></div>
     </div>
@@ -6566,6 +6685,12 @@ function dgAvail(){
     .sort((a, b) => ensureBattle(b).total - ensureBattle(a).total);
 }
 function dgFight(){
+  if(!inBatch()){
+    if(keyOf("dg") <= 0){
+      alert(`ต้องมี ${KEYMAP.dg.emoji} ${KEYMAP.dg.name} ก่อนถึงจะบุกได้\n\nซื้อได้บนสุดของหน้าดันเจี้ยนเลย`); return;
+    }
+    if(!keyUse("dg")) return;
+  }
   const x = DG[S.dgCur || DUNGEONS[0].id] || DUNGEONS[0];
   const team = (S.dgTeam || []).map(id => S.creatures.find(c => c.id === id))
     .filter(c => c && !dgTired(c));
@@ -6630,6 +6755,7 @@ function renderDungeon(){
   const tired = S.creatures.filter(c => c.stage === "adult" && dgTired(c));
 
   box.innerHTML = `
+    ${keyBar("dg")}
     ${DUNGEONS.length > 1 ? `<div class="dexbar">${DUNGEONS.map(y =>
       `<button class="dtab" aria-pressed="${y.id === x.id}" data-dgsel="${y.id}">${y.emoji} ${y.name}</button>`).join('')}</div>` : ''}
     <div class="twfoe guard">
@@ -6682,6 +6808,7 @@ function renderDungeon(){
     else if(S.dgTeam.length < DG_TEAM) S.dgTeam.push(id);
     sfx("tap"); renderDungeon();
   });
+  keyWire(box);
   const g = $('#btnDgGo'); if(g) g.onclick = dgFight;
   const g5 = box.querySelector('#btnDg5'), g10 = box.querySelector('#btnDg10');
   if(g5) g5.onclick = () => batchRun("dg", 5);
@@ -6791,6 +6918,10 @@ const abAvail = () => S.creatures.filter(c => c.stage === "adult" && !c.box)
 function abStart(){
   const team = (S.abTeam || []).map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
   if(team.length < 1){ alert("เลือกตุ้ยนุ้ยลงถ้ำก่อน"); return; }
+  if(keyOf("ab") <= 0){
+    alert(`ต้องมี ${KEYMAP.ab.emoji} ${KEYMAP.ab.name} ก่อนถึงจะลงถ้ำได้\n\nซื้อได้บนสุดของหน้าถ้ำเลย`); return;
+  }
+  if(!keyUse("ab")) return;
   const hp = {};
   team.forEach(c => hp[c.id] = 1);
   S.ab = { depth:1, team:team.map(c => c.id), hp, boons:[], offer:null,
@@ -6866,6 +6997,7 @@ function renderAbyss(){
     const pool = abAvail();
     const sel = new Set(S.abTeam || []);
     box.innerHTML = `
+      ${keyBar("ab")}
       <div class="twhead"><b>🌀 ชั้นลึกสุดที่เคยไปถึง ${best || "—"}</b>
         <span>เลือกได้ ${AB_TEAM} ตัว · เลือดไม่ฟื้นระหว่างชั้น</span></div>
       <p class="note" style="margin:0 0 10px">ของที่เก็บได้จะกองไว้ก่อน ยิ่งลึกยิ่งได้เยอะขึ้นทบต้น 9% ต่อชั้น
@@ -6882,7 +7014,8 @@ function renderAbyss(){
       }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวโตเต็มวัย</p>`}</div>
       <button class="btn" id="btnAbGo" style="width:100%;margin-top:10px"
         ${(S.abTeam || []).length ? '' : 'disabled'}>🌀 ลงถ้ำ (${(S.abTeam || []).length}/${AB_TEAM})</button>`;
-    box.querySelectorAll('[data-ab]').forEach(b => b.onclick = () => {
+    keyWire(box);
+  box.querySelectorAll('[data-ab]').forEach(b => b.onclick = () => {
       const id = +b.dataset.ab;
       S.abTeam = S.abTeam || [];
       if(S.abTeam.includes(id)) S.abTeam = S.abTeam.filter(x => x !== id);
@@ -6944,6 +7077,61 @@ function renderAbyss(){
   if(k) k.onclick = abBank;
 }
 
+/* ================= 🗝 กุญแจลงด่าน =================
+   กันการสแปมด่านรัวๆ · ซื้อได้ในหน้าด่านนั้นเลย */
+const KEYS = [
+  { id:"dg", emoji:"🗝", name:"กุญแจดันเจี้ยน", coins:2200, dust:0,   max:40,
+    note:"ใช้หนึ่งดอกต่อการบุกหนึ่งครั้ง" },
+  { id:"tw", emoji:"🔑", name:"กุญแจหอคอย",     coins:3600, dust:60,  max:20,
+    note:"ใช้หนึ่งดอกต่อการเริ่มไต่หนึ่งรอบ (ไต่ได้หลายชั้นในรอบเดียว)" },
+  { id:"ab", emoji:"🔓", name:"กุญแจถ้ำ",        coins:5200, dust:120, max:20,
+    note:"ใช้หนึ่งดอกต่อการลงถ้ำหนึ่งรอบ" }
+];
+const KEYMAP = Object.fromEntries(KEYS.map(k => [k.id, k]));
+const keyOf  = id => (S.keys && S.keys[id]) || 0;
+function keyAdd(id, n){
+  if(!n) return;
+  S.keys = S.keys || {};
+  S.keys[id] = Math.min(KEYMAP[id].max, keyOf(id) + n);
+}
+function keyUse(id){
+  if(keyOf(id) <= 0) return false;
+  S.keys[id] = keyOf(id) - 1;
+  return true;
+}
+function keyBuy(id, n){
+  const k = KEYMAP[id];
+  if(!k) return;
+  n = Math.min(n || 1, k.max - keyOf(id));
+  if(n <= 0){ alert(`เก็บ${k.name}ได้มากสุด ${k.max} ดอก`); return; }
+  const c = k.coins * n, d = k.dust * n;
+  if(S.coins < c){ alert(`เหรียญไม่พอ ต้อง 🪙 ${c}`); return; }
+  if((S.dust || 0) < d){ alert(`ผงตุ้ยนุ้ยไม่พอ ต้อง 💠 ${d}`); return; }
+  S.coins -= c; S.dust -= d;
+  keyAdd(id, n);
+  logf(`ซื้อ${k.emoji} ${k.name} ×${n} — มีอยู่ ${keyOf(id)} ดอก`, "good");
+  sfx("buy"); save(); render();
+}
+/* แผงซื้อกุญแจ · เอาไปแปะหัวหน้าด่านได้เลย */
+function keyBar(id){
+  const k = KEYMAP[id], have = keyOf(id);
+  const price = n => `🪙 ${k.coins*n}${k.dust ? ` · 💠 ${k.dust*n}` : ""}`;
+  return `<div class="holdbox" style="margin-bottom:10px">
+    <h4>${k.emoji} ${k.name} — มีอยู่ ${have}/${k.max} ดอก</h4>
+    <span class="sl2">${k.note} · ${have ? "พร้อมลงได้เลย" : "ต้องมีกุญแจก่อนถึงจะลงได้"}</span>
+    <div class="sellrow" style="flex-wrap:wrap;margin-top:6px">
+      <button class="dtab" data-keybuy="${id}" data-n="1">ซื้อ 1 ดอก · ${price(1)}</button>
+      <button class="dtab" data-keybuy="${id}" data-n="5">ซื้อ 5 ดอก · ${price(5)}</button>
+      <button class="dtab" data-keybuy="${id}" data-n="10">ซื้อ 10 ดอก · ${price(10)}</button>
+    </div>
+  </div>`;
+}
+function keyWire(box){
+  if(!box) return;
+  box.querySelectorAll('[data-keybuy]').forEach(b =>
+    b.onclick = () => keyBuy(b.dataset.keybuy, +b.dataset.n));
+}
+
 /* ---- หอคอยไต่ชั้น: ใช้ตัวเดิมซ้ำได้ทุกชั้นกัน ---- */
 const TW_TEAM   = 5;
 const TW_CHECK  = 5;          // จุดพักทุกห้าชั้น เริ่มรอบใหม่จากตรงนี้ได้
@@ -6980,6 +7168,10 @@ function towerAvail(){
     .sort((a, b) => ensureBattle(b).total - ensureBattle(a).total);
 }
 function towerStart(from){
+  if(keyOf("tw") <= 0){
+    alert(`ต้องมี ${KEYMAP.tw.emoji} ${KEYMAP.tw.name} ก่อนถึงจะไต่ได้\n\nซื้อได้บนสุดของหน้าหอคอยเลย`); return;
+  }
+  if(!keyUse("tw")) return;
   S.twRun = { floor: Math.max(1, from || 1), used: [], cleared: 0 };
   S.twTeam = [];
   logf(`เริ่มไต่หอคอยจากชั้นที่ ${S.twRun.floor}`, "");
@@ -7052,12 +7244,14 @@ function renderTower(){
     for(let f = 1; f <= best + 1; f += TW_CHECK) stops.push(f);
     if(!stops.length) stops.push(1);
     box.innerHTML = `
+      ${keyBar("tw")}
       <div class="twhead"><b>🗼 ชั้นสูงสุดที่เคยไปถึง ${best || "—"}</b>
         <span>ใช้ตัวเดิมซ้ำได้ทุกชั้น ไม่มีคูลดาวน์ · เลือกได้ทีละ ${TW_TEAM} ตัว</span></div>
       <p class="note" style="margin:0 0 10px">ทุก ${TW_CHECK} ชั้นเป็นจุดพัก รอบใหม่เริ่มจากจุดพักที่ปลดล็อกไว้ได้เลย
         · ทุกชั้นที่ 10 เจอผู้พิทักษ์ที่แกร่งกว่าปกติมาก</p>
       <div class="twstops">${stops.map(f =>
         `<button class="dtab" data-twstart="${f}">เริ่มจากชั้น ${f}</button>`).join('')}</div>`;
+    keyWire(box);
     box.querySelectorAll('[data-twstart]').forEach(b =>
       b.onclick = () => towerStart(+b.dataset.twstart));
     return;
@@ -8115,16 +8309,18 @@ function batchRun(kind, n){
   const keepManual = S.manualBattle;
   S.manualBattle = false;
   BATCH = { left:n };
+  const dgKeep = (S.dgTeam || []).slice();        // ดันเจี้ยนล้างทีมทุกรอบ จำไว้ใช้ซ้ำ
   let done = 0;
   for(let i = 0; i < n; i++){
     if(kind === "boss"){
       if(!S.team.length) break;
       fight(S.diff || 0);
     } else {
-      if(!(S.dgTeam || []).length) break;
-      const keep = (S.dgTeam || []).slice();
+      if(!dgKeep.length) break;
+      if(!keyUse("dg")) break;                     // กุญแจหมดก็หยุดตีรัวเอง
+      S.dgTeam = dgKeep.slice();
       dgFight();
-      S.dgTeam = keep;                              // ดันเจี้ยนล้างทีมทุกครั้ง เอากลับมาให้
+      S.dgTeam = dgKeep.slice();                    // เอาทีมกลับมาให้ทุกรอบ
     }
     done++;
     if(S.eggs.length >= NEST_MAX && kind === "boss" && i > 2) { /* รังเต็มก็ตีต่อได้ แค่ไข่ตกหล่น */ }
@@ -8331,6 +8527,7 @@ function fight(diff){
     S.bossWins = (S.bossWins || 0) + (win ? 1 : 0);
     if(win){
       const nCore = diff >= 3 ? 3 : diff >= 2 ? 2 : 1;
+      if(first){ keyAdd("dg", 2); keyAdd("tw", 1); keyAdd("ab", 1); }   // ชนะรอบแรกของวันได้กุญแจแจกฟรี
       if(first) addMat("core", nCore);
       else if(Math.random() < rm) addMat("core", Math.max(1, Math.round(nCore * rm)));
       if(first) qAdd("boss");

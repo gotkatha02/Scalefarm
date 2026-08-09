@@ -767,6 +767,14 @@ h2 + h2{margin-top:20px}
   padding:7px 10px;margin:8px 0 0;font-size:11.5px;color:#2F5A7A;line-height:1.55}
 .buildchip b{font-family:var(--display);font-size:13px;display:block;color:#24506E}
 .buildchip i{font-style:normal;color:var(--dim)}
+.elchip{display:inline-flex;align-items:center;gap:2px;font-style:normal;font-weight:700;
+  font-size:11px;line-height:1;padding:3px 7px;border-radius:999px;border:1.5px solid;
+  margin:0 3px 2px 0;white-space:nowrap}
+.elchip.sm{font-size:9.5px;padding:2px 5px;border-width:1px;margin:0 2px 1px 0}
+.eldot{display:inline-flex;align-items:center;justify-content:center;font-style:normal;
+  width:15px;height:15px;font-size:9px;border-radius:999px;border:1px solid;line-height:1}
+.wel{position:absolute;left:2px;top:2px;display:flex;gap:1px;pointer-events:none}
+.bxcell .bxel{position:absolute;top:1px;left:2px;display:flex;gap:1px}
 .boxbar{background:#F3F0FF;border:1.5px solid #DCD3F3;border-radius:14px;padding:10px 12px;margin:0 0 10px}
 .boxbar h4{font-family:var(--display);font-size:13.5px;margin:0 0 3px;color:#57459A}
 .boxbar .bxs{display:block;font-size:11px;color:var(--dim);margin-bottom:7px;line-height:1.5}
@@ -1405,6 +1413,44 @@ const NT = Object.fromEntries(NATURES.map(n=>[n.id,n]));
 /* ---- พรสวรรค์: สถานะหายากที่ส่งต่อทางสายเลือดได้ ตัวละหนึ่งอย่างเท่านั้น ---- */
 const ELEMENTS = ["ไฟ","ไฟฟ้า","ลม","พืช","แมลง","ดิน","หิน","น้ำ",
                   "น้ำแข็ง","เหล็ก","รัตติกาล","วิญญาณ","จิต","ประกาย","พิษ","มังกร"];
+/* ==== ป้ายธาตุ · สีกับอีโมจิประจำธาตุทั้ง 16 ==== */
+const EL_INFO = {
+  "ไฟ":       { e:"🔥", bg:"#FFE2D6", fg:"#A83A18", bd:"#F0B79E" },
+  "ไฟฟ้า":    { e:"⚡", bg:"#FFF4CC", fg:"#8A6A00", bd:"#EBD383" },
+  "ลม":       { e:"🌪", bg:"#E4F6EC", fg:"#2E6B57", bd:"#AEDCC6" },
+  "พืช":      { e:"🌿", bg:"#E3F6DA", fg:"#3C7028", bd:"#B4DEA0" },
+  "แมลง":     { e:"🐛", bg:"#EEF6D6", fg:"#5E7018", bd:"#CBDD9A" },
+  "ดิน":      { e:"⛰", bg:"#F3E7D2", fg:"#7A5A22", bd:"#DCC79C" },
+  "หิน":      { e:"🪨", bg:"#ECE7E0", fg:"#5E5348", bd:"#CFC5B8" },
+  "น้ำ":      { e:"💧", bg:"#DCEEFB", fg:"#1F5E8A", bd:"#A6CFEA" },
+  "น้ำแข็ง":  { e:"❄️", bg:"#E2F4FA", fg:"#25708A", bd:"#AEDCEA" },
+  "เหล็ก":    { e:"⚙️", bg:"#E8EBF0", fg:"#4A5566", bd:"#C2CAD6" },
+  "รัตติกาล": { e:"🌑", bg:"#E4E1EC", fg:"#463C5E", bd:"#BFB6D0" },
+  "วิญญาณ":   { e:"👻", bg:"#EDE6F7", fg:"#5A3E86", bd:"#CBB9E4" },
+  "จิต":      { e:"🌀", bg:"#F7E4F0", fg:"#8A3A72", bd:"#E5B8D6" },
+  "ประกาย":   { e:"✨", bg:"#FDECF3", fg:"#A83A63", bd:"#F2C0D3" },
+  "พิษ":      { e:"☠️", bg:"#EFE4F5", fg:"#6A2E82", bd:"#D3B6E0" },
+  "มังกร":    { e:"🐲", bg:"#E6E9FA", fg:"#3A4290", bd:"#B6BEEA" }
+};
+const elInfo = el => EL_INFO[el] || { e:"◆", bg:"#EEE", fg:"#555", bd:"#CCC" };
+const elEmo  = el => elInfo(el).e;
+/* ป้ายธาตุหนึ่งอัน · sm = ป้ายเล็กสำหรับการ์ดแคบ */
+function elChip(el, sm){
+  const i = elInfo(el);
+  return `<i class="elchip${sm ? " sm" : ""}" style="background:${i.bg};color:${i.fg};border-color:${i.bd}"
+    >${i.e} ${el}</i>`;
+}
+/* ป้ายธาตุของตุ้ยนุ้ยหนึ่งตัว (ตัวสองธาตุขึ้นสองป้าย) */
+const elChips = (c, sm) => [SP[c.sid] ? SP[c.sid].el : null, c.el2].filter(Boolean)
+  .map(el => elChip(el, sm)).join("");
+/* แบบจิ๋วสุด เอาไว้แปะมุมรูปในกล่องหรือทุ่ง */
+const elDot = c => {
+  const els = [SP[c.sid] ? SP[c.sid].el : null, c.el2].filter(Boolean);
+  return els.map(el => { const i = elInfo(el);
+    return `<i class="eldot" style="background:${i.bg};border-color:${i.bd}" title="${el}">${i.e}</i>`;
+  }).join("");
+};
+
 const TALENTS = [
   { id:"giant",    emoji:"💪", name:"ร่างยักษ์",   w:14, size:1.24,
     mod:{ def:1.18, spd:1.12, hp:1.10, spe:0.86 },
@@ -1675,7 +1721,14 @@ function packSave(){
      c36(pityNow()), S.legTarget && SIDX[S.legTarget] != null ? c36(SIDX[S.legTarget]) : "",
      c36(S.farmRounds || 0)].join(".") + "," +
     BUFFS.map(u => c36(Math.max(0, Math.round(buffLeft(u.id)/60000)))).join(".") + "," +
-    [c36(gateStep()), c36(S.godWin || 0), S.w2 ? 1 : 0, c36(S.manualWins || 0)].join(".");
+    [c36(gateStep()), c36(S.godWin || 0), S.w2 ? 1 : 0, c36(S.manualWins || 0)].join(".") + "," +
+    (abRun() ? [c36(S.ab.depth), c36(S.ab.cleared),
+      S.ab.team.map(c36).join("-"),
+      S.ab.team.map(id => c36(Math.round((S.ab.hp[id] || 0) * 100))).join("-"),
+      (S.ab.boons || []).map(id => c36(BOONS.findIndex(b => b.id === id))).join("-"),
+      (S.ab.offer || []).map(id => c36(BOONS.findIndex(b => b.id === id))).join("-"),
+      ["coins","dust","pollen","core","star","shard"].map(k => c36(S.ab.bag[k] || 0)).join("-")
+    ].join("~") : "");
 
   let bits = "";                                     // สมุดภาพ = 1 บิตต่อสายพันธุ์
   SPECIES.forEach(s => bits += (S.seen && S.seen[s.id]) ? "1" : "0");
@@ -1817,6 +1870,18 @@ function unpackSave(txt){
     S2.pity = p36(v[3] || "0");
     if(v[4]) S2.legTarget = (SPECIES[p36(v[4])] || {}).id || null;
     S2.farmRounds = p36(v[5] || "0"); }
+  if(m[32]){ const p = m[32].split("~");
+    if(p.length >= 7){
+      const team = p[2] ? p[2].split("-").map(p36) : [];
+      const hpv = p[3] ? p[3].split("-").map(p36) : [];
+      const hp = {}; team.forEach((id, i) => hp[id] = (hpv[i] || 0) / 100);
+      const bg = p[6].split("-").map(p36);
+      S2.ab = { depth:p36(p[0]), cleared:p36(p[1]), team, hp,
+        boons:(p[4] ? p[4].split("-") : []).map(x => (BOONS[p36(x)] || {}).id).filter(Boolean),
+        offer:(p[5] ? p[5].split("-") : []).map(x => (BOONS[p36(x)] || {}).id).filter(Boolean),
+        bag:{ coins:bg[0]||0, dust:bg[1]||0, pollen:bg[2]||0, core:bg[3]||0, star:bg[4]||0, shard:bg[5]||0 } };
+      if(!S2.ab.offer.length) S2.ab.offer = null;
+    } }
   if(m[31]){ const v = m[31].split(".");
     S2.gateStep = p36(v[0] || "0"); S2.godWin = p36(v[1] || "0");
     S2.w2 = v[2] === "1"; S2.manualWins = p36(v[3] || "0"); }
@@ -2266,6 +2331,7 @@ function renderBoxView(){
     cells.push(`<button class="bxcell ${c.shiny ? 'sh' : ''} ${S.bxSel === c.id ? 'on' : ''}"
       data-bxc="${c.id}">
       <img src="${ART[c.sid]}" alt="${SP[c.sid].name}" style="${shinyFilter(c)}">
+      <i class="bxel">${elDot(c)}</i>
       <i class="bxk">${c.lock ? "🔒" : ""}${isCrown(c) ? "👑" : ""}${c.shiny ? "✨" : ""}</i>
       <i class="bxlv">${c.stage === "baby" ? "🍼" : "Lv" + lvOf(c)}</i></button>`);
   }
@@ -2322,7 +2388,7 @@ function bxDetail(c){
   const bd = buildOf(c);
   return `<div class="bxdet">
     <h4>${sp.name} ${sexTag(c)} ${c.lock ? "🔒" : ""}${c.shiny ? "✨" : ""}${isCrown(c) ? "👑" : ""}</h4>
-    <span class="bxsub">${sp.el}${c.el2 ? " / " + c.el2 : ""} · ${
+    <span class="bxsub">${elChips(c)} ${
       c.stage === "baby" ? "ลูกตุ้ยนุ้ย · โตแล้ว " + Math.floor(clamp(c.exp/EXP_NEED*100,0,100)) + "%"
       : `${starStr(c.stars).slice(0, c.stars)} · 📈 Lv ${lvOf(c)} · พลังรวม ${b.total}`}
       · ${NT[c.nature] ? NT[c.nature].emoji + " " + NT[c.nature].name : ""}
@@ -2997,7 +3063,7 @@ function showGrown(list){
     return `<div class="grew ${c.shiny ? 'sh' : ''}">
       <div class="art"><img src="${ART[c.sid]}" alt="${sp.name}" style="${shinyFilter(c)}"></div>
       <h3>${c.myth ? '✧ อมตะ' : ''}${sp.name}${c.shiny ? ' ✨' : ''}${isNew ? '<span class="newtag">ตัวใหม่!</span>' : ''}</h3>
-      <p class="meta">${sp.el}${c.el2 ? ` / ${c.el2}` : ''} · สาย${clusterOf(sp.el)} · ${RAR_NAME[sp.rarity]} · ${n.emoji} ${n.name}
+      <p class="meta">${elChips(c)} · สาย${clusterOf(sp.el)} · ${RAR_NAME[sp.rarity]} · ${n.emoji} ${n.name}
         ${talOf(c) ? `<br><b style="color:#B8730A">${talOf(c).emoji} พรสวรรค์${talOf(c).name}</b>` : ''}
         ${c.shiny ? `<br><b style="color:var(--plum)">ไชนี่ ${shinyName(c)} ${shinyOf(c).h}°</b>` : ''}</p>
       <p class="st">${starStr(c.stars)}</p>
@@ -5901,6 +5967,12 @@ function renderGuide(){
         แต่ถอนแล้วรอบจบ ต้องเริ่มชั้น 1 ใหม่</b></div>
       <div class="dl"><span>ของเพิ่มขึ้น</span><b>ทบต้น 9% ต่อชั้น · ทุกชั้นที่ 4 ได้ 💎 · ทุกชั้นที่ 7 ได้ 🌟
         · ทุกชั้นที่ 12 ได้ 🔮 · ทุกชั้นที่ 10 เจอเจ้าถ้ำ ของ ×2.4</b></div>
+      <div class="dl"><span>🌀 พรจากถ้ำ (roguelike)</span><b>ผ่านทุกชั้นได้เลือกพร 1 จาก 3
+        ${BOONS.length} แบบ — ${BOONS.map(b => b.emoji + " " + b.name).join(" · ")}
+        · ตัวเพิ่มค่าซ้อนกันได้ไม่จำกัด (ดาเมจ เกราะ ความเร็ว คริต สถานะ ของ)
+        · น้ำพุกับชุบชีวิตใช้ผลทันที · พรเบอร์รี่กับพรผ้าคาดรับได้ครั้งเดียวต่อรอบ</b></div>
+      <div class="dl"><span>พรอยู่ได้แค่รอบเดียว</span><b>ถอนของกลับบ้านหรือตกรอบแล้วพรหายหมด
+        ต้องสะสมใหม่ทุกรอบ · ยังไม่เลือกพรจะลงชั้นต่อไปไม่ได้</b></div>
       <div class="dl"><span>กฎพิเศษ</span><b>ชั้น 4 ขึ้นไปสุ่มกฎมาให้ แลกกับของที่เยอะขึ้น —
         ${AB_RULES.slice(1).map(r => `${r.name} ×${r.loot}`).join(" · ")}</b></div>
       <div class="dl"><span>ศัตรูแรงขึ้น</span><b>ทบต้น 11.5% ต่อชั้น ชันกว่าหอคอยชัดเจน
@@ -6132,7 +6204,7 @@ function renderGuide(){
     </div>
     <div class="gbox"><h4>🔥 ตารางธาตุ</h4>
       <div class="dl"><span>ได้เปรียบ / เสียเปรียบ</span><b>แรง 1.4 เท่า · อ่อน 0.72 เท่า</b></div>
-      ${ELEMENTS.map(el => `<div class="dl"><span>${el}</span><b>กิน ${(BEATS_EL[el]||[]).join(" ") || "—"}
+      ${ELEMENTS.map(el => `<div class="dl"><span>${elChip(el)}</span><b>กิน ${(BEATS_EL[el]||[]).map(x => elEmo(x)+x).join(" ") || "—"}
         <br><i style="color:var(--dim);font-style:normal">แพ้ ${counters(el).join(" ") || "—"}</i></b></div>`).join('')}
     </div>
     <div class="gbox"><h4>💎 วัสดุหาจากไหน</h4>
@@ -6331,7 +6403,7 @@ function renderSellBar(){
             <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}">
             <span class="sgin">
               <b>${sp.name} ${sexTag(c)} ${c.stage === "baby" ? "· ลูกตุ้ยนุ้ย" : "· " + starStr(c.stars).slice(0, c.stars)}</b>
-              <small>${sp.el}${c.el2 ? "/" + c.el2 : ""} · 🧬 ${ivSum(c)}/${IV_MAX*6}${
+              <small>${elChips(c, 1)} 🧬 ${ivSum(c)}/${IV_MAX*6}${
                 c.stage === "adult" ? " · พลัง " + pw(c) : ""} · ${penName(c.pen)}</small>
               <small>${c.box ? "📦 อยู่ในตู้ฝาก · " : ""}${x.why.join(" · ")}</small>
             </span>
@@ -6587,7 +6659,7 @@ function renderDungeon(){
       const mu = unitMult(c, F);
       return `<button class="tm" aria-pressed="${on}" data-dg="${c.id}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
+        <small>${elChips(c, 1)}<br>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
           awaySet().has(c.id) ? " 🧭" : ""}
           <br>${multTag(mu)}</small>
       </button>`;
@@ -6631,6 +6703,57 @@ const AB_RULES = [
   { id:"rich",  name:"สายแร่ทองคำ",          note:"💰 ชั้นนี้ของที่ได้เยอะเป็นสองเท่า",
     opt:{}, loot:2.0 }
 ];
+/* ---- 🌀 พรจากถ้ำ · เลือกทีละหนึ่งจากสามหลังผ่านแต่ละชั้น (มีผลแค่ในรอบนั้น) ---- */
+const BOONS = [
+  { id:"atk",   emoji:"⚔️", name:"พรดาบ",        note:"ดาเมจทั้งทีม +15%",           dmg:0.15 },
+  { id:"hp",    emoji:"🛡", name:"พรเกราะ",       note:"เลือดสูงสุดทั้งทีม +18%",      hp:0.18 },
+  { id:"spe",   emoji:"💨", name:"พรลม",          note:"ความเร็วทั้งทีม +20%",         spe:0.20 },
+  { id:"crit",  emoji:"🎯", name:"พรแม่นยำ",      note:"โอกาสเข้าเต็มแรง +12%",        crit:0.12 },
+  { id:"st",    emoji:"🔥", name:"พรต้องสาป",     note:"ท่าธาตุทำให้ติดสถานะง่ายขึ้น +15%", st:0.15 },
+  { id:"loot",  emoji:"💰", name:"พรทรัพย์",      note:"ของที่เก็บได้ +25%",           loot:0.25 },
+  { id:"heal",  emoji:"💚", name:"น้ำพุศักดิ์สิทธิ์", note:"ฟื้นเลือดทีมทันที 45%",     once:true, heal:0.45 },
+  { id:"rev",   emoji:"✨", name:"ชุบชีวิต",       note:"ชุบตัวที่หมดแรงทุกตัวกลับมาที่ 40%", once:true, rev:0.40 },
+  { id:"berry", emoji:"🍓", name:"พรเบอร์รี่",     note:"ตัวที่ไม่มีของถือได้เบอร์รี่ฟื้นพลัง", uniq:true, berry:true },
+  { id:"sash",  emoji:"🎗️", name:"พรผ้าคาด",      note:"ตัวที่ไม่มีของถือรอด 1 หน่วยพลังหนึ่งครั้ง", uniq:true, sash:true }
+];
+const BOONMAP = Object.fromEntries(BOONS.map(x => [x.id, x]));
+function abOpt(r){
+  const o = { dmgMul:1, hpMul:1, speMul:1, critAdd:0, stAdd:0 };
+  (r.boons || []).forEach(id => {
+    const b = BOONMAP[id];
+    if(!b) return;
+    if(b.dmg)  o.dmgMul  += b.dmg;
+    if(b.hp)   o.hpMul   += b.hp;
+    if(b.spe)  o.speMul  += b.spe;
+    if(b.crit) o.critAdd += b.crit;
+    if(b.st)   o.stAdd   += b.st;
+    if(b.berry) o.allBerry = true;
+    if(b.sash)  o.allSash  = true;
+  });
+  return o;
+}
+const abLootBoon = r => 1 + (r.boons || []).reduce((a, id) =>
+  a + ((BOONMAP[id] && BOONMAP[id].loot) || 0), 0);
+function abOffer(r){
+  const taken = r.boons || [];
+  const pool = BOONS.filter(b => !(b.uniq && taken.indexOf(b.id) >= 0));
+  const out = [];
+  const R = pool.slice();
+  while(out.length < 3 && R.length) out.push(R.splice(Math.floor(Math.random()*R.length), 1)[0]);
+  return out.map(b => b.id);
+}
+function abTake(id){
+  const r = abRun();
+  if(!r || !r.offer || r.offer.indexOf(id) < 0) return;
+  const b = BOONMAP[id];
+  r.boons = (r.boons || []).concat([id]);
+  if(b.heal) r.team.forEach(cid => { if((r.hp[cid] || 0) > 0)
+    r.hp[cid] = Math.min(1, (r.hp[cid] || 0) + b.heal); });
+  if(b.rev) r.team.forEach(cid => { if((r.hp[cid] || 0) <= 0) r.hp[cid] = b.rev; });
+  r.offer = null;
+  logf(`🌀 รับ${b.emoji} ${b.name} — ${b.note}`, "good");
+  sfx("tap"); save(); render();
+}
 const abRun = () => S.ab || null;
 function abRule(d){
   if(d < 4) return AB_RULES[0];
@@ -6670,7 +6793,7 @@ function abStart(){
   if(team.length < 1){ alert("เลือกตุ้ยนุ้ยลงถ้ำก่อน"); return; }
   const hp = {};
   team.forEach(c => hp[c.id] = 1);
-  S.ab = { depth:1, team:team.map(c => c.id), hp,
+  S.ab = { depth:1, team:team.map(c => c.id), hp, boons:[], offer:null,
     bag:{ coins:0, dust:0, pollen:0, core:0, star:0, shard:0 }, cleared:0 };
   logf(`🌀 ลงถ้ำไร้ที่สิ้นสุดด้วย ${team.length} ตัว`, "");
   sfx("tap"); save(); render();
@@ -6681,15 +6804,17 @@ function abDive(){
   const team = r.team.map(id => S.creatures.find(c => c.id === id))
     .filter(c => c && (r.hp[c.id] || 0) > 0);
   if(!team.length){ abWipe(); return; }
+  if(r.offer){ alert("เลือกพรก่อนลุยชั้นต่อไป"); return; }
   const F = abFoe(r.depth), rule = abRule(r.depth);
-  battleGo(team, F, Object.assign({ maxRound:20, note:rule.note }, rule.opt), R => {
+  battleGo(team, F, Object.assign({ maxRound:20, note:rule.note }, abOpt(r), rule.opt), R => {
   r.hp = Object.assign({}, r.hp, R.hpFrac);
     let got = [];
     if(R.win){
-      const L = abLoot(r.depth, rule.loot || 1);
+      const L = abLoot(r.depth, (rule.loot || 1) * abLootBoon(r));
       for(const k in L) r.bag[k] = (r.bag[k] || 0) + L[k];
       r.cleared++;
       r.depth++;
+      r.offer = abOffer(r);                      // 🌀 เลือกพรก่อนไปชั้นต่อไป
       S.abBest = Math.max(S.abBest || 0, F.depth);
       got = [`🪙 ${L.coins}`, `💠 ${L.dust}`, L.pollen ? `🍃 ×${L.pollen}` : null,
              L.core ? `💎 ×${L.core}` : null, L.star ? `🌟 ×${L.star}` : null,
@@ -6698,14 +6823,15 @@ function abDive(){
     }
     const alive = team.filter(c => (r.hp[c.id] || 0) > 0).length;
     showArena(
-      { name:F.name, art:ART[F.sp.id], el:F.el },
+      { id:F.sp.id, name:F.name, el:F.el },
       { name:`🌀 ถ้ำไร้ที่สิ้นสุด ชั้น ${F.depth}` },
       R.log, R.ev, R.units, R.boss,
       R.win ? { win:true, title:`ผ่านชั้น ${F.depth}`,
                 detail: got.join(" · ") + `<br>ของในกองรวม 🪙 ${r.bag.coins} · 💠 ${r.bag.dust}` +
                   `<br>ทีมที่ยังยืนอยู่ ${alive}/${team.length} ตัว` }
               : { win:false, title:`ตกรอบที่ชั้น ${F.depth}`,
-                  detail:`ของทั้งกองหายไปหมด — ผ่านมาได้ ${r.cleared} ชั้น` });
+                  detail:`ของทั้งกองหายไปหมด — ผ่านมาได้ ${r.cleared} ชั้น` },
+      { art:ART[F.sp.id] });
     if(!R.win || !alive) abWipe(true);
     save(); render();
   });
@@ -6744,7 +6870,9 @@ function renderAbyss(){
         <span>เลือกได้ ${AB_TEAM} ตัว · เลือดไม่ฟื้นระหว่างชั้น</span></div>
       <p class="note" style="margin:0 0 10px">ของที่เก็บได้จะกองไว้ก่อน ยิ่งลึกยิ่งได้เยอะขึ้นทบต้น 9% ต่อชั้น
         · <b>ตกรอบแล้วเสียของทั้งกอง</b> ระหว่างชั้นถอนของกลับบ้านได้ทุกเมื่อ
-        · ชั้น 4 ขึ้นไปมีกฎพิเศษสุ่มมาแต่ให้ของเยอะขึ้น · ทุกชั้นที่ 10 เจอเจ้าถ้ำ</p>
+        · ชั้น 4 ขึ้นไปมีกฎพิเศษสุ่มมาแต่ให้ของเยอะขึ้น · ทุกชั้นที่ 10 เจอเจ้าถ้ำ
+        <br>🌀 <b>ผ่านทุกชั้นได้เลือกพร 1 จาก 3</b> — ดาเมจ เกราะ ความเร็ว คริต สถานะ ของ ฟื้นเลือด ชุบชีวิต
+        ซ้อนกันได้เรื่อยๆ แต่มีผลแค่ในรอบนั้น จบรอบแล้วหายหมด</p>
       <div class="team">${pool.length ? pool.slice(0, 60).map(c => {
         const b = statsOf(c), on = sel.has(c.id);
         return `<button class="tm" aria-pressed="${on}" data-ab="${c.id}">
@@ -6791,12 +6919,25 @@ function renderAbyss(){
         <small>${down ? "หมดแรง" : `เลือด ${Math.round(frac*100)}%`}
           <br>${multTag(unitMult(c, F))}</small></button>`;
     }).join('')}</div>
+    ${(r.boons || []).length ? `<p class="grptag">พรที่ได้มา: ${(r.boons||[]).map(id =>
+      `${BOONMAP[id].emoji} ${BOONMAP[id].name}`).join(" · ")}</p>` : ''}
+    ${r.offer ? `<div class="holdbox">
+      <h4>🌀 เลือกพรหนึ่งอย่างก่อนลงชั้นต่อไป</h4>
+      <div class="holdshop">${r.offer.map(id => { const b = BOONMAP[id];
+        return `<button class="hsb" data-boon="${id}"><b>${b.emoji} ${b.name}</b>${b.note}
+          ${b.once ? "<br><small>ใช้ผลทันทีครั้งเดียว</small>"
+            : b.uniq ? "<br><small>รับได้ครั้งเดียวต่อรอบ</small>"
+            : "<br><small>ซ้อนกันได้ไม่จำกัด</small>"}</button>`;
+      }).join('')}</div>
+      <p class="grptag">พรมีผลแค่ในรอบนี้ · ถอนของกลับบ้านหรือตกรอบแล้วหายทั้งหมด</p>
+    </div>` : ''}
     <div class="sellrow" style="margin-top:10px">
-      <button class="btn sun" id="btnAbDive" ${alive.length ? '' : 'disabled'} style="flex:1">
-        🌀 ลุยชั้น ${r.depth}</button>
+      <button class="btn sun" id="btnAbDive" ${alive.length && !r.offer ? '' : 'disabled'} style="flex:1">
+        ${r.offer ? "เลือกพรก่อน" : `🌀 ลุยชั้น ${r.depth}`}</button>
       <button class="btn ghost" id="btnAbBank" style="flex:1">🎒 ถอนของกลับบ้าน</button>
     </div>
     <p class="note">ถอนของแล้วรอบจบ ต้องเริ่มจากชั้น 1 ใหม่ · เลือดไม่ฟื้นให้ระหว่างชั้น ต้องเดาให้ถูกว่าจะไปต่อได้อีกกี่ชั้น</p>`;
+  box.querySelectorAll('[data-boon]').forEach(b => b.onclick = () => abTake(b.dataset.boon));
   const d = box.querySelector('#btnAbDive');
   if(d) d.onclick = abDive;
   const k = box.querySelector('#btnAbBank');
@@ -6946,7 +7087,7 @@ function renderTower(){
       const mu = unitMult(c, F);
       return `<button class="tm" aria-pressed="${on}" data-tw="${c.id}">
         <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
+        <small>${elChips(c, 1)}<br>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
           awaySet().has(c.id) ? " 🧭" : ""}
           <br>${multTag(mu)}</small>
       </button>`;
@@ -7350,7 +7491,7 @@ function lbMyTurn(u, m){
   }
   const { raw, mu } = calcDmg(u, m, B);
   let dmg = raw;
-  const crit = Math.random() < 0.10 + u.b.spe/1400 + (m.crit || 0)
+  const crit = Math.random() < 0.10 + u.b.spe/1400 + (m.crit || 0) + (u.critAdd || 0)
     + talG(u.c, "crit", 0) + decGlobal("bossCrit", "add");
   if(crit) dmg = Math.round(dmg * CRIT_MUL);
   if(B.st === "frz" && m.el === "ไฟ"){ B.st = null; lbSay(`${LB.foe.name} ละลายจากน้ำแข็ง`); }
@@ -7359,7 +7500,7 @@ function lbMyTurn(u, m){
   lbPop('lbFoeFx', '−' + dmg, crit ? 'crit' : '');
   sfx(crit ? "crit" : "hit");
   if(m.el && EL_MOVE[m.el] && EL_MOVE[m.el].st && !B.st &&
-     canStatus(B.el, B.el2, EL_MOVE[m.el].st) && Math.random() < 0.10){
+     canStatus(B.el, B.el2, EL_MOVE[m.el].st) && Math.random() < 0.10 + (u.stAdd || 0)){
     const k2 = EL_MOVE[m.el].st;
     B.st = k2; B.stT = STATUS[k2].turns;
     lbSay(`${LB.foe.name} ติด${STATUS[k2].emoji} ${STATUS[k2].name} จาก${m.n}`);
@@ -7499,6 +7640,7 @@ function calcDmg(u, m, boss){
   if(u.item === "orb")   mu *= 1.30;
   if(u.item === "band"  && !spec) mu *= 1.25;
   if(u.item === "specs" &&  spec) mu *= 1.25;
+  mu *= (u.dmgMul || 1);                               // 🌀 พรจากถ้ำ
   return { raw:Math.max(4, Math.round((A*0.62*(m.pw/60) - D*0.22) * mu * (0.86 + Math.random()*0.28))), mu };
 }
 const effWord = mu => mu >= 1.9 ? "แรงมาก!" : mu >= 1.3 ? "ได้เปรียบ"
@@ -7532,16 +7674,21 @@ function runBattleSides(team, foe, opt){
   opt = opt || {};
   const fel = foe.el, fel2 = foe.el2 !== undefined ? foe.el2 : bossEl2(foe.el);
   const units = team.map(c => {
-    const b = statsOf(c);
-    const hp = Math.round(b.hp * 2.2 * talG(c, "bossHp", 1) * decGlobal("bossHp", "mul"));
+    let b = statsOf(c);
+    if(opt.speMul) b = Object.assign({}, b, { spe:Math.round(b.spe * opt.speMul) });
+    let hp = Math.round(b.hp * 2.2 * talG(c, "bossHp", 1) * decGlobal("bossHp", "mul"));
+    if(opt.hpMul) hp = Math.round(hp * opt.hpMul);
     let mult = elMult2(SP[c.sid].el, fel, fel2);
     if(c.el2) mult = Math.max(mult, elMult2(c.el2, fel, fel2));
     const pp = {};
     mvOf(c).forEach(id => pp[id] = MV[id].pp);
     const frac = opt.hpFrac && opt.hpFrac[c.id] != null ? Math.max(0, opt.hpFrac[c.id]) : 1;
+    let item = opt.noItem ? null : battleItem(c);
+    if(!item && opt.allBerry) item = "berry";
+    if(!item && opt.allSash)  item = "sash";
     return { c, sp:SP[c.sid], hp:Math.max(frac > 0 ? 1 : 0, Math.round(hp * frac)), max:hp, b, mult, pp,
-             st:null, stT:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 },
-             item: opt.noItem ? null : battleItem(c),
+             st:null, stT:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 }, item,
+             dmgMul:opt.dmgMul || 1, critAdd:opt.critAdd || 0, stAdd:opt.stAdd || 0,
              usedBerry:false, usedSash:false };
   });
   const boss = { hp:foe.hp, max:foe.hp, atk:Math.round(foe.pw * (opt.atkMul || 1)),
@@ -7554,23 +7701,8 @@ function runBattle(team, foe, opt){
   opt = opt || {};
   const maxRound = opt.maxRound || 18;
   const fel = foe.el, fel2 = foe.el2 !== undefined ? foe.el2 : bossEl2(foe.el);
-  const units = team.map(c => {
-    const b = statsOf(c);
-    const hp = Math.round(b.hp * 2.2 * talG(c, "bossHp", 1) * decGlobal("bossHp", "mul"));
-    let mult = elMult2(SP[c.sid].el, fel, fel2);
-    if(c.el2) mult = Math.max(mult, elMult2(c.el2, fel, fel2));
-    const pp = {};
-    mvOf(c).forEach(id => pp[id] = MV[id].pp);
-    const frac = opt.hpFrac && opt.hpFrac[c.id] != null ? Math.max(0, opt.hpFrac[c.id]) : 1;
-    return { c, sp:SP[c.sid], hp:Math.max(frac > 0 ? 1 : 0, Math.round(hp * frac)), max:hp, b, mult, pp,
-             st:null, stT:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 },
-             item: opt.noItem ? null : battleItem(c),
-             usedBerry:false, usedSash:false };
-  });
-  const boss = { hp:foe.hp, max:foe.hp, atk:Math.round(foe.pw * (opt.atkMul || 1)), def:Math.round(foe.pw*0.62),
-                 spd:Math.round(foe.pw*0.58), spe:Math.round(foe.pw*0.8),
-                 el:fel, el2:fel2, st:null, stT:0,
-                 stg:{ atk:0, def:0, spa:0, spd:0, spe:0 }, raged:false };
+  const sides = runBattleSides(team, foe, opt);
+  const units = sides.units, boss = sides.boss;
   const log = [], ev = [], sfxq = [];
   const say = t => { ev.push({ k:"say", t }); log.push({ t, c:"" }); };
   FOE_IMMUNE = !!opt.foeImmune;
@@ -7697,7 +7829,7 @@ function runBattle(team, foe, opt){
 
       const { raw, mu } = dmgOf(u, m);
       let dmg = raw;
-      const crit = Math.random() < 0.10 + u.b.spe/1400 + (m.crit || 0)
+      const crit = Math.random() < 0.10 + u.b.spe/1400 + (m.crit || 0) + (u.critAdd || 0)
         + talG(u.c, "crit", 0) + decGlobal("bossCrit", "add");
       if(crit) dmg = Math.round(dmg * CRIT_MUL);
       if(boss.st === "frz" && m.el === "ไฟ"){ boss.st = null; log.push({ t:`${foe.name} ละลายจากน้ำแข็ง`, c:"" }); }
@@ -7710,7 +7842,7 @@ function runBattle(team, foe, opt){
         c: crit ? "big" : "" });
       /* ท่าโจมตีมีโอกาสติดสถานะตามธาตุด้วย */
       if(m.el && EL_MOVE[m.el] && EL_MOVE[m.el].st && !boss.st &&
-         canStatus(boss.el, boss.el2, EL_MOVE[m.el].st) && Math.random() < 0.10){
+         canStatus(boss.el, boss.el2, EL_MOVE[m.el].st) && Math.random() < 0.10 + (u.stAdd || 0)){
         const k = EL_MOVE[m.el].st;
         boss.st = k; boss.stT = STATUS[k].turns;
         ev.push({ k:"st", on:"boss", s:k });
@@ -8203,7 +8335,7 @@ function showArena(B, D, log, ev, units, boss, R, opt){
   }
   /* โหมดสั่งเองเล่นฉากไปแล้ว หรือเปิดข้ามฉากถาวร → ไปหน้าสรุปเลย */
   if(!ev || !ev.length || skipArena()){
-    if(opt.onEnd) opt.onEnd(); else showFight(B, D, log, R);
+    if(opt.onEnd) opt.onEnd(); else showFight(B, D, log, R, opt.art);
     return;
   }
   const artSrc = opt.art || BOSS_ART[B.id];
@@ -8330,19 +8462,20 @@ function showArena(B, D, log, ev, units, boss, R, opt){
   timer = setTimeout(step, 420);
 }
 
-function showFight(B, D, log, R){
+function showFight(B, D, log, R, art){
   const FN = { grass:"🌿 หญ้าสด", fruit:"🍎 ผลไม้ป่า", cake:"🍰 ขนมพิเศษ" };
   const m = document.createElement('div');
   m.className = 'mask';
   m.innerHTML = `<div class="result">
-    <img class="bosshero" src="${BOSS_ART[B.id]}" alt="${B.name}">
+    <img class="bosshero" src="${art || BOSS_ART[B.id] || ART[B.id] || ''}" alt="${B.name}">
     <h2>${R.win ? "🎉 ชนะ" : "😵 ยังไม่ไหว"} · ${B.name} (${D.name})</h2>
     <p class="xplab">ทำดาเมจได้ ${Math.round(R.dealt*100)}%</p>
     <ul class="blog">${log.map(l => `<li class="${l.c}"><b>${l.t}</b></li>`).join('')}</ul>
     <div class="rew">
-      <div class="rw">🪙 ${R.coins}</div>
+      ${R.coins != null ? `<div class="rw">🪙 ${R.coins}</div>` : ''}
       ${R.dust ? `<div class="rw">💠 ${R.dust}</div>` : ''}
-      ${Object.entries(R.gotFood).map(([k,v]) => `<div class="rw">${FN[k]} ×${v}</div>`).join('')}
+      ${Object.entries(R.gotFood || {}).map(([k,v]) => `<div class="rw">${FN[k]} ×${v}</div>`).join('')}
+      ${R.title ? `<div class="rw">${R.title}</div>` : ''}
       ${(R.eggs || []).map(e => `<div class="rw">✦ ${BOSS_EGG_NAME[B.id] || 'ไข่บอส'}${e.starPull ? ' (ดาวมงคล)' : ''} · ลุ้นตำนาน ${Math.round(LEGEND_CHANCE*100)}%</div>`).join('')}
     </div>
     <button class="btn" id="closeFight">กลับทุ่ง</button></div>`;
@@ -8397,7 +8530,7 @@ function renderBoss(){
     const filt = shinyFilter(c);
     return `<button class="tm" aria-pressed="${on}" data-t="${c.id}">
       <img src="${ART[c.sid]}" alt="" style="${filt}"><b>${sp.name}</b>
-      <small>${starStr(c.stars).slice(0,c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
+      <small>${elChips(c, 1)}<br>${starStr(c.stars).slice(0,c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}${
         gone.has(c.id) ? " 🧭" : ""}
         <br>${multTag(unitMult(c, B))}</small></button>`;
   }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวโตเต็มวัยไปสู้</p>`;
@@ -8613,7 +8746,7 @@ function renderSel(){
     <div class="selscroll"><div class="row">
     <div class="who">
       <h3>${c.myth ? '✧ อมตะ' : ''}${sp.name} ${sexTag(c)}${c.shiny ? ` ✨ <span style="font-size:12px;color:var(--plum)">${shinyName(c)} ${shinyOf(c).h}°</span>` : ''}</h3>
-      <p class="sub">${sp.el}${c.el2 ? ` / ${c.el2}` : ''} · ${n.emoji} ${n.name} · ${c.stage === 'baby' ? 'ลูกตุ้ยนุ้ย' : 'โตเต็มวัย'}${
+      <p class="sub">${elChips(c)} · ${n.emoji} ${n.name} · ${c.stage === 'baby' ? 'ลูกตุ้ยนุ้ย' : 'โตเต็มวัย'}${
         c.stage === 'baby' && c.starPull ? ' · ⭐ ดาวมงคล' : ''}
         ${c.stage === 'adult' ? `<span class="stars">${starStr(c.stars)}</span>` : ''}</p>
       <p class="xplab" style="margin:-7px 0 8px">${n.emoji} นิสัย${n.name} — ${n.note || '-'}</p>
@@ -9008,7 +9141,7 @@ function renderDex(){
     return `<div class="dex ${got ? '' : 'lock'} ${s.legend ? 'lg' : ''} ${s.prize ? 'pz' : ''}">
       <div class="dth"><img src="${ART[s.id]}" alt="${got ? s.name : ''}" loading="lazy"></div>
       <b>${mythSeen[s.id] ? "✧ " : ""}${got ? s.name : "???"}</b>
-      <small>${got ? `${s.legend ? '✦ ตำนาน' : s.prize ? '◈ ล้ำค่า' : RAR_NAME[s.rarity]} · ${s.el}` : "ยังไม่เคยเจอ"}</small>
+      <small>${got ? `${s.legend ? '✦ ตำนาน' : s.prize ? '◈ ล้ำค่า' : RAR_NAME[s.rarity]}<br>${elChip(s.el, 1)}` : "ยังไม่เคยเจอ"}</small>
       ${got && bz ? `<small class="dbz">จาก${bz}</small>` : ''}
       ${have[s.id] ? `<span class="dhave">มี ${have[s.id]}</span>` : ''}
     </div>`;
@@ -9128,7 +9261,7 @@ function mgDetail(c, ctx){
       ${row("สายพันธุ์", `${sp.name}${c.myth ? " ✧" : ""}`)}
       ${row("ดาว", adult ? `${starStr(c.stars).slice(0, c.stars)} (${c.stars}/5)`
         : `ยังไม่รู้ · แนวโน้ม ${(STAR_BASE + (c.starPull||0)).toFixed(1)}`)}
-      ${row("ธาตุ", sp.el + (c.el2 ? " / " + c.el2 : ""))}
+      ${row("ธาตุ", elChips(c) + (c.el2 ? " (สองธาตุ)" : ""))}
       ${row("เพศ", sexOf(c).name || sexOf(c).sym)}
       ${row("นิสัย", `${NT[c.nature].emoji} ${NT[c.nature].name}`)}
       ${row("พรสวรรค์", talOf(c) ? `${talOf(c).emoji} ${talOf(c).name}` : "—")}
@@ -9994,6 +10127,7 @@ function startPen(){
       ${c.shiny ? '<div class="spk"><i>✦</i><i>✦</i><i>✧</i><i>✦</i><i>✧</i></div>' : ''}
       ${c.myth ? '<div class="mythfx"><i>✧</i><i>✧</i><i>✧</i></div>' : ''}
       ${talFX(c)}
+      <div class="wel">${elDot(c)}</div>
       <div class="flip"><div class="body" style="${filt};animation-duration:${rnd(2.3,3.4).toFixed(2)}s">
         ${baby ? babySVG(sp, h) : `<img src="${ART[c.sid]}" alt="${sp.name}" style="height:${h}px">`}
       </div></div>${baby ? `<div class="xp"><i style="width:${c.exp/EXP_NEED*100}%"></i></div>` : ''}`;

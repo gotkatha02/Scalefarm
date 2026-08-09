@@ -620,8 +620,93 @@ h2 + h2{margin-top:20px}
 .quake{animation:quake .34s ease}
 @keyframes quake{0%,100%{transform:translateX(0)}
   20%{transform:translateX(-7px)}45%{transform:translateX(6px)}70%{transform:translateX(-3px)}}
+/* ---- อนิเมชั่นตอนสู้: ตัวขยับ + เอฟเฟกต์สกิล ---- */
+.lungeS{animation:lungeS .36s cubic-bezier(.3,-.4,.5,1.5)}
+@keyframes lungeS{0%,100%{transform:translateX(0)}
+  40%{transform:translateX(26px) scale(1.08) rotate(-4deg)}
+  62%{transform:translateX(10px) scale(1.02)}}
+.castS{animation:castS .5s ease}
+@keyframes castS{0%,100%{transform:scale(1)}
+  30%{transform:scale(1.13) translateY(-8px)}60%{transform:scale(.97)}}
+.hurtS{animation:hurtS .38s ease}
+@keyframes hurtS{0%,100%{transform:translateX(0);filter:none}
+  15%{transform:translateX(-8px);filter:brightness(1.9) saturate(.3)}
+  40%{transform:translateX(7px);filter:brightness(1.5)}
+  70%{transform:translateX(-3px)}}
+.healS{animation:healS .7s ease}
+@keyframes healS{0%,100%{filter:none}40%{filter:brightness(1.25) saturate(1.4)}}
+.fxlayer{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:4}
+.fxb{position:absolute;left:50%;top:50%;width:112px;height:112px;margin:-56px 0 0 -56px;
+  border-radius:50%;animation:fxb .55s ease-out forwards}
+@keyframes fxb{0%{opacity:0;transform:scale(.25)}25%{opacity:.95;transform:scale(.8)}
+  100%{opacity:0;transform:scale(1.7)}}
+.fxr{position:absolute;left:50%;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;
+  border-radius:50%;border:3px solid;animation:fxr .6s ease-out forwards}
+@keyframes fxr{0%{opacity:.95;transform:scale(.4)}100%{opacity:0;transform:scale(6)}}
+.fxs{position:absolute;left:50%;top:50%;width:130px;height:9px;margin:-4px 0 0 -65px;
+  border-radius:9px;animation:fxs .4s ease-out forwards}
+@keyframes fxs{0%{opacity:0;transform:rotate(-38deg) scaleX(.2)}
+  35%{opacity:1;transform:rotate(-38deg) scaleX(1)}
+  100%{opacity:0;transform:rotate(-38deg) scaleX(1.25) translateX(18px)}}
+.fxp{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;
+  animation:fxp .8s ease-out forwards}
+@keyframes fxp{0%{opacity:0;transform:translate(0,0) scale(.5)}
+  20%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3)}}
+.ultwrap{position:fixed;inset:0;pointer-events:none;z-index:60;display:grid;place-items:center}
+.ultflash{position:absolute;inset:0;animation:ultflash .55s ease-out forwards}
+@keyframes ultflash{0%{opacity:0}18%{opacity:.72}100%{opacity:0}}
+.ultname{position:relative;font-family:var(--display);font-size:26px;font-weight:800;
+  padding:10px 22px;border-radius:16px;color:#fff;white-space:nowrap;
+  text-shadow:0 3px 0 #0006,0 0 18px #fff8;animation:ultname 1.05s ease-out forwards}
+@keyframes ultname{0%{opacity:0;transform:scale(.5) rotate(-6deg)}
+  20%{opacity:1;transform:scale(1.12) rotate(1deg)}
+  40%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:scale(1.06)}}
+/* ---- เอฟเฟกต์สกิลแบบ SVG แยกตามธาตุ ---- */
+.fxsvg{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;
+  overflow:visible;pointer-events:none}
+.fxsvg.big{width:230px;height:230px;margin:-115px 0 0 -115px}
+.fxsvg *{transform-origin:50px 50px}
+.fOut{animation:fOut .62s ease-out forwards}
+@keyframes fOut{0%{opacity:0;transform:scale(.2)}22%{opacity:1;transform:scale(.75)}
+  100%{opacity:0;transform:scale(1.55)}}
+.fIn{animation:fIn .5s ease-out forwards}
+@keyframes fIn{0%{opacity:0;transform:scale(2.1)}45%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(.85)}}
+.fRise{animation:fRise .8s ease-out forwards}
+@keyframes fRise{0%{opacity:0;transform:translateY(16px) scale(.5)}
+  25%{opacity:1}100%{opacity:0;transform:translateY(-42px) scale(1.15)}}
+.fFall{animation:fFall .6s ease-in forwards}
+@keyframes fFall{0%{opacity:0;transform:translateY(-40px) scale(.7)}
+  35%{opacity:1}100%{opacity:0;transform:translateY(14px) scale(1.05)}}
+.fSpin{animation:fSpin .8s ease-out forwards}
+@keyframes fSpin{0%{opacity:0;transform:rotate(0) scale(.3)}
+  25%{opacity:1}100%{opacity:0;transform:rotate(220deg) scale(1.5)}}
+.fFlash{animation:fFlash .5s steps(1) forwards}
+@keyframes fFlash{0%,100%{opacity:0}10%,30%,55%{opacity:1}20%,42%{opacity:.25}}
+.fSweep{animation:fSweep .45s ease-out forwards}
+@keyframes fSweep{0%{opacity:0;transform:translateX(-46px) scaleX(.3)}
+  30%{opacity:1;transform:translateX(0) scaleX(1)}
+  100%{opacity:0;transform:translateX(42px) scaleX(1.1)}}
+.fCut{animation:fCut .42s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes fCut{0%{opacity:0;transform:translate(-34px,26px) scale(.55)}
+  22%{opacity:1;transform:translate(-8px,6px) scale(1)}
+  70%{opacity:1;transform:translate(10px,-8px) scale(1.04)}
+  100%{opacity:0;transform:translate(26px,-20px) scale(1.08)}}
+.fWhite{animation:fWhite .26s steps(1) forwards}
+@keyframes fWhite{0%,100%{opacity:0}12%,34%{opacity:.55}22%{opacity:.15}}
+.fPulse{animation:fPulse .7s ease-out forwards}
+@keyframes fPulse{0%{opacity:0;transform:scale(.35)}30%{opacity:.95;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.9)}}
+.fxgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fxcell{position:relative;aspect-ratio:1/1;border-radius:13px;border:1.5px solid;
+  overflow:hidden;cursor:pointer;display:grid;place-items:center;font-family:var(--display)}
+.fxcell b{position:relative;z-index:2;font-size:11px;line-height:1.25;text-align:center;
+  text-shadow:0 1px 0 #fff8}
+.fxkinds{display:flex;gap:5px;margin:0 0 8px;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){
-  .lunge,.lungeL,.quake{animation:none} .dmg{animation-duration:.4s}
+  .lunge,.lungeL,.quake,.lungeS,.castS,.hurtS,.healS{animation:none} .dmg{animation-duration:.4s}
+  .fxb,.fxr,.fxs,.fxp,.ultflash,.ultname{animation-duration:.25s}
+  .fOut,.fIn,.fRise,.fFall,.fSpin,.fFlash,.fSweep,.fPulse{animation-duration:.28s}
 }
 .penrow{display:flex;gap:8px;align-items:stretch;background:#F7FBF7;border:2px solid var(--line);
   border-radius:15px;padding:8px 10px;margin-bottom:7px}
@@ -771,6 +856,27 @@ h2 + h2{margin-top:20px}
   font-size:11px;line-height:1;padding:3px 7px;border-radius:999px;border:1.5px solid;
   margin:0 3px 2px 0;white-space:nowrap}
 .elchip.sm{font-size:9.5px;padding:2px 5px;border-width:1px;margin:0 2px 1px 0}
+.rowpick{display:flex;gap:4px;margin-top:4px}
+.rowpick button{flex:1;font-family:inherit;font-size:10px;padding:3px 2px;border-radius:8px;
+  border:1.5px solid #DED3C4;background:#fff;color:#5A5044;cursor:pointer;line-height:1.2}
+.rowpick button[aria-pressed="true"]{border-color:#7C6ADF;background:#F2EFFD;color:#4A3C8A;font-weight:700}
+.formbox{background:#F6F2FF;border:1.5px solid #DED3F3;border-radius:14px;padding:10px 12px;margin:0 0 10px}
+.formbox h4{font-family:var(--display);font-size:13.5px;margin:0 0 4px;color:#57459A}
+.formrow{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.formrow>b{width:66px;flex:none;font-size:11.5px}
+.formrow .fslot{flex:1;display:flex;gap:4px;flex-wrap:wrap;min-height:34px}
+.formrow .fslot img{width:32px;height:32px;object-fit:contain}
+.enbar{height:5px;border-radius:99px;background:#E6DFF6;overflow:hidden;margin-top:2px}
+.enbar i{display:block;height:100%;background:linear-gradient(90deg,#8A6ADF,#C2A6F5)}
+.enfull{box-shadow:0 0 0 2px #C2A6F5}
+.ultbtn{width:100%;margin-top:6px;font-family:inherit;font-size:13px;font-weight:700;padding:9px;
+  border-radius:12px;border:1.5px solid #8A6ADF;background:linear-gradient(90deg,#7C6ADF,#A98AF0);
+  color:#fff;cursor:pointer}
+.ultbtn:disabled{opacity:.4;cursor:not-allowed;background:#DDD6EE;color:#6A5F86;border-color:#CFC5E4}
+.ultbox{background:#F6F2FF;border:1.5px solid #DED3F3;border-radius:14px;padding:10px 12px;margin:8px 0}
+.ultbox h4{font-family:var(--display);font-size:13px;margin:0 0 5px;color:#57459A}
+.ultbox select{width:100%;font-family:inherit;font-size:12px;padding:5px 7px;border-radius:9px;
+  border:1.5px solid #D9CEF0;background:#fff;margin-bottom:5px}
 .eldot{display:inline-flex;align-items:center;justify-content:center;font-style:normal;
   width:15px;height:15px;font-size:9px;border-radius:999px;border:1px solid;line-height:1}
 .bxcell .bxel{position:absolute;top:1px;left:2px;display:flex;gap:1px}
@@ -1180,6 +1286,7 @@ h2 + h2{margin-top:20px}
   <div id="bossCard"></div>
   <h2>เลือกทีม (สูงสุด 3 ตัว)</h2>
   <div class="team" id="teamList"></div>
+  <div id="formBox"></div>
   <div class="holdbox">
     <h4>🧰 ตัวช่วยฟาร์ม</h4>
     <div class="sellrow" style="flex-wrap:wrap">
@@ -1764,7 +1871,10 @@ function packSave(){
     (c.lv || 1) > 1 ? c36(c.lv) : "",
     c.xp ? c36(c.xp) : "",
     c.ped ? c.ped.map(x => x && SIDX[x] != null ? c36(SIDX[x]) : "").join(".") : "",
-    c.box && c.bx ? c36(c.bx) : ""
+    c.box && c.bx ? c36(c.bx) : "",
+    c.row != null ? c36(c.row) : "",
+    c.bd && BUILD_SPEC[c.bd] ? c36(BUILD_SPECS.findIndex(x => x.id === c.bd)) : "",
+    c.ult && ULT[c.ult] ? c36(ULTS.findIndex(x => x.id === c.ult) + 1) : ""
   ].join(",")).join(";");
 
   const eggs = (S.eggs || []).map(e => [
@@ -1943,6 +2053,9 @@ function unpackSave(txt){
     if(f[32]){ const v = f[32].split(".");
       c.ped = v.map(x => x === "" ? "" : ((SPECIES[p36(x)] || {}).id || "")); }
     if(f[33]) c.bx = p36(f[33]);
+    if(f[34] !== "" && f[34] != null) c.row = p36(f[34]);
+    if(f[35] !== "" && f[35] != null){ const b = BUILD_SPECS[p36(f[35])]; if(b) c.bd = b.id; }
+    if(f[36]){ const u = ULTS[p36(f[36]) - 1]; if(u) c.ult = u.id; }
     return c;
   });
 
@@ -4047,7 +4160,8 @@ function rollBattle(c){
     const share = w[b.k] / tot;
     const jitter = 0.86 + Math.random()*0.28;      // แต่ละตัวไม่เท่ากันแม้ดาวเท่ากัน
     const nm = natOf(c).mod[b.k] || 1;                // นิสัยดันบางค่าขึ้น ลดบางค่าลง
-    out[b.k] = Math.max(8, Math.round(budget * share * jitter * (b.k === "hp" ? 1.9 : 1.05) * nm));
+    const bmod = buildSpec(c).mod[b.k] || 1;
+    out[b.k] = Math.max(8, Math.round(bmod * budget * share * jitter * (b.k === "hp" ? 1.9 : 1.05) * nm));
   }
   const tm = talG(c, "mod", null);              // ร่างยักษ์/ร่างจิ๋ว บิดรูปทรงค่าพลัง
   if(tm) for(const b of BSTATS) if(tm[b.k]) out[b.k] = Math.max(8, Math.round(out[b.k] * tm[b.k]));
@@ -5898,6 +6012,36 @@ function renderQuests(){
 }
 
 /* ==== คู่มือในเกม ==== */
+let FX_KIND = "spec";
+function renderFxGrid(){
+  const g = $('#fxGrid');
+  if(!g) return;
+  g.innerHTML = ELEMENTS.map(el => { const i = elInfo(el);
+    return `<button class="fxcell" data-fxel="${el}"
+      style="background:${i.bg};border-color:${i.bd};color:${i.fg}">
+      <b>${i.e}<br>${el}</b></button>`;
+  }).join('');
+  const play = cell => {
+    const el = cell.dataset.fxel;
+    cell.querySelectorAll('.fxlayer').forEach(x => x.remove());
+    const L = document.createElement('div');
+    L.className = 'fxlayer';
+    L.innerHTML = elFxSvg(el, FX_KIND);
+    cell.appendChild(L);
+    setTimeout(() => L.remove(), 950);
+  };
+  g.querySelectorAll('[data-fxel]').forEach((c, k) => {
+    c.onclick = () => { sfx("tap"); play(c); };
+    setTimeout(() => play(c), 60 * k);            // เล่นไล่ให้ดูรอบแรกเลย
+  });
+  ["hit","spec","heal","buff"].forEach(k => {
+    const b = $('#fxK' + k);
+    if(b){
+      b.setAttribute('aria-pressed', FX_KIND === k);
+      b.onclick = () => { FX_KIND = k; sfx("tap"); renderFxGrid(); };
+    }
+  });
+}
 function renderGuide(){
   const box = $('#guideBox');
   if(!box) return;
@@ -6229,6 +6373,63 @@ function renderGuide(){
         (น้อยกว่าปล่อยกลับป่า เพราะแลกมาเป็นเหรียญแล้ว)</b></div>
       <div class="dl"><span>ตัวที่ล็อกไว้</span><b>ล็อก 🔒 แล้วส่งขายไม่ได้เลย กันเผลอ</b></div>
     </div>
+    <div class="gbox"><h4>🎆 อนิเมชั่นกับเอฟเฟกต์ตอนสู้</h4>
+      <div class="dl"><span>ตัวขยับ</span><b>ตอนใช้ท่ากายภาพตัวจะพุ่งไปข้างหน้า · ท่าพลังพิเศษจะร่ายท่า
+        · ถูกตีจะสะบัดพร้อมกะพริบขาว · ฟื้นเลือดจะเปล่งประกาย</b></div>
+      <div class="dl"><span>⚔️ ท่ากายภาพ</span><b>ใช้เอฟเฟกต์ฟันกลางเหมือนกันหมดทุกธาตุ —
+        รอยฟันขาววาบสามเส้นกวาดเฉียงพร้อมแฟลชขาว (แบบท่า Cut) ไม่ย้อมสีธาตุ</b></div>
+      <div class="dl"><span>✨ ท่าพลังพิเศษ</span><b>ใช้เอฟเฟกต์เฉพาะตัวของแต่ละธาตุทั้ง 16 แบบ
+        ย้อมสีตามชุดสีประจำธาตุ</b></div>
+      <div class="dl"><span>ฟื้นเลือด/บัฟ</span><b>ประกายลอยขึ้นจากตัว สีเขียวถ้าฟื้นเลือด สีธาตุถ้าเป็นบัฟ</b></div>
+      <div class="dl"><span>💫 ไม้ตาย</span><b>แฟลชเต็มจอสีธาตุ + ป้ายชื่อสกิลเด้งกลางจอ
+        พร้อมเอฟเฟกต์ใหญ่กว่าท่าปกติ 1.6 เท่า</b></div>
+      <div class="dl"><span>ใช้ได้ทั้งสองโหมด</span><b>ทั้งโหมดสั่งเองและฉากย้อนหลังของโหมดออโต้</b></div>
+      <div class="dl"><span>ดูของจริง</span><b>กดปุ่มด้านล่างเพื่อดูเอฟเฟกต์ทั้ง 16 ธาตุ
+        แตะช่องไหนก็เล่นซ้ำได้</b></div>
+      <div class="fxkinds" style="margin:8px 0">
+        <button class="dtab" id="fxKhit">⚔️ ท่ากายภาพ (ฟันกลาง)</button>
+        <button class="dtab" id="fxKspec">✨ ท่าพลังพิเศษ</button>
+        <button class="dtab" id="fxKheal">💚 ฟื้นเลือด</button>
+        <button class="dtab" id="fxKbuff">⬆️ บัฟ</button>
+      </div>
+      <div class="fxgrid" id="fxGrid"></div>
+      <div class="dl"><span>เครื่องช้าหรือไม่ชอบภาพขยับ</span><b>ถ้าตั้งค่าเครื่องเป็นลดการเคลื่อนไหว
+        (Reduce Motion) เกมจะหั่นเวลาอนิเมชั่นให้สั้นลงเองอัตโนมัติ · หรือเปิด ⏭ ข้ามฉากถาวรก็ได้</b></div>
+    </div>
+    <div class="gbox"><h4>🎯 แถวจัดทัพ</h4>
+      <div class="dl"><span>ตั้งที่ไหน</span><b>หน้าสเตตัสของแต่ละตัว หรือกล่อง 🎯 แถวจัดทัพ ใต้รายการเลือกทีมบอส</b></div>
+      ${ROWS.map(r => `<div class="dl"><span>${r.emoji} ${r.name}</span><b>${r.note}</b></div>`).join('')}
+      <div class="dl"><span>ทำไมต้องคิด</span><b>บอสเล็งเป้าตามน้ำหนักแถว (หน้า 60% · กลาง 30% · หลัง 10%)
+        ถ้าแถวหน้ายังยืนอยู่ แถวหลังกินดาเมจแค่ 65%</b></div>
+      <div class="dl"><span>สูตรที่ใช้บ่อย</span><b>สายอึดยืนหน้า 1-2 ตัว · สายพลังจิตยืนหลัง · สายตีไวยืนกลาง
+        — ถ้าเอาสายพลังจิตไปยืนหน้าจะเสียโบนัส 24% และตายเร็ว</b></div>
+    </div>
+    <div class="gbox"><h4>🧱 สายปั้น 5 สาย</h4>
+      <div class="dl"><span>ปั้นได้หลายแบบ</span><b>สายพันธุ์เดียวกันปั้นคนละสายได้ ตัวเดิมก็เปลี่ยนไปมาได้
+        เปลี่ยนครั้งละ 💠 800 (กลับสายสมดุลฟรี) ค่าพลังคิดใหม่ทันที</b></div>
+      ${BUILD_SPECS.map(b => `<div class="dl"><span>${b.emoji} ${b.name}</span><b>${b.note}
+        ${Object.keys(b.mod).length ? "<br><i style='font-style:normal;color:var(--dim)'>" +
+          BSTATS.filter(x => b.mod[x.k]).map(x => `${x.short} ×${b.mod[x.k]}`).join(" · ") + "</i>" : ""}</b></div>`).join('')}
+      <div class="dl"><span>ตั้งที่ไหน</span><b>หน้าสเตตัสของตัวนั้น กล่อง 🧱 สายปั้น</b></div>
+      <div class="dl"><span>เข้ากับอะไร</span><b>สายอึด→แถวหน้า+🍓เบอร์รี่ · สายตีแรง→🥊สายรัดหมัด
+        · สายพลังจิต→แถวหลัง+👓แว่น · สายตีไว→🎗️ผ้าคาด+ท่าออกก่อน</b></div>
+    </div>
+    <div class="gbox"><h4>💫 ไม้ตาย (สกิล active) ${ULTS.length} สกิล</h4>
+      <div class="dl"><span>ตัวละหนึ่งสกิล</span><b>ซื้อใส่ได้ในหน้าสเตตัส กล่อง 💫 ไม้ตาย
+        · เปลี่ยนได้ทุกเมื่อแต่จ่ายค่าเรียนใหม่</b></div>
+      <div class="dl"><span>เรียนได้บางสกิล</span><b>สกิลไร้ธาตุ ${ULTS.filter(u => !u.el).length} สกิลใครก็เรียนได้
+        · สกิลประจำธาตุเรียนได้เฉพาะธาตุของตัวเอง (ธาตุละ 2 สกิล) · ตัวสองธาตุเรียนได้ทั้งสองฝั่ง</b></div>
+      <div class="dl"><span>พลังงาน</span><b>ออกท่าปกติได้ +${ULT_ACT} · ถูกตี +${ULT_HIT}
+        ครบ ${ULT_MAX} แล้วปล่อยได้ · ปล่อยแล้วรีเซ็ตเป็น 0</b></div>
+      <div class="dl"><span>กดเองหรือออโต้</span><b>โหมดสั่งเองมีปุ่มไม้ตายใต้ตัวเรา กดตอนไหนก็ได้ที่พลังงานเต็ม
+        · โหมดออโต้ปล่อยให้เองทันทีที่เต็ม</b></div>
+      <div class="dl"><span>สกิลสายโจมตี</span><b>ฟันสะบั้นฟ้า · ระเบิดพลังจิต · ดูดพลังชีวิต · บดขยี้เกราะ
+        · อวสาน+ตราสาปประจำธาตุทั้ง 16 ธาตุ</b></div>
+      <div class="dl"><span>สกิลสายซัพพอร์ต</span><b>สายธารบำบัด (ฟื้นทีม 40%) · กำแพงศรัทธา (เกราะทีม +2)
+        · คำรามปลุกใจ (โจมตีทีม +2) · ลมส่งทัพ (ความเร็วทีม +2) · ชำระมลทิน (ล้างสถานะ+ฟื้น)</b></div>
+      <div class="dl"><span>ไม้ตายแรงแค่ไหน</span><b>พลังท่า 110–230 (ท่าปกติหนักสุด 98) และคูณเพิ่มอีก 15%
+        · ตราสาปประจำธาตุใส่สถานะได้แน่นอนไม่ต้องลุ้น</b></div>
+    </div>
     <div class="gbox"><h4>🎮 โหมดสั่งเอง (เทิร์นเบส)</h4>
       <div class="dl"><span>เปิดที่ไหน</span><b>แท็บบอส → ปุ่มบนสุดเหนือปุ่มออกไปสู้ · สลับได้ทุกเมื่อ
         ใช้กับบอสรายวัน ดันเจี้ยน หอคอย และถ้ำไร้ที่สิ้นสุดทั้งหมด</b></div>
@@ -6336,6 +6537,7 @@ function renderGuide(){
       <div class="dl"><span>เพดานโบนัส</span><b>พรสวรรค์+ฉาก+ของตกแต่ง รวมไม่เกิน ${EARN_CAP} เท่าต่อตัว</b></div>
       <div class="dl"><span>ตอนไม่อยู่</span><b>สะสมให้สูงสุด 8 ชั่วโมง</b></div>
     </div>`;
+  renderFxGrid();
 }
 
 /* ==== ขายเร็ว: เลือกทีเดียวได้ทั้งกอง + ตั้งขายอัตโนมัติ ==== */
@@ -7455,6 +7657,111 @@ const wxMul = el => {
   return el && w.up === el ? 1.25 : el && w.down === el ? 0.75 : 1;
 };
 
+/* ================= 🎯 แถวจัดทัพ =================
+   วางหน้า-กลาง-หลัง มีผลจริงกับเกราะ ดาเมจ และโอกาสถูกเล็ง */
+const ROWS = [
+  { id:0, emoji:"🛡", name:"แถวหน้า", def:1.32, phys:1.15, spec:0.95, aggro:60,
+    note:"เกราะกับความต้านทาน +32% · ท่ากายภาพแรงขึ้น 15% · ถูกเล็งมากที่สุด" },
+  { id:1, emoji:"⚔️", name:"แถวกลาง", def:1.06, phys:1.06, spec:1.08, aggro:30,
+    note:"สมดุลทุกทาง · ถูกเล็งปานกลาง" },
+  { id:2, emoji:"✨", name:"แถวหลัง", def:0.78, phys:0.90, spec:1.24, aggro:10,
+    note:"ท่าพลังพิเศษแรงขึ้น 24% แต่บอบบาง · ถูกเล็งน้อยสุด และถ้าแถวหน้ายังอยู่จะกันดาเมจให้อีก 35%" }
+];
+const rowOf = c => ROWS[Math.max(0, Math.min(2, c && c.row != null ? c.row : 1))];
+function setRow(cid, r){
+  const c = S.creatures.find(x => x.id === cid);
+  if(!c) return;
+  c.row = Math.max(0, Math.min(2, r));
+  sfx("tap"); save(); render();
+}
+
+/* ================= 🧱 สายปั้น =================
+   สายพันธุ์เดียวกันปั้นได้หลายแบบ เปลี่ยนได้ทุกเมื่อด้วยผงตุ้ยนุ้ย */
+const BUILD_SPECS = [
+  { id:"bal",  emoji:"⚖️", name:"สายสมดุล", dust:0,
+    mod:{}, note:"ไม่ปรับอะไร ค่าพลังตามธรรมชาติของตัวนั้น" },
+  { id:"tank", emoji:"🛡", name:"สายอึด",   dust:800,
+    mod:{ hp:1.24, def:1.20, spd:1.20, atk:0.86, spa:0.86, spe:0.84 },
+    note:"เลือด เกราะ ต้านทาน ขึ้นมาก แลกกับพลังโจมตีและความเร็ว" },
+  { id:"pow",  emoji:"🥊", name:"สายตีแรง", dust:800,
+    mod:{ atk:1.30, hp:0.92, def:0.88, spd:0.88, spa:0.90 },
+    note:"พลังโจมตีกายภาพพุ่ง แลกกับความอึด" },
+  { id:"mag",  emoji:"👓", name:"สายพลังจิต", dust:800,
+    mod:{ spa:1.30, hp:0.92, def:0.88, spd:0.90, atk:0.90 },
+    note:"พลังพิเศษพุ่ง แลกกับความอึด" },
+  { id:"fast", emoji:"💨", name:"สายตีไว",  dust:800,
+    mod:{ spe:1.40, atk:1.06, spa:1.06, hp:0.90, def:0.84, spd:0.84 },
+    note:"ความเร็วพุ่งมาก ออกก่อนและคริตบ่อย แต่บอบบางสุด" }
+];
+const BUILD_SPEC = Object.fromEntries(BUILD_SPECS.map(x => [x.id, x]));
+const buildSpec = c => BUILD_SPEC[(c && c.bd) || "bal"] || BUILD_SPEC.bal;
+function setBuild(cid, id){
+  const c = S.creatures.find(x => x.id === cid);
+  const b = BUILD_SPEC[id];
+  if(!c || !b) return;
+  if(c.bd === id || (!c.bd && id === "bal")) return;
+  if(b.dust && (S.dust || 0) < b.dust){ alert(`เปลี่ยนสายปั้นต้องใช้ 💠 ${b.dust}`); return; }
+  if(b.dust) S.dust -= b.dust;
+  c.bd = id;
+  c.bs = null; ensureBattle(c);
+  logf(`${SP[c.sid].name} เปลี่ยนเป็น ${b.emoji} ${b.name}`, "good");
+  sfx("buy"); save(); render();
+}
+
+/* ================= 💫 ไม้ตาย (สกิล active) =================
+   ตัวละหนึ่งสกิล · เรียนได้เฉพาะสกิลไร้ธาตุกับสกิลธาตุของตัวเอง
+   เก็บพลังงานครบ 100 แล้วปล่อยได้ · โหมดสั่งเองกดเอง โหมดออโต้ปล่อยให้ */
+const ULT_MAX = 100, ULT_ACT = 22, ULT_HIT = 11;
+const ULTS = [
+  { id:"u_slash", n:"ฟันสะบั้นฟ้า",  el:null, k:"atk", pw:210, dust:1200,
+    note:"ดาเมจกายภาพหนักมากใส่ศัตรู" },
+  { id:"u_burst", n:"ระเบิดพลังจิต", el:null, k:"atk", pw:200, spec:true, dust:1200,
+    note:"ดาเมจพลังพิเศษหนักมากใส่ศัตรู" },
+  { id:"u_drain", n:"ดูดพลังชีวิต",  el:null, k:"atk", pw:150, spec:true, drain:0.6, dust:1600,
+    note:"ดาเมจพลังพิเศษ แล้วฟื้นเลือดตัวเองเท่ากับ 60% ที่ทำได้" },
+  { id:"u_heal",  n:"สายธารบำบัด",   el:null, k:"sup", heal:0.40, dust:1400,
+    note:"ฟื้นเลือดทั้งทีม 40% ของเลือดสูงสุด" },
+  { id:"u_guard", n:"กำแพงศรัทธา",   el:null, k:"sup", stg:{ def:2, spd:2 }, all:true, dust:1400,
+    note:"เกราะและต้านทานทั้งทีม +2 ขั้น" },
+  { id:"u_rage",  n:"คำรามปลุกใจ",   el:null, k:"sup", stg:{ atk:2, spa:2 }, all:true, dust:1600,
+    note:"พลังโจมตีและพลังพิเศษทั้งทีม +2 ขั้น" },
+  { id:"u_haste", n:"ลมส่งทัพ",      el:null, k:"sup", stg:{ spe:2 }, all:true, dust:1200,
+    note:"ความเร็วทั้งทีม +2 ขั้น" },
+  { id:"u_cleanse",n:"ชำระมลทิน",    el:null, k:"sup", cleanse:true, heal:0.18, dust:1300,
+    note:"ล้างสถานะผิดปกติทั้งทีม แล้วฟื้นเลือด 18%" },
+  { id:"u_break", n:"บดขยี้เกราะ",   el:null, k:"atk", pw:120, foeStg:{ def:-2, spd:-2 }, dust:1500,
+    note:"ดาเมจปานกลาง แล้วกดเกราะกับต้านทานของศัตรูลง 2 ขั้น" }
+];
+/* สกิลประจำธาตุ · ธาตุละสองอัน (ดาเมจหนัก + ใส่สถานะ) */
+Object.keys(EL_MOVE).forEach(el => {
+  const d = EL_MOVE[el], k = "u" + ELEMENTS.indexOf(el);
+  ULTS.push({ id:k + "a", n:"อวสาน" + d.n[1], el, k:"atk", pw:230, spec:true, dust:1800,
+    note:`ดาเมจธาตุ${el}หนักที่สุด คูณธาตุเต็มรูปแบบ` });
+  ULTS.push({ id:k + "b", n:"ตราสาป" + d.n[2], el, k:"atk", pw:110, spec:true, dust:1600,
+    st: d.st || null, foeStg: d.st ? null : { atk:-2 },
+    note: d.st ? `ดาเมจธาตุ${el}แล้วใส่${STATUS[d.st].emoji} ${STATUS[d.st].name}แน่นอน`
+               : `ดาเมจธาตุ${el}แล้วกดพลังโจมตีศัตรู 2 ขั้น` });
+});
+const ULT = Object.fromEntries(ULTS.map(x => [x.id, x]));
+const ultOf = c => (c && c.ult && ULT[c.ult]) || null;
+function ultLearnable(c){
+  const els = [SP[c.sid] ? SP[c.sid].el : null, c.el2].filter(Boolean);
+  return ULTS.filter(u => !u.el || els.indexOf(u.el) >= 0);
+}
+function buyUlt(cid, id){
+  const c = S.creatures.find(x => x.id === cid), u = ULT[id];
+  if(!c || !u) return;
+  if(c.ult === id) return;
+  if(ultLearnable(c).indexOf(u) < 0){ alert(`${SP[c.sid].name} เรียนสกิลนี้ไม่ได้`); return; }
+  if((S.dust || 0) < u.dust){ alert(`ต้องใช้ 💠 ${u.dust}`); return; }
+  if(!confirm(`ให้${SP[c.sid].name}เรียน 💫 ${u.n}?\n\n${u.note}\n\nใช้ 💠 ${u.dust}` +
+    (c.ult ? `\nสกิลเดิม ${ULT[c.ult].n} จะถูกแทนที่` : ""))) return;
+  S.dust -= u.dust;
+  c.ult = id;
+  logf(`${SP[c.sid].name} เรียน 💫 ${u.n} แล้ว`, "good");
+  sfx("buy"); save(); render();
+}
+
 const MONO_BONUS = 1.15;      // ตัวธาตุเดียวใช้ท่าธาตุตัวเองได้โบนัส (แทน STAB)
 
 /* ---- ป้ายโครงตัว: ดูจากสัดส่วนค่าพลังจริง แล้วแนะนำของถือที่เข้ากัน ---- */
@@ -7546,6 +7853,7 @@ function lbOpen(){
       <div class="aboss" id="lbFoe"><img id="lbFoeArt" src="" alt="">
         <div class="ahitfx" id="lbFoeFx"></div></div>
       <div class="lbme" id="lbMe"></div>
+      <button class="ultbtn" id="lbUlt"></button>
     </div>
     <div class="lblog" id="lbLog"></div>
     <div class="lbmoves" id="lbMoves"></div>
@@ -7576,7 +7884,10 @@ function lbDraw(){
     <div class="lbinfo">
       <b>${u.sp.name} ${u.st ? STATUS[u.st].emoji + " " + STATUS[u.st].name : ""}</b>
       <div class="hpbar big"><i style="width:${Math.max(0, u.hp/u.max*100)}%"></i></div>
-      <small>${Math.max(0, u.hp)} / ${u.max} · 📈 Lv ${lvOf(u.c)} · ${multTag(u.mult)}
+      ${u.ult ? `<div class="enbar ${u.en >= ULT_MAX ? 'enfull' : ''}"><i style="width:${
+        Math.min(100, u.en/ULT_MAX*100)}%"></i></div>` : ''}
+      <small>${u.row ? u.row.emoji + " " + u.row.name + " · " : ""}${Math.max(0, u.hp)} / ${u.max}
+        · 📈 Lv ${lvOf(u.c)} · ${multTag(u.mult)}
         ${BSTATS.map(x => u.stg[x.k] ? `<i class="stg">${x.short}${u.stg[x.k] > 0 ? "+" : ""}${u.stg[x.k]}</i>` : "").join("")}
         ${u.item ? `<i class="stg">${HELDMAP[u.c.it].emoji}</i>` : ""}</small>
     </div>
@@ -7604,12 +7915,27 @@ function lbDraw(){
     <button class="lbsw ${i === LB.act ? 'on' : ''} ${x.hp <= 0 ? 'down' : ''}"
       data-lbsw="${i}" ${ready && x.hp > 0 && i !== LB.act ? '' : 'disabled'}>
       <img src="${ART[x.c.sid]}" alt="" style="${shinyFilter(x.c)}">
-      <small>${x.hp <= 0 ? "หมดแรง" : Math.round(x.hp/x.max*100) + "%"}</small></button>`).join('');
+      <small>${x.row ? x.row.emoji : ""}${x.hp <= 0 ? "หมดแรง" : Math.round(x.hp/x.max*100) + "%"}
+        ${x.ult ? `<br>💫${Math.round(x.en)}` : ""}</small></button>`).join('');
+  const ub = q('lbUlt');
+  if(ub){
+    const s = u && u.ult;
+    ub.style.display = s ? '' : 'none';
+    if(s){
+      const full = u.en >= ULT_MAX;
+      ub.disabled = !(ready && full);
+      ub.textContent = full ? `💫 ปล่อย ${s.n}!` : `💫 ${s.n} · พลังงาน ${Math.round(u.en)}/${ULT_MAX}`;
+      ub.onclick = lbUseUlt;
+    }
+  }
   m.querySelectorAll('[data-lbmv]').forEach(b =>
     b.onclick = () => lbUse(+b.dataset.lbmv));
   m.querySelectorAll('[data-lbsw]').forEach(b =>
     b.onclick = () => lbSwitch(+b.dataset.lbsw));
 }
+const lbEl = id => { const m = document.getElementById('lbMask'); return m ? m.querySelector('#' + id) : null; };
+const lbMeArt  = () => { const e = lbEl('lbMe'); return e ? e.querySelector('img') : null; };
+const lbFoeArt = () => lbEl('lbFoeArt');
 const lbPop = (id, txt, cls) => {
   const m = document.getElementById('lbMask');
   if(!m) return;
@@ -7631,6 +7957,25 @@ function lbSwitch(i){
   LB.act = i;
   lbDraw();
   setTimeout(() => lbFoeTurn(true), 420);
+}
+function lbUseUlt(){
+  if(!LB || LB.busy || LB.over) return;
+  const u = lbAct();
+  if(!u || u.hp <= 0 || !u.ult || u.en < ULT_MAX) return;
+  LB.busy = true;
+  LB.round++;
+  const s = u.ult;
+  ultBanner(s.n, s.el || SP[u.c.sid].el);
+  fxAnim(lbMeArt(), 'castS');
+  fxAt(lbEl(s.k === "sup" ? 'lbMe' : 'lbFoe'),
+    s.k === "sup" ? (s.heal ? "heal" : "buff") : "spec", s.el || SP[u.c.sid].el, true);
+  if(s.pw) fxAnim(lbFoeArt(), 'hurtS');
+  fireUlt(u, LB.boss, LB.units, lbSay);
+  lbPop('lbFoeFx', '💫 ' + u.ult.n, 'crittag');
+  sfx("crit");
+  lbDraw();
+  setTimeout(() => { if(LB.boss.hp <= 0){ lbEnd(true); return; }
+    lbFoeTurn(); lbDraw(); setTimeout(lbEndTurn, 620); }, 900);
 }
 function lbUse(i){
   if(!LB || LB.busy || LB.over) return;
@@ -7661,16 +8006,21 @@ function lbMyTurn(u, m){
     u.hp -= d; lbSay(`${u.sp.name} 💫 สับสน ตีใส่ตัวเอง −${d}`); lbPop('lbMeFx', '−' + d, 'crit'); return;
   }
   u.pp[m.id] = Math.max(0, (u.pp[m.id] || 0) - 1);
+  u.en = Math.min(ULT_MAX, u.en + ULT_ACT);
   if(Math.random() > m.acc){ lbSay(`${u.sp.name} ใช้${m.n} แต่พลาด!`); return; }
   if(m.heal){
     const g = Math.min(u.max - u.hp, Math.round(u.max*m.heal));
-    u.hp += g; lbSay(`${u.sp.name} ใช้${m.n} ฟื้นพลัง +${g}`); lbPop('lbMeFx', '+' + g, 'good'); return;
+    u.hp += g;
+    fxAnim(lbMeArt(), 'healS'); fxAt(lbEl('lbMe'), "heal", "พืช");
+    lbSay(`${u.sp.name} ใช้${m.n} ฟื้นพลัง +${g}`); lbPop('lbMeFx', '+' + g, 'good'); return;
   }
   if(m.stg && m.pw === 0){
     const tgt = m.stg.self ? u.stg : B.stg, parts = [];
     BSTATS.forEach(bt => { if(m.stg[bt.k]){
       tgt[bt.k] = clamp(tgt[bt.k] + m.stg[bt.k], -6, 6);
       parts.push(`${bt.short}${m.stg[bt.k] > 0 ? "+" : ""}${m.stg[bt.k]}`); } });
+    fxAnim(lbMeArt(), 'castS');
+    fxAt(lbEl(m.stg.self ? 'lbMe' : 'lbFoe'), "buff", m.el || SP[u.c.sid].el);
     lbSay(`${u.sp.name} ใช้${m.n} — ${m.stg.self ? "ตัวเอง" : LB.foe.name} ${parts.join(" ")}`);
     lbPop(m.stg.self ? 'lbMeFx' : 'lbFoeFx', parts.join(" "), m.stg.self ? 'good' : '');
     return;
@@ -7679,10 +8029,14 @@ function lbMyTurn(u, m){
     if(B.st) lbSay(`${LB.foe.name} ติดสถานะอยู่แล้ว`);
     else if(!canStatus(B.el, B.el2, m.st)) lbSay(`${LB.foe.name} ไม่ติด${STATUS[m.st].name}`);
     else { B.st = m.st; B.stT = STATUS[m.st].turns;
+      fxAnim(lbMeArt(), 'castS'); fxAt(lbEl('lbFoe'), "spec", m.el || SP[u.c.sid].el);
       lbSay(`${u.sp.name} ใช้${m.n} — ${LB.foe.name} ติด${STATUS[m.st].emoji} ${STATUS[m.st].name}!`);
       lbPop('lbFoeFx', STATUS[m.st].emoji + STATUS[m.st].name, 'crittag'); }
     return;
   }
+  fxAnim(lbMeArt(), m.k === "s" ? 'castS' : 'lungeS');
+  fxAt(lbEl('lbFoe'), m.k === "s" ? "spec" : "hit", m.el || SP[u.c.sid].el);
+  fxAnim(lbFoeArt(), 'hurtS');
   const { raw, mu } = calcDmg(u, m, B);
   let dmg = raw;
   const crit = Math.random() < 0.10 + u.b.spe/1400 + (m.crit || 0) + (u.critAdd || 0)
@@ -7722,8 +8076,12 @@ function lbFoeTurn(freeHit){
   let dm = 0;
   for(let sw = 0; sw < swings; sw++)
     dm += Math.max(5, Math.round((A*0.7 - (t.b.def*stMul(t.stg.def) + t.b.spd*stMul(t.stg.spd))*0.16)
-      * bmu * (0.85 + Math.random()*0.3)));
+      * bmu * (0.85 + Math.random()*0.3) / (t.row ? t.row.def : 1) * guardCut(LB.units, t)));
   t.hp -= dm;
+  t.en = Math.min(ULT_MAX, t.en + ULT_HIT);
+  fxAnim(lbFoeArt(), 'lungeL');
+  fxAt(lbEl('lbMe'), "hit", B.el);
+  fxAnim(lbMeArt(), 'hurtS');
   lbSay(`${LB.foe.name} โจมตี${t.sp.name} −${dm}${bmu > 1.3 ? " (ทะลุเกราะ)" : bmu < 1 ? " (ต้านไว้ได้)" : ""}`);
   lbPop('lbMeFx', '−' + dm, 'crit');
   sfx("hurt");
@@ -7834,12 +8192,256 @@ function calcDmg(u, m, boss){
   if(u.item === "orb")   mu *= 1.30;
   if(u.item === "band"  && !spec) mu *= 1.25;
   if(u.item === "specs" &&  spec) mu *= 1.25;
+  if(u.row) mu *= spec ? u.row.spec : u.row.phys;       // 🎯 แถวจัดทัพ
   mu *= (u.dmgMul || 1);                               // 🌀 พรจากถ้ำ
   return { raw:Math.max(4, Math.round((A*0.62*(m.pw/60) - D*0.22) * mu * (0.86 + Math.random()*0.28))), mu };
 }
 const effWord = mu => mu >= 1.9 ? "แรงมาก!" : mu >= 1.3 ? "ได้เปรียบ"
   : mu <= 0.4 ? "แทบไม่ระคาย" : mu < 1 ? "เสียเปรียบ" : "";
 const spdOf = u => u.b.spe * stMul(u.stg.spe) * (u.st === "par" ? 0.5 : 1);
+
+/* ================= 🎆 เอฟเฟกต์ตอนสู้ ================= */
+const fxAnim = (el, cls) => {
+  if(!el) return;
+  el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 800);
+};
+/* ================= 🎨 คลังเอฟเฟกต์ SVG ประจำธาตุ =================
+   ทุกธาตุมีรูปทรงเฉพาะตัว · สีดึงจากชุดสี 16 ธาตุ · ขยับด้วย CSS keyframes */
+const FX_SVG = {
+  "ไฟ": (a, b) => `
+    ${[0,1,2].map(i => `<path class="fRise" style="animation-delay:${i*.09}s" fill="${i?b:a}"
+      d="M${34+i*16} 74 C${28+i*16} 62 ${40+i*16} 58 ${34+i*16} 44
+         C${44+i*16} 54 ${46+i*16} 66 ${34+i*16} 74 Z"/>`).join('')}
+    <circle class="fPulse" cx="50" cy="50" r="26" fill="none" stroke="${a}" stroke-width="5"/>`,
+  "ไฟฟ้า": (a, b) => `
+    ${[0,1,2].map(i => `<polyline class="fFlash" style="animation-delay:${i*.06}s" fill="none"
+      stroke="${i%2?b:a}" stroke-width="${5-i}" stroke-linejoin="round"
+      points="${28+i*14},14 ${44+i*10},44 ${30+i*12},50 ${52+i*8},88"/>`).join('')}
+    <circle class="fIn" cx="50" cy="50" r="18" fill="${a}" opacity=".55"/>`,
+  "ลม": (a, b) => `
+    ${[0,1,2].map(i => `<path class="fSpin" style="animation-delay:${i*.08}s" fill="none"
+      stroke="${i?b:a}" stroke-width="${5-i}" stroke-linecap="round"
+      d="M${20+i*8} 50 A ${30-i*7} ${30-i*7} 0 1 1 ${80-i*8} 50"/>`).join('')}
+    <circle class="fPulse" cx="50" cy="50" r="14" fill="${a}" opacity=".5"/>`,
+  "พืช": (a, b) => `
+    ${[0,1,2,3,4].map(i => `<g class="fSpin" style="animation-delay:${i*.06}s;transform-origin:50px 50px">
+      <path fill="${i%2?b:a}" transform="rotate(${i*72} 50 50)"
+        d="M50 50 C60 34 76 30 82 22 C78 40 68 52 50 50 Z"/></g>`).join('')}
+    <circle class="fPulse" cx="50" cy="50" r="18" fill="none" stroke="${a}" stroke-width="4"/>`,
+  "แมลง": (a, b) => `
+    ${[0,1,2,3].map(i => `<path class="fIn" style="animation-delay:${i*.07}s" stroke="${i%2?b:a}"
+      stroke-width="4" stroke-linecap="round" fill="none"
+      d="M${14+i*8} ${14+i*6} L50 50"/>`).join('')}
+    <ellipse class="fOut" cx="50" cy="50" rx="22" ry="13" fill="${a}" opacity=".6"/>
+    <ellipse class="fOut" cx="50" cy="50" rx="13" ry="22" fill="${b}" opacity=".5"/>`,
+  "ดิน": (a, b) => `
+    ${[0,1,2,3].map(i => `<rect class="fRise" style="animation-delay:${i*.07}s" fill="${i%2?b:a}"
+      x="${22+i*16}" y="62" width="${13-i}" height="${13-i}" rx="2"
+      transform="rotate(${i*24} ${28+i*16} 68)"/>`).join('')}
+    <ellipse class="fPulse" cx="50" cy="66" rx="34" ry="10" fill="${a}" opacity=".5"/>`,
+  "หิน": (a, b) => `
+    ${[0,1,2].map(i => `<polygon class="fFall" style="animation-delay:${i*.09}s" fill="${i?b:a}"
+      points="${30+i*20},22 ${44+i*20},30 ${38+i*20},46 ${24+i*20},40"/>`).join('')}
+    <ellipse class="fPulse" cx="50" cy="62" rx="32" ry="12" fill="${b}" opacity=".55"/>`,
+  "น้ำ": (a, b) => `
+    ${[0,1,2].map(i => `<path class="fOut" style="animation-delay:${i*.08}s" fill="none"
+      stroke="${i?b:a}" stroke-width="${6-i}" stroke-linecap="round"
+      d="M${14+i*6} ${48+i*6} Q35 ${30+i*6} 50 ${48+i*6} T${86-i*6} ${48+i*6}"/>`).join('')}
+    ${[0,1,2,3].map(i => `<circle class="fRise" style="animation-delay:${.1+i*.06}s"
+      cx="${26+i*16}" cy="62" r="${5-i%2}" fill="${a}"/>`).join('')}`,
+  "น้ำแข็ง": (a, b) => `
+    <g class="fIn">${[0,1,2,3,4,5].map(i => `<rect fill="${i%2?b:a}" x="47" y="20" width="6" height="60"
+      rx="3" transform="rotate(${i*30} 50 50)"/>`).join('')}</g>
+    ${[0,1,2].map(i => `<polygon class="fOut" style="animation-delay:${i*.09}s" fill="${b}"
+      points="${24+i*24},${24+i*8} ${34+i*24},${20+i*8} ${30+i*24},${34+i*8}"/>`).join('')}`,
+  "เหล็ก": (a, b) => `
+    ${[0,1,2].map(i => `<rect class="fSweep" style="animation-delay:${i*.07}s" fill="${i?b:a}"
+      x="6" y="${38+i*10}" width="88" height="${7-i}" rx="4"
+      transform="rotate(${-24+i*8} 50 50)"/>`).join('')}
+    <circle class="fIn" cx="50" cy="50" r="20" fill="none" stroke="${a}" stroke-width="6"
+      stroke-dasharray="9 7"/>`,
+  "รัตติกาล": (a, b) => `
+    ${[0,1,2].map(i => `<path class="fIn" style="animation-delay:${i*.08}s" fill="${i?b:a}"
+      transform="rotate(${i*120} 50 50)"
+      d="M50 14 A36 36 0 0 1 50 86 A26 26 0 0 0 50 14 Z" opacity=".8"/>`).join('')}
+    <circle class="fPulse" cx="50" cy="50" r="16" fill="${a}"/>`,
+  "วิญญาณ": (a, b) => `
+    ${[0,1,2].map(i => `<path class="fRise" style="animation-delay:${i*.1}s" fill="${i?b:a}"
+      opacity=".85"
+      d="M${30+i*18} 70 q-9 -14 2 -22 q11 -8 18 2 q6 9 -2 20 q-9 -6 -18 0 Z"/>`).join('')}
+    <circle class="fPulse" cx="50" cy="46" r="22" fill="none" stroke="${b}" stroke-width="4"/>`,
+  "จิต": (a, b) => `
+    ${[0,1,2,3].map(i => `<circle class="fOut" style="animation-delay:${i*.09}s" cx="50" cy="50"
+      r="${12+i*10}" fill="none" stroke="${i%2?b:a}" stroke-width="${5-i}" stroke-dasharray="${16+i*6} ${8+i*3}"/>`).join('')}`,
+  "ประกาย": (a, b) => `
+    ${[0,1,2,3].map(i => `<path class="fOut" style="animation-delay:${i*.08}s" fill="${i%2?b:a}"
+      transform="rotate(${i*45} 50 50)"
+      d="M50 ${16+i*6} L57 43 L${84-i*6} 50 L57 57 L50 ${84-i*6} L43 57 L${16+i*6} 50 L43 43 Z"/>`).join('')}`,
+  "พิษ": (a, b) => `
+    ${[0,1,2,3,4].map(i => `<circle class="fRise" style="animation-delay:${i*.08}s"
+      cx="${24+i*13}" cy="66" r="${9-i%3*2}" fill="${i%2?b:a}" opacity=".85"/>`).join('')}
+    <ellipse class="fPulse" cx="50" cy="58" rx="30" ry="16" fill="${a}" opacity=".45"/>`,
+  "มังกร": (a, b) => `
+    ${[0,1].map(i => `<path class="fSweep" style="animation-delay:${i*.1}s" fill="none"
+      stroke="${i?b:a}" stroke-width="7" stroke-linecap="round"
+      d="M14 ${26+i*36} Q50 ${50+i*4} 86 ${26+i*36}"/>`).join('')}
+    ${[0,1,2].map(i => `<polygon class="fIn" style="animation-delay:${i*.08}s" fill="${b}"
+      points="50,${30+i*14} 58,${38+i*14} 50,${46+i*14} 42,${38+i*14}"/>`).join('')}`
+};
+/* ⚔️ ท่ากายภาพ · เอฟเฟกต์ฟันกลาง ใช้เหมือนกันทุกธาตุ แบบท่า Cut
+   วาดสองชั้น: เส้นเข้มด้านหลังให้เห็นบนพื้นสว่าง + เส้นขาววาบด้านหน้า */
+const FX_CUT = () => `
+  <rect class="fWhite" x="-20" y="-20" width="140" height="140" fill="#fff"/>
+  ${[0,1,2].map(i => {
+    const y = 30 + i*17, w = 9 - i*2, d = (i*0.055).toFixed(3);
+    return `<g class="fCut" style="animation-delay:${d}s">
+      <path fill="none" stroke="#2E2A26" stroke-opacity=".55" stroke-linecap="round"
+        stroke-width="${w + 5}" d="M8 ${y + 26} Q50 ${y - 10} 92 ${y - 24}"/>
+      <path fill="none" stroke="#FFFFFF" stroke-linecap="round"
+        stroke-width="${w}" d="M8 ${y + 26} Q50 ${y - 10} 92 ${y - 24}"/>
+    </g>`;
+  }).join('')}
+  ${[0,1,2,3].map(i => `<circle class="fRise" style="animation-delay:${(0.12 + i*0.05).toFixed(2)}s"
+    cx="${26 + i*17}" cy="${58 - i*7}" r="${3.5 - i*0.4}" fill="#fff"/>`).join('')}`;
+
+/* เอฟเฟกต์ฟื้นเลือดกับบัฟ ใช้ร่วมกันทุกธาตุ แต่ย้อมสีธาตุ */
+const FX_HEAL = (a) => `
+  ${[0,1,2,3,4,5].map(i => `<path class="fRise" style="animation-delay:${i*.07}s" fill="${a}"
+    d="M${18+i*13} 74 l4 -9 l4 9 l-4 9 Z"/>`).join('')}
+  <circle class="fPulse" cx="50" cy="52" r="24" fill="none" stroke="${a}" stroke-width="5"/>`;
+const FX_BUFF = (a, b) => `
+  ${[0,1,2].map(i => `<polygon class="fRise" style="animation-delay:${i*.09}s" fill="${i?b:a}"
+    points="${28+i*22},72 ${40+i*22},48 ${34+i*22},52 ${44+i*22},26 ${32+i*22},50 ${38+i*22},46"/>`).join('')}
+  <circle class="fPulse" cx="50" cy="50" r="20" fill="none" stroke="${b}" stroke-width="4"/>`;
+/* คืน markup ของ svg เอฟเฟกต์ · kind = hit / spec / heal / buff */
+function elFxSvg(el, kind, big){
+  const i = elInfo(el);
+  const a = i.fg, b = i.bd;
+  const body = kind === "hit" ? FX_CUT()                       // ท่ากายภาพ = ฟันกลาง ทุกธาตุเหมือนกัน
+    : kind === "heal" ? FX_HEAL("#3E9E6E")
+    : kind === "buff" ? FX_BUFF(a, b)
+    : (FX_SVG[el] || FX_SVG["หิน"])(a, b);
+  return `<svg class="fxsvg${big ? " big" : ""}" viewBox="0 0 100 100">${body}</svg>`;
+}
+
+/* พุ่งเอฟเฟกต์ลงบนกล่องเป้า · kind = hit / spec / heal / buff / ult */
+function fxAt(host, kind, el, big){
+  if(!host) return;
+  const i = elInfo(el || "หิน");
+  const L = document.createElement('div');
+  L.className = 'fxlayer';
+  L.innerHTML = elFxSvg(el || "หิน", kind === "spec" || kind === "hit" ? kind : kind, big);
+  const scale = big ? 1.6 : 1;
+  if(kind === "heal" || kind === "buff"){
+    const c = kind === "heal" ? "#7FD3A6" : i.fg;
+    for(let k = 0; k < 8; k++){
+      const p = document.createElement('i');
+      p.className = 'fxp';
+      p.style.background = c;
+      p.style.setProperty('--dx', (Math.random()*70 - 35).toFixed(0) + 'px');
+      p.style.setProperty('--dy', (-30 - Math.random()*44).toFixed(0) + 'px');
+      p.style.animationDelay = (k*0.05).toFixed(2) + 's';
+      L.appendChild(p);
+    }
+  } else {
+    const b = document.createElement('i');
+    b.className = 'fxb';
+    b.style.background = `radial-gradient(circle, ${i.fg}CC 0%, ${i.bd}88 45%, transparent 72%)`;
+    b.style.transform = `scale(${scale})`;
+    L.appendChild(b);
+    const r = document.createElement('i');
+    r.className = 'fxr';
+    r.style.borderColor = i.fg;
+    L.appendChild(r);
+    if(kind === "spec"){
+      for(let k = 0; k < 6; k++){
+        const p = document.createElement('i');
+        p.className = 'fxp';
+        p.style.background = i.fg;
+        p.style.setProperty('--dx', (Math.random()*90 - 45).toFixed(0) + 'px');
+        p.style.setProperty('--dy', (Math.random()*90 - 45).toFixed(0) + 'px');
+        p.style.animationDelay = (k*0.04).toFixed(2) + 's';
+        L.appendChild(p);
+      }
+    } else {
+      const s = document.createElement('i');
+      s.className = 'fxs';
+      s.style.background = `linear-gradient(90deg, transparent, ${i.fg}, #fff, transparent)`;
+      L.appendChild(s);
+    }
+  }
+  host.appendChild(L);
+  setTimeout(() => L.remove(), big ? 1200 : 900);
+}
+/* แบนเนอร์ไม้ตาย · แฟลชเต็มจอ + ชื่อสกิล */
+function ultBanner(name, el){
+  const i = elInfo(el || "ประกาย");
+  const w = document.createElement('div');
+  w.className = 'ultwrap';
+  w.innerHTML = `<div class="ultflash" style="background:radial-gradient(circle at 50% 45%, ${i.fg}AA, ${i.bg}55 45%, transparent 75%)"></div>
+    <div class="ultname" style="background:linear-gradient(120deg, ${i.fg}, ${i.bd})">💫 ${name}</div>`;
+  document.body.appendChild(w);
+  setTimeout(() => w.remove(), 1150);
+}
+/* เล็งเป้าตามน้ำหนักของแถว · แถวหน้าโดนมากสุด */
+function pickTarget(alive){
+  const w = alive.map(u => (u.row ? u.row.aggro : 30));
+  const tot = w.reduce((a, b) => a + b, 0);
+  let r = Math.random() * tot;
+  for(let i = 0; i < alive.length; i++){ r -= w[i]; if(r <= 0) return alive[i]; }
+  return alive[alive.length - 1];
+}
+/* แถวหน้ายังยืนอยู่ = แถวหลังกินดาเมจน้อยลง */
+const guardCut = (units, t) => (t.row && t.row.id === 2
+  && units.some(u => u.hp > 0 && u.row && u.row.id === 0)) ? 0.65 : 1;
+/* ปล่อยไม้ตาย · คืนข้อความบรรยายไว้ลง log */
+function fireUlt(u, boss, units, sayFn){
+  const s = u.ult;
+  if(!s) return "";
+  u.en = 0;
+  const bits = [`💫 ${u.sp.name} ปล่อย${s.n}!`];
+  if(s.heal){
+    const list = s.k === "sup" ? units.filter(x => x.hp > 0) : [u];
+    list.forEach(x => { const g = Math.min(x.max - x.hp, Math.round(x.max * s.heal)); x.hp += g; });
+    bits.push(`ฟื้นเลือด ${Math.round(s.heal*100)}%${s.k === "sup" ? " ทั้งทีม" : ""}`);
+  }
+  if(s.cleanse){ units.forEach(x => { x.st = null; x.stT = 0; }); bits.push("ล้างสถานะทั้งทีม"); }
+  if(s.stg){
+    const list = s.all ? units.filter(x => x.hp > 0) : [u];
+    const parts = [];
+    BSTATS.forEach(b => { if(s.stg[b.k]){
+      list.forEach(x => x.stg[b.k] = clamp(x.stg[b.k] + s.stg[b.k], -6, 6));
+      parts.push(`${b.short}+${s.stg[b.k]}`); } });
+    bits.push(parts.join(" ") + (s.all ? " ทั้งทีม" : ""));
+  }
+  if(s.pw){
+    const m = { el:s.el, k:s.spec ? "s" : "p", pw:s.pw, acc:1 };
+    const { raw, mu } = calcDmg(u, m, boss);
+    const dmg = Math.round(raw * 1.15);
+    boss.hp -= dmg;
+    bits.push(`−${dmg} ${effWord(mu)}`);
+    if(s.drain){
+      const g = Math.min(u.max - u.hp, Math.round(dmg * s.drain));
+      u.hp += g;
+      bits.push(`ดูดเลือดคืน +${g}`);
+    }
+    if(s.st && !boss.st && canStatus(boss.el, boss.el2, s.st)){
+      boss.st = s.st; boss.stT = STATUS[s.st].turns;
+      bits.push(`ศัตรูติด${STATUS[s.st].emoji} ${STATUS[s.st].name}`);
+    }
+  }
+  if(s.foeStg){
+    const parts = [];
+    BSTATS.forEach(b => { if(s.foeStg[b.k]){
+      boss.stg[b.k] = clamp(boss.stg[b.k] + s.foeStg[b.k], -6, 6);
+      parts.push(`${b.short}${s.foeStg[b.k]}`); } });
+    bits.push("ศัตรู " + parts.join(" "));
+  }
+  const line = bits.join(" · ");
+  if(sayFn) sayFn(line);
+  return line;
+}
 /* เฟสของบอสปิดโลก · ใช้ร่วมกันทั้งโหมดออโต้และโหมดสั่งเอง */
 function bossPhase(boss, units, say){
   const fr = boss.hp / boss.max;
@@ -7880,8 +8482,10 @@ function runBattleSides(team, foe, opt){
     let item = opt.noItem ? null : battleItem(c);
     if(!item && opt.allBerry) item = "berry";
     if(!item && opt.allSash)  item = "sash";
+    const row = rowOf(c);
     return { c, sp:SP[c.sid], hp:Math.max(frac > 0 ? 1 : 0, Math.round(hp * frac)), max:hp, b, mult, pp,
-             st:null, stT:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 }, item,
+             st:null, stT:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 }, item, row,
+             en:0, ult:ultOf(c),
              dmgMul:opt.dmgMul || 1, critAdd:opt.critAdd || 0, stAdd:opt.stAdd || 0,
              usedBerry:false, usedSash:false };
   });
@@ -7970,6 +8574,16 @@ function runBattle(team, foe, opt){
 
     for(const { u, m } of order){
       if(boss.hp <= 0 || u.hp <= 0) continue;
+      /* 💫 พลังงานเต็ม ปล่อยไม้ตายแทนท่าปกติ */
+      if(u.ult && u.en >= ULT_MAX){
+        const line = fireUlt(u, boss, units, null);
+        ev.push({ k:"ult", u:units.indexOf(u), t:u.ult.n, dmg:0,
+                  el:u.ult.el || u.sp.el, sup:u.ult.k === "sup" });
+        log.push({ t:line, c:"big" });
+        if(boss.hp <= 0) break;
+        continue;
+      }
+      u.en = Math.min(ULT_MAX, u.en + ULT_ACT);
       const S_ = u.st ? STATUS[u.st] : null;
       if(S_ && S_.skip && Math.random() < S_.skip){
         ev.push({ k:"say", t:`${u.sp.name} ${S_.emoji} ${S_.name} — ขยับไม่ได้` });
@@ -8030,7 +8644,7 @@ function runBattle(team, foe, opt){
       boss.hp -= dmg;
       sfxq.push(crit ? "crit" : "hit");
       ev.push({ k:"hit", u:units.indexOf(u), dmg, crit, special:m.k === "s",
-                bhp:Math.max(0, boss.hp), mult:mu, mv:m.n });
+                bhp:Math.max(0, boss.hp), mult:mu, mv:m.n, el:m.el || u.sp.el });
       log.push({ t:`${u.sp.name} ใช้${m.n} ${crit ? "เข้าเต็มแรง! " : ""}−${dmg}` +
         (mu >= 1.9 ? " (แรงมาก!)" : mu >= 1.3 ? " (ได้เปรียบ)" : mu <= 0.4 ? " (แทบไม่ระคาย)" : mu < 1 ? " (เสียเปรียบ)" : ""),
         c: crit ? "big" : "" });
@@ -8067,12 +8681,13 @@ function runBattle(team, foe, opt){
       for(let sw = 0; sw < swings; sw++){
       const alive = units.filter(u => u.hp > 0);
       if(alive.length){
-        const t = alive[Math.floor(Math.random()*alive.length)];
+        const t = pickTarget(alive);
         const bmu = elMult2(boss.el, SP[t.c.sid].el, t.c.el2 || null);
         const A = boss.atk * stMul(boss.stg.atk) * (boss.st === "burn" ? 0.5 : 1);
         let dm = Math.max(5, Math.round((A*0.7 - (t.b.def*stMul(t.stg.def) + t.b.spd*stMul(t.stg.spd))*0.16)
-          * bmu * (0.85 + Math.random()*0.3)));
+          * bmu * (0.85 + Math.random()*0.3) / (t.row ? t.row.def : 1) * guardCut(units, t)));
         t.hp -= dm;
+        t.en = Math.min(ULT_MAX, t.en + ULT_HIT);
         sfxq.push("hurt");
         ev.push({ k:"boss", u:units.indexOf(t), dmg:dm, uhp:Math.max(0, t.hp), down:t.hp <= 0 });
         log.push({ t:`${foe.name} สวนกลับใส่${t.sp.name} −${dm}` +
@@ -8626,6 +9241,16 @@ function showArena(B, D, log, ev, units, boss, R, opt){
       timer = setTimeout(step, 760);
       return;
     }
+    if(e.k === "ult"){
+      ultBanner(e.t, e.el || B.el);
+      fxAnim($$('aU' + e.u), 'castS');
+      fxAt($$(e.sup ? 'aU' + e.u : 'aBoss'), e.sup ? "buff" : "spec", e.el || B.el, true);
+      pop($$('aBossFx'), '💫 ' + e.t, 'crittag');
+      $$('aRound').textContent = units[e.u].sp.name + ' ปล่อย ' + e.t + '!';
+      sfx("crit");
+      timer = setTimeout(step, 820);
+      return;
+    }
     if(e.k === "st"){
       const s = STATUS[e.s];
       if(e.on === "boss"){ pop($$('aBossFx'), s.emoji + ' ' + s.name, 'crittag'); }
@@ -8642,6 +9267,8 @@ function showArena(B, D, log, ev, units, boss, R, opt){
     }
     if(e.k === "heal"){
       const u = units[e.u];
+      fxAt($$('aU' + e.u), "heal", "พืช");
+      fxAnim($$('aU' + e.u) && $$('aU' + e.u).querySelector('img'), 'healS');
       pop($$('aF' + e.u), '+' + e.amt, 'good');
       $$('aH' + e.u).style.width = Math.min(100, e.uhp / u.max * 100) + '%';
       const un0 = $$('aU' + e.u);
@@ -8658,6 +9285,10 @@ function showArena(B, D, log, ev, units, boss, R, opt){
            : e.mult <= 0.4 ? ' — แทบไม่ระคาย' : e.mult < 1 ? ' — เสียเปรียบ' : '');
       }
       shake($$('aBoss'), 'quake');
+      if(!e.dot){
+        fxAnim($$('aBoss') && $$('aBoss').querySelector('img'), 'hurtS');
+        fxAt($$('aBoss'), e.special ? "spec" : "hit", e.el || B.el);
+      }
       pop($$('aBossFx'), '−' + e.dmg, e.crit ? 'crit' : '');
       if(e.crit) pop($$('aBossFx'), 'เข้าเต็มแรง!', 'crittag');
       const pct = Math.max(0, e.bhp / boss.max * 100);
@@ -8669,7 +9300,11 @@ function showArena(B, D, log, ev, units, boss, R, opt){
     }
     if(e.k === "boss"){
       const un = $$('aU' + e.u);
-      if(!e.dot) shake($$('aBoss'), 'lungeL');
+      if(!e.dot){
+        shake($$('aBoss'), 'lungeL');
+        fxAt(un, "hit", boss.el);
+        fxAnim(un && un.querySelector('img'), 'hurtS');
+      }
       shake(un, 'quake');
       pop($$('aF' + e.u), '−' + e.dmg, 'red');
       const u = units[e.u];
@@ -8828,6 +9463,26 @@ function renderBoss(){
     $('#manualNote').textContent = manualOn()
       ? "เลือกท่าเองทุกเทิร์น สลับตัวได้ · ใช้กับบอส ดันเจี้ยน หอคอย และถ้ำทั้งหมด"
       : "ระบบสู้ให้เองแล้วเล่นเป็นฉากย้อนหลัง · กดสลับเป็นเทิร์นเบสได้";
+  }
+  {
+    const fm = $('#formBox');
+    if(fm){
+      const team = (S.team || []).map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
+      fm.innerHTML = !team.length ? '' : `<div class="formbox">
+        <h4>🎯 แถวจัดทัพ</h4>
+        ${ROWS.map(r => `<div class="formrow"><b>${r.emoji} ${r.name}</b>
+          <span class="fslot">${team.filter(c => rowOf(c).id === r.id).map(c =>
+            `<img src="${ART[c.sid]}" alt="${SP[c.sid].name}" title="${SP[c.sid].name}" style="${shinyFilter(c)}">`
+          ).join('') || '<small class="sl2">ว่าง</small>'}</span></div>`).join('')}
+        ${team.map(c => `<div class="formrow"><b>${SP[c.sid].name.slice(0,7)}</b>
+          <span class="rowpick" style="flex:1">${ROWS.map(r => `<button data-frw="${c.id}" data-frwid="${r.id}"
+            aria-pressed="${rowOf(c).id === r.id}">${r.emoji}</button>`).join('')}</span></div>`).join('')}
+        <p class="grptag">แถวหน้ากันดาเมจให้แถวหลัง 35% และถูกเล็ง 60% · แถวหลังท่าพลังพิเศษแรงขึ้น 24%
+          แต่เกราะเหลือ 78% · ตั้งได้ที่นี่หรือในหน้าสเตตัสของแต่ละตัว</p>
+      </div>`;
+      fm.querySelectorAll('[data-frw]').forEach(b =>
+        b.onclick = () => setRow(+b.dataset.frw, +b.dataset.frwid));
+    }
   }
   const fb = $('#btnFight');
   const tries = bossTries(), rmNow = repeatMul();
@@ -9058,6 +9713,31 @@ function renderSel(){
            </span>`;
          })()}
          ${(() => {
+           const cur = buildSpec(c), u = ultOf(c), learn = ultLearnable(c);
+           return `<div class="ultbox">
+             <h4>🧱 สายปั้น · ตอนนี้ ${cur.emoji} ${cur.name}</h4>
+             <div class="rowpick">${BUILD_SPECS.map(b => `<button data-bd="${c.id}" data-bdid="${b.id}"
+               aria-pressed="${cur.id === b.id}">${b.emoji}<br>${b.name.replace("สาย","")}</button>`).join('')}</div>
+             <p class="mvnote">${cur.note}${cur.id !== "bal" ? "" : ""}
+               <br>เปลี่ยนสายได้ทุกเมื่อ ครั้งละ 💠 800 (สายสมดุลฟรี) · ค่าพลังคิดใหม่ทันที
+               <br>สายพันธุ์เดียวกันปั้นคนละสายได้ ตัวเดิมก็เปลี่ยนไปมาได้</p>
+             <h4 style="margin-top:8px">🎯 แถวจัดทัพ · ตอนนี้ ${rowOf(c).emoji} ${rowOf(c).name}</h4>
+             <div class="rowpick">${ROWS.map(r => `<button data-rw="${c.id}" data-rwid="${r.id}"
+               aria-pressed="${rowOf(c).id === r.id}">${r.emoji}<br>${r.name.replace("แถว","")}</button>`).join('')}</div>
+             <p class="mvnote">${rowOf(c).note}</p>
+             <h4 style="margin-top:8px">💫 ไม้ตาย · ${u ? u.n : "ยังไม่มี"}</h4>
+             ${u ? `<p class="mvnote">${u.note}<br>เก็บพลังงานครบ ${ULT_MAX} แล้วปล่อยได้
+               (ออกท่าได้ +${ULT_ACT} · ถูกตี +${ULT_HIT} ต่อครั้ง)</p>` : ''}
+             <select data-ultsel="${c.id}">
+               <option value="">— เลือกสกิลที่จะเรียน —</option>
+               ${learn.map(x => `<option value="${x.id}" ${u && u.id === x.id ? "selected" : ""}
+                 >${x.k === "atk" ? "⚔️" : "💚"} ${x.n} · ${x.el || "ไร้ธาตุ"} · 💠${x.dust}</option>`).join('')}
+             </select>
+             <p class="mvnote">เรียนได้เฉพาะสกิลไร้ธาตุกับสกิลธาตุของตัวเอง — ตัวนี้เลือกได้ ${learn.length} สกิล
+               ${c.el2 ? "(มีสองธาตุ เลือกได้ทั้งสองฝั่ง)" : ""}</p>
+           </div>`;
+         })()}
+         ${(() => {
            const bd = buildOf(c), tops = topStats(c, 2), it = heldOf(c);
            if(!bd) return '';
            const want = HELDMAP[bd.item];
@@ -9103,6 +9783,12 @@ function renderSel(){
     </div>
   </div></div></div>`;
   if(keepTop){ const s = box.querySelector('.selscroll'); if(s) s.scrollTop = keepTop; }
+  box.querySelectorAll('[data-bd]').forEach(b =>
+    b.onclick = () => setBuild(+b.dataset.bd, b.dataset.bdid));
+  box.querySelectorAll('[data-rw]').forEach(b =>
+    b.onclick = () => setRow(+b.dataset.rw, +b.dataset.rwid));
+  box.querySelectorAll('[data-ultsel]').forEach(el =>
+    el.onchange = () => { if(el.value) buyUlt(+el.dataset.ultsel, el.value); });
   box.querySelectorAll('[data-mv]').forEach(el =>
     el.onchange = () => setMove(+el.dataset.mv, +el.dataset.slot, el.value));
   box.querySelectorAll('[data-ev]').forEach(b => b.onclick = () => evFeed(b.dataset.ev));

@@ -976,6 +976,13 @@ h2 + h2{margin-top:20px}
     <button class="dtab big" data-shop="dust">💠 ผงตุ้ยนุ้ย</button>
     <button class="dtab big" data-shop="scene">🏞 ฉากทุ่ง</button>
     <button class="dtab big" data-shop="dec">🎁 ของตกแต่ง</button>
+    <button class="dtab big" data-shop="shrine">🕯 ศาลเจ้าใหญ่</button>
+  </div>
+
+  <div id="shopShrine">
+    <h2>🕯 ศาลเจ้าใหญ่</h2>
+    <p class="note" id="shrineNote" style="margin:0 0 10px"></p>
+    <div class="shop" id="shrineList"></div>
   </div>
 
   <div id="shopMon">
@@ -1062,6 +1069,11 @@ h2 + h2{margin-top:20px}
     <button class="dtab big" data-bmode="daily">⚔️ บอสประจำวัน</button>
     <button class="dtab big" data-bmode="tower">🗼 หอคอยไต่ชั้น</button>
     <button class="dtab big" data-bmode="dg">🕳 ดันเจี้ยน</button>
+    <button class="dtab big" data-bmode="abyss">🌀 ถ้ำไร้ที่สิ้นสุด</button>
+  </div>
+  <div id="paneAbyss">
+    <h2>🌀 ถ้ำไร้ที่สิ้นสุด</h2>
+    <div id="abyssBox"></div>
   </div>
   <div id="paneDg">
     <h2>ดันเจี้ยน</h2>
@@ -1086,10 +1098,16 @@ h2 + h2{margin-top:20px}
     <button class="dtab big" data-mode="dex">📔 สมุดภาพ</button>
     <button class="dtab big" data-mode="manage">🗂 จัดการตุ้ยนุ้ย</button>
     <button class="dtab big" data-mode="stats">📊 สถิติ</button>
+    <button class="dtab big" data-mode="collect">🏆 รางวัลสะสม</button>
     <button class="dtab big" data-mode="guide">📖 คู่มือ</button>
   </div>
 
   <div id="paneGuide"><h2>📖 คู่มือฟาร์ม</h2><div id="guideBox"></div></div>
+
+  <div id="paneCollect"><h2>🏆 รางวัลสะสม</h2>
+    <p class="note" style="margin:0 0 10px">โบนัสทุกอย่างในหน้านี้เป็นของถาวรและติดกับฟาร์ม
+      ไม่ใช่ติดตัวใดตัวหนึ่ง · เก็บสายพันธุ์ได้มากขึ้นก็ขึ้นเองอัตโนมัติ</p>
+    <div id="collectBox"></div></div>
 
   <div id="paneStats">
     <h2>📊 <span id="statName"></span>
@@ -1537,7 +1555,9 @@ function packSave(){
     [S.bossTier || 0, S.capBonus || 0, S.decayCut || 0,
      S.incLv || 0, S.twinLv || 0, S.hires || 0].map(c36).join(".") + "," +
     HELD.map(x => c36(heldOwn(x.id))).join(".") + "," +
-    (S.bossTryDay === todayKey() ? c36(S.bossTry || 0) : "0");
+    (S.bossTryDay === todayKey() ? c36(S.bossTry || 0) : "0") + "," +
+    SHRINE.map(x => c36(shLv(x.id))).join(".") + "," +
+    c36(S.abBest || 0);
 
   let bits = "";                                     // สมุดภาพ = 1 บิตต่อสายพันธุ์
   SPECIES.forEach(s => bits += (S.seen && S.seen[s.id]) ? "1" : "0");
@@ -1569,7 +1589,9 @@ function packSave(){
     c.mv && c.mv.length ? c.mv.map(id => c36(MOVES.findIndex(m => m.id === id) + 1)).join(".") : "",
     c.mvEgg && MV[c.mvEgg] ? c36(MOVES.findIndex(m => m.id === c.mvEgg) + 1) : "",
     c.box ? 1 : "",
-    c.box && c.penBack != null ? c36(c.penBack) : ""
+    c.box && c.penBack != null ? c36(c.penBack) : "",
+    (c.lv || 1) > 1 ? c36(c.lv) : "",
+    c.xp ? c36(c.xp) : ""
   ].join(",")).join(";");
 
   const eggs = (S.eggs || []).map(e => [
@@ -1656,6 +1678,10 @@ function unpackSave(txt){
   if(m[22]){ const v = m[22].split(".");
     HELD.forEach((x, i) => { const n = p36(v[i] || "0"); if(n) S2.hbag[x.id] = n; }); }
   if(m[23]){ const n = p36(m[23]); if(n){ S2.bossTry = n; S2.bossTryDay = todayKey(); } }
+  S2.shrine = {};
+  if(m[24]){ const v = m[24].split(".");
+    SHRINE.forEach((x, i) => { const n = p36(v[i] || "0"); if(n) S2.shrine[x.id] = n; }); }
+  if(m[25]) S2.abBest = p36(m[25]);
   S2.incMigrated = true;
 
   S2.seen = {};
@@ -1694,7 +1720,7 @@ function unpackSave(txt){
     if(f[21]){ const v = f[21].split("."); c.iv = {};
       BSTATS.forEach((b, k) => c.iv[b.k] = Math.min(IV_MAX, p36(v[k] || "0"))); }
     if(f[22]){ const v = f[22].split("."); c.ev = {};
-      BSTATS.forEach((b, k) => c.ev[b.k] = Math.min(EV_MAX, p36(v[k] || "0"))); }
+      BSTATS.forEach((b, k) => c.ev[b.k] = Math.min(EV_MAX_OF(), p36(v[k] || "0"))); }
     c.sex = (f[23] === "f" || f[23] === "n") ? f[23] : "m";
     if(f[24]){ const it = HELD[p36(f[24]) - 1]; if(it) c.it = it.id; }
     if(f[25] === "1") c.masu = true;
@@ -1703,6 +1729,8 @@ function unpackSave(txt){
     if(f[27]){ const m = MOVES[p36(f[27]) - 1]; if(m) c.mvEgg = m.id; }
     if(f[28] === "1") c.box = true;
     if(c.box && f[29]) c.penBack = p36(f[29]);
+    if(f[30]) c.lv = Math.min(LV_MAX, Math.max(1, p36(f[30])));
+    if(f[31]) c.xp = p36(f[31]);
     return c;
   });
 
@@ -2011,7 +2039,7 @@ function careOf(c){                                  // เหลือไว้
    จุดกึ่งกลางของการสุ่มอยู่ที่ 2 ดาว · ไข่จากการผสมจะเลื่อนจุดกึ่งกลางตามดาวเฉลี่ยของพ่อแม่ */
 const STAR_BASE = 2.0;
 function starOdds(c){
-  const center = STAR_BASE + (c.starPull || 0), sig = 1.0;
+  const center = STAR_BASE + (c.starPull || 0) + shVal("star"), sig = 1.0;
   const w = [1,2,3,4,5].map(i => Math.exp(-((i-center)**2) / (2*sig*sig)) + 0.03);
   const tot = w.reduce((a,b) => a+b, 0);
   return w.map(x => x / tot);
@@ -2026,6 +2054,128 @@ const starsOf = c => Math.round(careOf(c));      // ค่าที่ "น่�
 const natOf = c => NT[c.nature] || { mod:{}, grow:1, earn:1, care:0, name:"", emoji:"", note:"" };
 /* เพดานตัวคูณรายได้ต่อตัว — พรสวรรค์ ฉาก ของตกแต่ง ซ้อนกันได้ แต่ไม่เกิน 2.2 เท่า
    ไม่งั้นปลายเกมรายได้พุ่งจนที่ทิ้งเงินทั้งเกมหมดในไม่กี่วัน */
+/* ==== 🏆 รางวัลจากการสะสมสมุดภาพ · โบนัสถาวรทั้งฟาร์ม ==== */
+const DEX_TIERS = [
+  { n:50,  coin:0.05, power:0.02, name:"นักสะสมมือใหม่" },
+  { n:100, coin:0.10, power:0.04, name:"นักสะสมตัวจริง" },
+  { n:200, coin:0.20, power:0.08, name:"ปรมาจารย์สมุดภาพ" },
+  { n:280, coin:0.30, power:0.12, name:"ตำนานนักสะสม" },
+  { n:319, coin:0.45, power:0.18, name:"ครบทุกสายพันธุ์" }
+];
+const seenIdList = () => Object.keys(S.seen || {});
+const dexSeen  = () => seenIdList().filter(id => SP[id]).length;
+function elDone(){                                  // ธาตุที่เก็บครบทุกสายพันธุ์
+  const seen = new Set(seenIdList());
+  return ELEMENTS.filter(el => {
+    const all = SPECIES.filter(s => s.el === el);
+    return all.length && all.every(s => seen.has(s.id));
+  });
+}
+const collabDone = () => COLLAB_LIST.length > 0 && COLLAB_LIST.every(s => (S.seen || {})[s.id]);
+const legendDone = () => LEGEND_LIST.length > 0 && LEGEND_LIST.every(s => (S.seen || {})[s.id]);
+const crowned = () => S.creatures.filter(c => BSTATS.every(b => ivOf(c)[b.k] >= IV_MAX));
+const isCrown = c => BSTATS.every(b => ivOf(c)[b.k] >= IV_MAX);
+function dexTier(){
+  const n = dexSeen();
+  let t = null;
+  DEX_TIERS.forEach(x => { if(n >= x.n) t = x; });
+  return t;
+}
+const colCoin  = () => (dexTier() ? dexTier().coin : 0)
+  + (collabDone() ? 0.15 : 0) + (legendDone() ? 0.15 : 0);
+const colPower = () => (dexTier() ? dexTier().power : 0)
+  + (collabDone() ? 0.10 : 0) + (legendDone() ? 0.10 : 0)
+  + Math.min(0.10, crowned().length * 0.01);
+/* ธาตุที่เก็บครบ ตัวธาตุนั้นแรงขึ้น 5% */
+const elBonus = c => {
+  const done = elDone();
+  const mine = [SP[c.sid].el, c.el2].filter(Boolean);
+  return 1 + 0.05 * mine.filter(el => done.indexOf(el) >= 0).length;
+};
+function renderCollect(){
+  const box = $('#collectBox');
+  if(!box) return;
+  const n = dexSeen(), t = dexTier(), done = elDone(), cr = crowned();
+  const nextT = DEX_TIERS.find(x => n < x.n);
+  box.innerHTML = `
+    <div class="gbox"><h4>🏆 ความคืบหน้าสมุดภาพ ${n}/${SPECIES.length}</h4>
+      <div class="dl"><span>ขั้นตอนนี้</span><b>${t ? `${t.name} — รายได้ +${Math.round(t.coin*100)}% · ดาเมจ +${Math.round(t.power*100)}%`
+        : "ยังไม่ถึงขั้นแรก (ต้องเก็บ 50 สายพันธุ์)"}</b></div>
+      ${nextT ? `<div class="dl"><span>ขั้นถัดไป</span><b>${nextT.name} ที่ ${nextT.n} สายพันธุ์
+        · อีก ${nextT.n - n} ตัว → รายได้ +${Math.round(nextT.coin*100)}% · ดาเมจ +${Math.round(nextT.power*100)}%</b></div>` : ''}
+      ${DEX_TIERS.map(x => `<div class="dl"><span>${n >= x.n ? "✅" : "⬜"} ${x.n} ตัว</span><b>${x.name}
+        · 🪙 +${Math.round(x.coin*100)}% · 💥 +${Math.round(x.power*100)}%</b></div>`).join('')}
+    </div>
+    <div class="gbox"><h4>🔥 เก็บครบตามธาตุ ${done.length}/${ELEMENTS.length}</h4>
+      <div class="dl"><span>โบนัส</span><b>ธาตุที่เก็บครบ ตุ้ยนุ้ยธาตุนั้นตีแรงขึ้น 5% (ตัวสองธาตุนับได้ทั้งสองฝั่ง)</b></div>
+      ${ELEMENTS.map(el => {
+        const all = SPECIES.filter(s => s.el === el);
+        const got = all.filter(s => (S.seen || {})[s.id]).length;
+        return `<div class="dl"><span>${got >= all.length ? "✅" : ""} ${el}</span><b>${got}/${all.length}${
+          got >= all.length ? " · +5% แล้ว" : ` · อีก ${all.length - got} ตัว`}</b></div>`;
+      }).join('')}
+    </div>
+    <div class="gbox"><h4>👑 ของสะสมพิเศษ</h4>
+      <div class="dl"><span>${collabDone() ? "✅" : "⬜"} ครบชุด collab</span><b>${
+        COLLAB_LIST.filter(s => (S.seen||{})[s.id]).length}/${COLLAB_LIST.length}
+        · ครบแล้วได้ 🪙 +15% · 💥 +10%</b></div>
+      <div class="dl"><span>${legendDone() ? "✅" : "⬜"} ครบตัวตำนาน</span><b>${
+        LEGEND_LIST.filter(s => (S.seen||{})[s.id]).length}/${LEGEND_LIST.length}
+        · ครบแล้วได้ 🪙 +15% · 💥 +10%</b></div>
+      <div class="dl"><span>👑 ตัวมงกุฎ</span><b>${cr.length} ตัว — ค่าแฝงเต็ม 31 ทั้ง 6 ช่อง
+        · ตัวละ 💥 +1% (สูงสุด +10%)${cr.length ? "<br>" + cr.slice(0,8).map(c => SP[c.sid].name).join(" · ") : ""}</b></div>
+      <div class="dl"><span>รวมโบนัสตอนนี้</span><b>🪙 รายได้ +${Math.round(colCoin()*100)}%
+        · 💥 ดาเมจ +${Math.round(colPower()*100)}%</b></div>
+    </div>`;
+}
+
+/* ==== 🕯 ศาลเจ้าใหญ่ · อัปเกรดถาวรไม่จำกัดระดับ ที่ทิ้งเงินปลายเกม ==== */
+const SHRINE = [
+  { id:"coin",  emoji:"🪙", name:"พรแห่งความมั่งคั่ง", per:0.02,  base:20000, mul:1.16,
+    unit: v => `รายได้ฟาร์ม +${Math.round(v*100)}%` },
+  { id:"power", emoji:"💥", name:"พรแห่งพลัง",         per:0.015, base:35000, mul:1.18,
+    unit: v => `ดาเมจในสนามรบ +${(v*100).toFixed(1)}%` },
+  { id:"egg",   emoji:"🥚", name:"พรแห่งไข่",           per:0.005, base:60000, mul:1.20,
+    unit: v => `โอกาสได้ไข่บอส +${(v*100).toFixed(1)}%` },
+  { id:"star",  emoji:"⭐", name:"พรแห่งดวงดาว",        per:0.003, base:80000, mul:1.22,
+    unit: v => `แนวโน้มดาวลูกทุกตัว +${v.toFixed(3)}` },
+  { id:"ev",    emoji:"💪", name:"พรแห่งการฝึก",        per:2,     base:50000, mul:1.15,
+    unit: v => `เพดานค่าฝึกต่อช่อง +${v}` }
+];
+const SHRINEMAP = Object.fromEntries(SHRINE.map(x => [x.id, x]));
+const shLv    = id => (S.shrine && S.shrine[id]) || 0;
+const shVal   = id => shLv(id) * SHRINEMAP[id].per;
+const shPrice = id => Math.round(SHRINEMAP[id].base * Math.pow(SHRINEMAP[id].mul, shLv(id)));
+const shTotal = () => SHRINE.reduce((a, x) => a + shLv(x.id), 0);
+function buyShrine(id){
+  const u = SHRINEMAP[id];
+  if(!u) return;
+  const p = shPrice(id);
+  if(S.coins < p){ alert("เหรียญไม่พอ"); return; }
+  S.coins -= p;
+  S.shrine = S.shrine || {};
+  S.shrine[id] = shLv(id) + 1;
+  logf(`🕯 ${u.emoji} ${u.name} ขึ้นเป็นระดับ ${shLv(id)} — ${u.unit(shVal(id))}`, "good");
+  sfx("buy"); save(); render();
+}
+function renderShrine(){
+  const box = $('#shrineList');
+  if(!box) return;
+  box.innerHTML = SHRINE.map(u => {
+    const p = shPrice(u.id), can = S.coins >= p;
+    return `<div class="item">
+      <div class="iemo">${u.emoji}</div><h3>${u.name}</h3>
+      <p>${u.unit(shVal(u.id))}<br>ระดับ ${shLv(u.id)} · อัปแล้ว${u.unit(shVal(u.id) + u.per)}</p>
+      <button class="btn" data-shr="${u.id}" ${can ? '' : 'disabled'}>
+        <span class="price">🪙 ${p}</span></button>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('[data-shr]').forEach(b => b.onclick = () => buyShrine(b.dataset.shr));
+  const n = $('#shrineNote');
+  if(n) n.textContent = `รวมทั้งหมด ${shTotal()} ระดับ · ไม่มีเพดาน อัปได้เรื่อยๆ ` +
+    `ราคาขึ้นทีละ 15–22% ต่อระดับ · ผลทุกอย่างถาวร ติดกับฟาร์มไม่ใช่ตัวใดตัวหนึ่ง`;
+}
+
 const EARN_CAP = 2.2;
 function earnMul(c){
   const m = talG(c, "earn", 1)
@@ -2050,7 +2200,7 @@ function farmRate(){
   const dk = decayNow();
   const fest = festFx("earn", 1);
   return workSlice().reduce((a,c,k) => a + rateOf(c) / (1 + dk*k), 0)
-    * phaseNow().mult * weatherNow().coin * fest;
+    * phaseNow().mult * weatherNow().coin * fest * (1 + shVal("coin") + colCoin());
 }
 /* จำนวนตัวที่ "คิดเป็นเต็มคน" หลังหักลดหลั่น เอาไว้โชว์ให้เห็นว่าเพิ่มตัวแล้วคุ้มแค่ไหน */
 const workEff = () => { const dk = decayNow();
@@ -3228,6 +3378,35 @@ function rollBattle(c){
 }
 function ensureBattle(c){ if(c.stage === "adult" && !c.bs) c.bs = rollBattle(c); return c.bs; }
 
+/* ==== 📈 เลเวลตัวโตเต็มวัย · สู้แล้วได้ EXP ค่าพลังขึ้นตามเลเวล ==== */
+const LV_MAX   = 100;
+const LV_STEP  = 0.007;                                  // ค่าพลัง +0.7% ต่อเลเวล
+const lvOf     = c => Math.max(1, Math.min(LV_MAX, (c && c.lv) || 1));
+const lvMul    = c => 1 + (lvOf(c) - 1) * LV_STEP;        // เลเวล 100 = +69%
+const xpNeed   = lv => Math.round(70 * Math.pow(lv, 1.35));
+const xpOf     = c => (c && c.xp) || 0;
+/* ค่าพลังที่ใช้จริงในสนามรบ = ค่าพื้นฐาน × ตัวคูณเลเวล */
+function statsOf(c){
+  const b = ensureBattle(c), m = lvMul(c);
+  if(m === 1) return b;
+  const out = {};
+  BSTATS.forEach(x => out[x.k] = Math.round(b[x.k] * m));
+  out.total = BSTATS.reduce((a, x) => a + out[x.k], 0);
+  return out;
+}
+function giveXp(c, amt){
+  if(!c || c.stage !== "adult" || lvOf(c) >= LV_MAX || amt <= 0) return 0;
+  c.lv = lvOf(c);
+  c.xp = xpOf(c) + Math.round(amt);
+  let up = 0;
+  while(c.lv < LV_MAX && c.xp >= xpNeed(c.lv)){
+    c.xp -= xpNeed(c.lv);
+    c.lv++; up++;
+  }
+  if(c.lv >= LV_MAX) c.xp = 0;
+  return up;
+}
+
 /* ---- ตู้กาชา ---- */
 const NEST_MAX = 40;
 const LEGEND_POWER = 1.45;    // ตัวตำนานได้แต้มพลังรวมมากกว่าตุ้ยนุ้ยปกติ 45%
@@ -4120,7 +4299,7 @@ function codeToCre(txt){
   else c.iv = rollIV();
   c.ev = zeroEV();
   if(f[17]){ const v = f[17].split("."); c.ev = {};
-    BSTATS.forEach((b, k) => c.ev[b.k] = Math.min(EV_MAX, p36(v[k] || "0"))); }
+    BSTATS.forEach((b, k) => c.ev[b.k] = Math.min(EV_MAX_OF(), p36(v[k] || "0"))); }
   c.sex = (f[18] === "f" || f[18] === "n") ? f[18] : (f[18] === "m" ? "m" : rollSex(c.sid));
   return c;
 }
@@ -4713,7 +4892,8 @@ const canPair = (a, b) => sexPairOk(a, b) && groupOk(a, b);
 /* ==== ค่าแฝง (IV) กับ ค่าฝึก (EV) แบบเดียวกับที่โปเกม่อนใช้ ==== */
 const IV_MAX = 31;                 // ค่าแฝงต่อช่อง 0–31 ล็อกตั้งแต่เกิด
 const IV_PASS = 5;                 // ผสมพันธุ์ส่งค่าแฝงจากพ่อแม่ให้ลูก 5 ช่อง
-const EV_MAX = 252;                // ค่าฝึกต่อช่องสูงสุด
+const EV_BASE_MAX = 252;           // ค่าฝึกต่อช่องพื้นฐาน
+const EV_MAX_OF = () => EV_BASE_MAX + shVal("ev");     // 🕯 พรแห่งการฝึก ดันเพดานขึ้น
 const EV_TOTAL = 510;              // ค่าฝึกรวมทั้งตัวสูงสุด
 const EV_PER_FOOD = 12;            // อาหารฝึกหนึ่งชิ้นได้เท่านี้
 
@@ -4820,11 +5000,11 @@ function evFeed(id){
   const f = EV_FOOD[id];
   if(!c || !f) return;
   const ev = evOf(c);
-  if(ev[f.k] >= EV_MAX){ alert(`ช่อง${BSTATS.find(b=>b.k===f.k).name}เต็มเพดาน ${EV_MAX} แล้ว`); return; }
+  if(ev[f.k] >= EV_MAX_OF()){ alert(`ช่อง${BSTATS.find(b=>b.k===f.k).name}เต็มเพดาน ${EV_MAX_OF()} แล้ว`); return; }
   if(evSum(c) >= EV_TOTAL){ alert(`ค่าฝึกรวมเต็มเพดาน ${EV_TOTAL} แล้ว ต้องล้างค่าฝึกก่อน`); return; }
   if(S.coins < f.price){ alert("เหรียญไม่พอ"); return; }
   S.coins -= f.price;
-  const room = Math.min(EV_MAX - ev[f.k], EV_TOTAL - evSum(c), EV_PER_FOOD);
+  const room = Math.min(EV_MAX_OF() - ev[f.k], EV_TOTAL - evSum(c), EV_PER_FOOD);
   ev[f.k] += room;
   if(c.stage === "adult") c.bs = rollBattle(c);
   popFx(c.id, f.emoji);
@@ -5015,7 +5195,7 @@ function renderGuide(){
       <div class="dl"><span>มีผลแค่ไหน</span><b>คูณค่าพลังช่องนั้น 0.80–1.20 เท่า</b></div>
       <div class="dl"><span>ทำให้ดีขึ้นได้ไหม</span><b>ไม่ได้ ต้องผสมพันธุ์ไล่รุ่นเอาเท่านั้น</b></div>
       <div class="dl"><span>สืบทอด</span><b>ลูกได้ค่าแฝง ${IV_PASS} จาก 6 ช่องมาจากพ่อหรือแม่ ที่เหลือสุ่มใหม่</b></div>
-      <div class="dl"><span>ค่าฝึก (EV)</span><b>ป้อนอาหารฝึกได้ ช่องละไม่เกิน ${EV_MAX} รวมไม่เกิน ${EV_TOTAL}</b></div>
+      <div class="dl"><span>ค่าฝึก (EV)</span><b>ป้อนอาหารฝึกได้ ช่องละไม่เกิน ${EV_MAX_OF()} รวมไม่เกิน ${EV_TOTAL}</b></div>
       <div class="dl"><span>ล้างค่าฝึก</span><b>💠 400 แล้วจัดใหม่ได้</b></div>
       <div class="dl"><span>ค่าฝึกส่งต่อไหม</span><b>ไม่ส่งต่อเลย ลูกเริ่มที่ 0 ทุกช่องเสมอ — ฝึกไว้เพื่อใช้ตัวนั้นสู้ ไม่ใช่เพื่อทำพันธุ์</b></div>
       <div class="dl"><span>ผสมรัวได้แค่ไหน</span><b>ไม่มีเวลาพัก ติดแค่รัง ${NEST_MAX} ฟองและช่องอุ่น</b></div>
@@ -5050,6 +5230,47 @@ function renderGuide(){
       <div class="dl"><span>ผสมพันธุ์</span><b>ไม่มีเวลาพักอยู่แล้ว ขีดจำกัดจริงคือช่องในรัง</b></div>
       <div class="dl"><span>ยังจำกัดอยู่อย่างเดียว</span><b>🧭 ลาดตระเวน — ตัวที่ออกเดินทางจะไม่อยู่ในฟาร์มจนกลับมา
         จึงส่งไปสู้ในระหว่างนั้นไม่ได้</b></div>
+    </div>
+    <div class="gbox"><h4>🕯 ศาลเจ้าใหญ่ · ที่ทิ้งเงินปลายเกม</h4>
+      <div class="dl"><span>อยู่ไหน</span><b>แท็บร้านค้า → 🕯 ศาลเจ้าใหญ่</b></div>
+      <div class="dl"><span>ไม่มีเพดาน</span><b>อัปได้เรื่อยๆ ไม่ตัน ราคาขึ้นทีละ 15–22% ต่อระดับ
+        · ผลถาวรและติดกับฟาร์ม ไม่ใช่ติดตัวใดตัวหนึ่ง</b></div>
+      ${SHRINE.map(u => `<div class="dl"><span>${u.emoji} ${u.name}</span><b>ระดับละ ${
+        u.id === "ev" ? "+2 เพดานค่าฝึก" : "+" + (u.per*100).toFixed(1) + "%"} · เริ่มที่ 🪙 ${u.base}</b></div>`).join('')}
+    </div>
+    <div class="gbox"><h4>🏆 รางวัลสะสม</h4>
+      <div class="dl"><span>อยู่ไหน</span><b>แท็บสมุดภาพ → 🏆 รางวัลสะสม</b></div>
+      <div class="dl"><span>สะสมสายพันธุ์</span><b>${DEX_TIERS.map(x =>
+        `${x.n} ตัว → 🪙+${Math.round(x.coin*100)}% 💥+${Math.round(x.power*100)}%`).join(" · ")}</b></div>
+      <div class="dl"><span>ครบตามธาตุ</span><b>เก็บครบทุกสายพันธุ์ในธาตุหนึ่ง ตุ้ยนุ้ยธาตุนั้นตีแรงขึ้น 5%
+        · ตัวสองธาตุนับได้ทั้งสองฝั่ง</b></div>
+      <div class="dl"><span>ครบชุดใหญ่</span><b>ครบ collab ทั้งชุด 🪙+15% 💥+10% · ครบตัวตำนานทั้งหมดอีกชุดเดียวกัน</b></div>
+      <div class="dl"><span>👑 ตัวมงกุฎ</span><b>ตัวที่ค่าแฝงเต็ม 31 ทั้ง 6 ช่อง ติดป้าย 👑
+        · มีกี่ตัวก็ได้ 💥 +1% ต่อตัว สูงสุด +10%</b></div>
+      <div class="dl"><span>โบนัสขึ้นเอง</span><b>ไม่ต้องกดรับ เก็บได้มากขึ้นก็ขึ้นทันที</b></div>
+    </div>
+    <div class="gbox"><h4>📈 เลเวลตัวโตเต็มวัย</h4>
+      <div class="dl"><span>เก็บเลเวลยังไง</span><b>ส่งลงสนามรบ ทุกตัวที่ลงได้ประสบการณ์ ชนะได้เต็ม
+        แพ้ได้ตามดาเมจที่ทำได้ · เลเวลสูงสุด ${LV_MAX}</b></div>
+      <div class="dl"><span>ได้อะไร</span><b>ค่าพลังทุกค่า +${(LV_STEP*100).toFixed(1)}% ต่อเลเวล
+        · เลเวล ${LV_MAX} = ค่าพลัง ×${(1+(LV_MAX-1)*LV_STEP).toFixed(2)}</b></div>
+      <div class="dl"><span>ดูที่ไหน</span><b>ป้ายเขียวในหน้าสเตตัส บอกเลเวล แถบประสบการณ์ และพลังรวมเทียบกับฐาน
+        · ในลิสต์จัดการขึ้นป้าย 📈 Lv</b></div>
+      <div class="dl"><span>ทำไมสำคัญ</span><b>ตัวที่ปั้นมานานจะต่างจากตัวที่เพิ่งฟักจริงๆ
+        ไม่ใช่แค่ค่าแฝงกับดาวอย่างเดียวอีกแล้ว</b></div>
+    </div>
+    <div class="gbox"><h4>🌀 ถ้ำไร้ที่สิ้นสุด</h4>
+      <div class="dl"><span>อยู่ไหน</span><b>แท็บบอส → 🌀 ถ้ำไร้ที่สิ้นสุด · ลงได้ ${AB_TEAM} ตัว ไม่จำกัดรอบต่อวัน</b></div>
+      <div class="dl"><span>กติกา</span><b>ลุยชั้นต่อชั้นด้วยทีมเดิม <b>เลือดไม่ฟื้นระหว่างชั้น</b>
+        ของที่เก็บได้จะกองไว้ก่อน ยังไม่เข้ากระเป๋า</b></div>
+      <div class="dl"><span>เดิมพัน</span><b>ตกรอบ = เสียของทั้งกอง · ระหว่างชั้นกด 🎒 ถอนของกลับบ้านได้ทุกเมื่อ
+        แต่ถอนแล้วรอบจบ ต้องเริ่มชั้น 1 ใหม่</b></div>
+      <div class="dl"><span>ของเพิ่มขึ้น</span><b>ทบต้น 9% ต่อชั้น · ทุกชั้นที่ 4 ได้ 💎 · ทุกชั้นที่ 7 ได้ 🌟
+        · ทุกชั้นที่ 12 ได้ 🔮 · ทุกชั้นที่ 10 เจอเจ้าถ้ำ ของ ×2.4</b></div>
+      <div class="dl"><span>กฎพิเศษ</span><b>ชั้น 4 ขึ้นไปสุ่มกฎมาให้ แลกกับของที่เยอะขึ้น —
+        ${AB_RULES.slice(1).map(r => `${r.name} ×${r.loot}`).join(" · ")}</b></div>
+      <div class="dl"><span>ศัตรูแรงขึ้น</span><b>ทบต้น 11.5% ต่อชั้น ชันกว่าหอคอยชัดเจน
+        ต้องเดาให้ถูกว่าเลือดที่เหลือไปต่อได้อีกกี่ชั้น</b></div>
     </div>
     <div class="gbox"><h4>♻️ ใช้ตัวเดิมซ้ำได้ทุกอย่าง ไม่มีคูลดาวน์</h4>
       <div class="dl"><span>บอสรายวัน</span><b>ทีมเดิม 3 ตัวส่งลงได้ทุกรอบ ไม่จำกัดรอบ ไม่ต้องพัก</b></div>
@@ -5677,6 +5898,192 @@ function renderDungeon(){
   const g = $('#btnDgGo'); if(g) g.onclick = dgFight;
 }
 
+/* ================= 🌀 ถ้ำไร้ที่สิ้นสุด =================
+   ลุยชั้นต่อชั้นด้วยทีมเดิม เลือดไม่ฟื้นระหว่างชั้น ของกองสะสมขึ้นเรื่อยๆ
+   แต่ถ้าตกรอบเสียของทั้งกอง · ระหว่างชั้นเลือกได้ว่าจะถอนของกลับบ้านหรือลุยต่อ */
+const AB_TEAM = 5;
+const AB_RULES = [
+  { id:"none",  name:"ไม่มีกฎพิเศษ",        note:"", opt:{} },
+  { id:"noitem",name:"ห้ามใช้ของถือ",        note:"🚫 ชั้นนี้ของถือทุกชิ้นใช้ไม่ได้",
+    opt:{ noItem:true }, loot:1.35 },
+  { id:"immune",name:"ศัตรูไม่ติดสถานะ",     note:"🛡 ชั้นนี้ศัตรูไม่ติดสถานะผิดปกติเลย",
+    opt:{ foeImmune:true }, loot:1.35 },
+  { id:"rage",  name:"ศัตรูคลั่ง",           note:"😡 ชั้นนี้ศัตรูตีแรงขึ้น 40%",
+    opt:{ atkMul:1.4 }, loot:1.45 },
+  { id:"rich",  name:"สายแร่ทองคำ",          note:"💰 ชั้นนี้ของที่ได้เยอะเป็นสองเท่า",
+    opt:{}, loot:2.0 }
+];
+const abRun = () => S.ab || null;
+function abRule(d){
+  if(d < 4) return AB_RULES[0];
+  const R = rngFrom(d * 9173 + 41);
+  R();
+  return AB_RULES[1 + Math.floor(R() * (AB_RULES.length - 1))];
+}
+function abFoe(d){
+  const R = rngFrom(d * 6151 + 7);
+  const boss = d % 10 === 0;
+  const pool = boss ? LEGEND_LIST : SPECIES.filter(s => !s.legend && s.rarity >= 2);
+  const sp = pool[Math.floor(R() * pool.length)] || SPECIES[0];
+  const k = Math.pow(1.115, d - 1);                       // ชันกว่าหอคอยชัดเจน
+  return {
+    id:"ab" + d, depth:d, boss, sp, el:sp.el, el2:bossEl2(sp.el),
+    name:(boss ? "เจ้าถ้ำชั้น " + d + " · " : "ชั้น " + d + " · ") + sp.name,
+    hp: Math.round((520 + d*150) * k * (boss ? 2.0 : 1)),
+    pw: Math.round((46 + d*6) * Math.pow(1.05, d - 1) * (boss ? 1.5 : 1))
+  };
+}
+function abLoot(d, mul){
+  const boss = d % 10 === 0;
+  const k = (mul || 1) * (boss ? 2.4 : 1) * Math.pow(1.09, d - 1);
+  return {
+    coins: Math.round((320 + d*150) * k),
+    dust:  Math.round((18 + d*9) * k),
+    pollen: Math.max(1, Math.round(d/3 * k)),
+    core:  d % 4 === 0 ? Math.max(1, Math.round(k)) : 0,
+    star:  boss ? Math.max(2, Math.round(2*k)) : (d % 7 === 0 ? 1 : 0),
+    shard: d % 12 === 0 ? Math.max(1, Math.round(k)) : 0
+  };
+}
+const abAvail = () => S.creatures.filter(c => c.stage === "adult" && !c.box)
+  .sort((a, b) => statsOf(b).total - statsOf(a).total);
+function abStart(){
+  const team = (S.abTeam || []).map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
+  if(team.length < 1){ alert("เลือกตุ้ยนุ้ยลงถ้ำก่อน"); return; }
+  const hp = {};
+  team.forEach(c => hp[c.id] = 1);
+  S.ab = { depth:1, team:team.map(c => c.id), hp,
+    bag:{ coins:0, dust:0, pollen:0, core:0, star:0, shard:0 }, cleared:0 };
+  logf(`🌀 ลงถ้ำไร้ที่สิ้นสุดด้วย ${team.length} ตัว`, "");
+  sfx("tap"); save(); render();
+}
+function abDive(){
+  const r = abRun();
+  if(!r) return;
+  const team = r.team.map(id => S.creatures.find(c => c.id === id))
+    .filter(c => c && (r.hp[c.id] || 0) > 0);
+  if(!team.length){ abWipe(); return; }
+  const F = abFoe(r.depth), rule = abRule(r.depth);
+  const R = runBattle(team, F, Object.assign({ maxRound:20, note:rule.note }, rule.opt));
+  r.hp = Object.assign({}, r.hp, R.hpFrac);
+  let got = [];
+  if(R.win){
+    const L = abLoot(r.depth, rule.loot || 1);
+    for(const k in L) r.bag[k] = (r.bag[k] || 0) + L[k];
+    r.cleared++;
+    r.depth++;
+    S.abBest = Math.max(S.abBest || 0, F.depth);
+    got = [`🪙 ${L.coins}`, `💠 ${L.dust}`, L.pollen ? `🍃 ×${L.pollen}` : null,
+           L.core ? `💎 ×${L.core}` : null, L.star ? `🌟 ×${L.star}` : null,
+           L.shard ? `🔮 ×${L.shard}` : null].filter(Boolean);
+    R.log.push({ t:`เก็บของชั้น ${F.depth} — ${got.join(" · ")}`, c:"good" });
+  }
+  const alive = team.filter(c => (r.hp[c.id] || 0) > 0).length;
+  showArena(
+    { name:F.name, art:ART[F.sp.id], el:F.el },
+    { name:`🌀 ถ้ำไร้ที่สิ้นสุด ชั้น ${F.depth}` },
+    R.log, R.ev, R.units, R.boss,
+    R.win ? { win:true, title:`ผ่านชั้น ${F.depth}`,
+              detail: got.join(" · ") + `<br>ของในกองรวม 🪙 ${r.bag.coins} · 💠 ${r.bag.dust}` +
+                `<br>ทีมที่ยังยืนอยู่ ${alive}/${team.length} ตัว` }
+            : { win:false, title:`ตกรอบที่ชั้น ${F.depth}`,
+                detail:`ของทั้งกองหายไปหมด — ผ่านมาได้ ${r.cleared} ชั้น` });
+  if(!R.win || !alive) abWipe(true);
+  save(); render();
+}
+function abBank(){
+  const r = abRun();
+  if(!r) return;
+  const b = r.bag;
+  if(!confirm(`ถอนของกลับบ้าน?\n\n🪙 ${b.coins} · 💠 ${b.dust} · 🍃 ${b.pollen} · 💎 ${b.core}` +
+    ` · 🌟 ${b.star} · 🔮 ${b.shard}\n\nผ่านมาได้ ${r.cleared} ชั้น · รอบนี้จะจบลง`)) return;
+  S.coins += b.coins;
+  S.dust = (S.dust || 0) + b.dust;
+  addMat("pollen", b.pollen); addMat("core", b.core);
+  addMat("star", b.star); addMat("shard", b.shard);
+  S.abBanked = (S.abBanked || 0) + 1;
+  logf(`🌀 ถอนของจากถ้ำ — 🪙 ${b.coins} · 💠 ${b.dust} (ผ่าน ${r.cleared} ชั้น)`, "good");
+  S.ab = null;
+  sfx("win"); save(); render();
+}
+function abWipe(quiet){
+  const r = abRun();
+  if(!r) return;
+  if(!quiet) logf(`🌀 ออกจากถ้ำมือเปล่า — ของทั้งกองหายไป`, "");
+  S.ab = null;
+  save(); render();
+}
+function renderAbyss(){
+  const box = $('#abyssBox');
+  if(!box) return;
+  const r = abRun(), best = S.abBest || 0;
+  if(!r){
+    const pool = abAvail();
+    const sel = new Set(S.abTeam || []);
+    box.innerHTML = `
+      <div class="twhead"><b>🌀 ชั้นลึกสุดที่เคยไปถึง ${best || "—"}</b>
+        <span>เลือกได้ ${AB_TEAM} ตัว · เลือดไม่ฟื้นระหว่างชั้น</span></div>
+      <p class="note" style="margin:0 0 10px">ของที่เก็บได้จะกองไว้ก่อน ยิ่งลึกยิ่งได้เยอะขึ้นทบต้น 9% ต่อชั้น
+        · <b>ตกรอบแล้วเสียของทั้งกอง</b> ระหว่างชั้นถอนของกลับบ้านได้ทุกเมื่อ
+        · ชั้น 4 ขึ้นไปมีกฎพิเศษสุ่มมาแต่ให้ของเยอะขึ้น · ทุกชั้นที่ 10 เจอเจ้าถ้ำ</p>
+      <div class="team">${pool.length ? pool.slice(0, 60).map(c => {
+        const b = statsOf(c), on = sel.has(c.id);
+        return `<button class="tm" aria-pressed="${on}" data-ab="${c.id}">
+          <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}"><b>${SP[c.sid].name}</b>
+          <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}${buildOf(c) ? " " + buildOf(c).emoji : ""}
+            <br>📈 Lv ${lvOf(c)}</small></button>`;
+      }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวโตเต็มวัย</p>`}</div>
+      <button class="btn" id="btnAbGo" style="width:100%;margin-top:10px"
+        ${(S.abTeam || []).length ? '' : 'disabled'}>🌀 ลงถ้ำ (${(S.abTeam || []).length}/${AB_TEAM})</button>`;
+    box.querySelectorAll('[data-ab]').forEach(b => b.onclick = () => {
+      const id = +b.dataset.ab;
+      S.abTeam = S.abTeam || [];
+      if(S.abTeam.includes(id)) S.abTeam = S.abTeam.filter(x => x !== id);
+      else if(S.abTeam.length < AB_TEAM) S.abTeam.push(id);
+      sfx("tap"); renderAbyss();
+    });
+    const g = box.querySelector('#btnAbGo');
+    if(g) g.onclick = abStart;
+    return;
+  }
+  const F = abFoe(r.depth), rule = abRule(r.depth), b = r.bag;
+  const team = r.team.map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
+  const alive = team.filter(c => (r.hp[c.id] || 0) > 0);
+  box.innerHTML = `
+    <div class="twfoe guard">
+      <img src="${ART[F.sp.id]}" alt="">
+      <div><h3>${F.name}</h3>
+        <div class="bl">ธาตุ${foeEls(F).join(" + ")} · เลือด ${F.hp} · พลัง ${F.pw}</div>
+        <div class="bl">${(() => { const c2 = bestAgainst(F);
+          return c2.length ? `แพ้ทาง ${c2.map(x => `${x.el} ×${x.mu.toFixed(2)}`).join(" · ")}` : "ไม่แพ้ทางธาตุไหน"; })()}</div>
+        <div class="bl">${rule.id === "none" ? "ชั้นนี้ไม่มีกฎพิเศษ"
+          : `${rule.note} · ของเยอะขึ้น ×${rule.loot}`}</div>
+      </div>
+    </div>
+    <div class="twhead"><b>ของในกองตอนนี้</b>
+      <span>🪙 ${b.coins} · 💠 ${b.dust} · 🍃 ${b.pollen} · 💎 ${b.core} · 🌟 ${b.star} · 🔮 ${b.shard}</span></div>
+    <p class="note" style="margin:0 0 10px">ผ่านมาแล้ว ${r.cleared} ชั้น · ทีมที่ยังยืนอยู่ ${alive.length}/${team.length} ตัว
+      · ตกรอบแล้วของทั้งกองหายหมด</p>
+    <div class="team">${team.map(c => {
+      const frac = r.hp[c.id] || 0, down = frac <= 0;
+      return `<button class="tm ${down ? 'down' : ''}" aria-pressed="false" disabled>
+        <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}${down ? ';filter:grayscale(1)' : ''}">
+        <b>${SP[c.sid].name}</b>
+        <small>${down ? "หมดแรง" : `เลือด ${Math.round(frac*100)}%`}
+          <br>${multTag(unitMult(c, F))}</small></button>`;
+    }).join('')}</div>
+    <div class="sellrow" style="margin-top:10px">
+      <button class="btn sun" id="btnAbDive" ${alive.length ? '' : 'disabled'} style="flex:1">
+        🌀 ลุยชั้น ${r.depth}</button>
+      <button class="btn ghost" id="btnAbBank" style="flex:1">🎒 ถอนของกลับบ้าน</button>
+    </div>
+    <p class="note">ถอนของแล้วรอบจบ ต้องเริ่มจากชั้น 1 ใหม่ · เลือดไม่ฟื้นให้ระหว่างชั้น ต้องเดาให้ถูกว่าจะไปต่อได้อีกกี่ชั้น</p>`;
+  const d = box.querySelector('#btnAbDive');
+  if(d) d.onclick = abDive;
+  const k = box.querySelector('#btnAbBank');
+  if(k) k.onclick = abBank;
+}
+
 /* ---- หอคอยไต่ชั้น: ใช้ตัวเดิมซ้ำได้ทุกชั้นกัน ---- */
 const TW_TEAM   = 5;
 const TW_CHECK  = 5;          // จุดพักทุกห้าชั้น เริ่มรอบใหม่จากตรงนี้ได้
@@ -5891,7 +6298,9 @@ const STATUS = {
   cfz:  { emoji:"💫", name:"สับสน",  turns:3, self:0.33, immune:[] }
 };
 const stMul = n => n >= 0 ? (2 + n) / 2 : 2 / (2 - n);
-const canStatus = (el, el2, k) => !(STATUS[k].immune.indexOf(el) >= 0 || (el2 && STATUS[k].immune.indexOf(el2) >= 0));
+let FOE_IMMUNE = false;                 // กฎถ้ำบางข้อ: ศัตรูไม่ติดสถานะเลย
+const canStatus = (el, el2, k) => !FOE_IMMUNE &&
+  !(STATUS[k].immune.indexOf(el) >= 0 || (el2 && STATUS[k].immune.indexOf(el2) >= 0));
 
 /* ---- คลังท่า · ท่าไร้ธาตุใช้ได้ทุกตัว + ท่าประจำธาตุอีกธาตุละสามท่า ---- */
 const EL_MOVE = {
@@ -6051,22 +6460,26 @@ function runBattle(team, foe, opt){
   const maxRound = opt.maxRound || 18;
   const fel = foe.el, fel2 = foe.el2 !== undefined ? foe.el2 : bossEl2(foe.el);
   const units = team.map(c => {
-    const b = ensureBattle(c);
+    const b = statsOf(c);
     const hp = Math.round(b.hp * 2.2 * talG(c, "bossHp", 1) * decGlobal("bossHp", "mul"));
     let mult = elMult2(SP[c.sid].el, fel, fel2);
     if(c.el2) mult = Math.max(mult, elMult2(c.el2, fel, fel2));
     const pp = {};
     mvOf(c).forEach(id => pp[id] = MV[id].pp);
-    return { c, sp:SP[c.sid], hp, max:hp, b, mult, pp, st:null, stT:0,
-             stg:{ atk:0, def:0, spa:0, spd:0, spe:0 }, item:battleItem(c),
+    const frac = opt.hpFrac && opt.hpFrac[c.id] != null ? Math.max(0, opt.hpFrac[c.id]) : 1;
+    return { c, sp:SP[c.sid], hp:Math.max(frac > 0 ? 1 : 0, Math.round(hp * frac)), max:hp, b, mult, pp,
+             st:null, stT:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 },
+             item: opt.noItem ? null : battleItem(c),
              usedBerry:false, usedSash:false };
   });
-  const boss = { hp:foe.hp, max:foe.hp, atk:foe.pw, def:Math.round(foe.pw*0.62),
+  const boss = { hp:foe.hp, max:foe.hp, atk:Math.round(foe.pw * (opt.atkMul || 1)), def:Math.round(foe.pw*0.62),
                  spd:Math.round(foe.pw*0.58), spe:Math.round(foe.pw*0.8),
                  el:fel, el2:fel2, st:null, stT:0,
                  stg:{ atk:0, def:0, spa:0, spd:0, spe:0 }, raged:false };
   const log = [], ev = [], sfxq = [];
   const say = t => { ev.push({ k:"say", t }); log.push({ t, c:"" }); };
+  FOE_IMMUNE = !!opt.foeImmune;
+  if(opt.note) say(opt.note);
 
   /* 💪 ร่างยักษ์ ขู่บอสตอนลงสนาม (แบบ Intimidate) */
   const scare = units.filter(u => talG(u.c, "size", 1) > 1.1).length;
@@ -6085,6 +6498,7 @@ function runBattle(team, foe, opt){
     const D = (spec ? boss.spd : boss.def) * stMul(spec ? boss.stg.spd : boss.stg.def);
     let mu = elMult2(m.el, boss.el, boss.el2) * wxMul(m.el);
     if(m.el && !u.c.el2 && (m.el === u.sp.el)) mu *= MONO_BONUS;
+    mu *= (1 + shVal("power") + colPower()) * elBonus(u.c);   // 🕯 พร + 🏆 รางวัลสะสม
     if(u.item === "orb")   mu *= 1.30;
     if(u.item === "band"  && !spec) mu *= 1.25;
     if(u.item === "specs" &&  spec) mu *= 1.25;
@@ -6284,7 +6698,21 @@ function runBattle(team, foe, opt){
   }
   const win = boss.hp <= 0;
   const dealt = clamp(1 - boss.hp / boss.max, 0, 1);
-  return { units, boss, log, ev, win, dealt, sfxq };
+  /* 📈 ทุกตัวที่ลงสนามได้ประสบการณ์ ชนะได้เต็ม แพ้ได้ตามดาเมจที่ทำได้ */
+  const xp = Math.max(4, Math.round((foe.pw * 0.9 + foe.hp * 0.02) * (win ? 1 : 0.35 + dealt * 0.4)));
+  units.forEach(u => {
+    const up = giveXp(u.c, xp);
+    if(up){
+      u.c.bs = null; ensureBattle(u.c);
+      log.push({ t:`📈 ${u.sp.name} ขึ้นเป็นเลเวล ${lvOf(u.c)}!`, c:"big" });
+      ev.push({ k:"say", t:`📈 ${u.sp.name} ขึ้นเลเวล ${lvOf(u.c)}` });
+    }
+  });
+  ev.push({ k:"say", t:`ทุกตัวได้ประสบการณ์ +${xp}` });
+  FOE_IMMUNE = false;
+  const hpFrac = {};
+  units.forEach(u => hpFrac[u.c.id] = Math.max(0, u.hp) / u.max);
+  return { units, boss, log, ev, win, dealt, sfxq, xp, hpFrac };
 }
 
 
@@ -6377,7 +6805,8 @@ function fight(diff){
     for(let i = 0; i < (L.eggs || 1) + festAdd("bossEgg"); i++){
       if(S.eggs.length >= NEST_MAX) break;
       const sure = !!L.eggs && first;            // วันที่ของขวัญคือไข่ ได้แน่นอนเฉพาะรอบแรก
-      if(!sure && Math.random() >= (i === 0 ? D.eggCh : D.eggCh*0.85) * (first ? 1 : rm)) continue;
+      if(!sure && Math.random() >= (i === 0 ? D.eggCh : D.eggCh*0.85)
+        * (first ? 1 : rm) * (1 + shVal("egg"))) continue;
       const e = { sid:pickByRarity(3), tier:2, rar:3, boss:true, bossId:B.id };
       if(L.eggStar) e.starPull = L.eggStar;
       S.eggs.push(e); eggs.push(e);
@@ -6768,10 +7197,10 @@ function renderSel(){
             <i class="ivst">${ivStars(iv[b.k])}</i><b>${iv[b.k]}/${IV_MAX}</b>
             ${c.stage === 'adult' ? `<u class="evn">ฝึก ${ev[b.k]}</u>` : ''}</div>`).join('')}
           ${c.stage === 'adult' ? `<small class="evsum">ค่าฝึกรวม ${evSum(c)}/${EV_TOTAL}
-            · ช่องละไม่เกิน ${EV_MAX}</small>` : `<small class="evsum">ฝึกได้ตอนโตเต็มวัย</small>`}
+            · ช่องละไม่เกิน ${EV_MAX_OF()}</small>` : `<small class="evsum">ฝึกได้ตอนโตเต็มวัย</small>`}
         </div>
         ${c.stage === 'adult' ? `<div class="evfoods">${Object.keys(EV_FOOD).map(k => {
-          const f = EV_FOOD[k], full = ev[f.k] >= EV_MAX || evSum(c) >= EV_TOTAL;
+          const f = EV_FOOD[k], full = ev[f.k] >= EV_MAX_OF() || evSum(c) >= EV_TOTAL;
           return `<button class="evb" data-ev="${k}" ${full || S.coins < f.price ? 'disabled' : ''}>
             ${f.emoji} ${BSTATS.find(b=>b.k===f.k).short} <small>🪙${f.price}</small></button>`;
         }).join('')}<button class="evb bad" data-evreset="1">🧽 ล้างค่าฝึก 💠400</button></div>` : ''}`;
@@ -6832,6 +7261,16 @@ function renderSel(){
                  ? `<br>🥚 ท่าไข่ที่สืบมาจากพ่อแม่: ${MV[c.mvEgg].n}` : ""}
                ${it && it.battle ? `<br>${it.emoji} ${it.name} — ${it.note}` : ""}</p>
            </div>`;
+         })()}
+         ${(() => {
+           const lv = lvOf(c), need = xpNeed(lv), pc = lv >= LV_MAX ? 100 : Math.round(xpOf(c)/need*100);
+           return `<span class="buildchip" style="background:#F4F9EE;border-color:#D5E7C3;color:#3E6A38">
+             <b>📈 เลเวล ${lv}${lv >= LV_MAX ? " · เต็มขั้นแล้ว" : "/" + LV_MAX}
+               · ค่าพลัง ×${lvMul(c).toFixed(2)}</b>
+             ${lv >= LV_MAX ? "ฝึกจนสุดทางแล้ว" :
+               `ประสบการณ์ ${xpOf(c)}/${need} (${pc}%) — ส่งลงสนามรบเพื่อเก็บเลเวล`}
+             <br><i>พลังรวมตอนนี้ ${statsOf(c).total} (ฐาน ${ensureBattle(c).total})</i>
+           </span>`;
          })()}
          ${(() => {
            const bd = buildOf(c), tops = topStats(c, 2), it = heldOf(c);
@@ -6900,6 +7339,7 @@ function renderSel(){
 }
 
 function renderShop(){
+  renderShrine();
   renderMarket();
   renderScenes();
   renderNursery();
@@ -7364,6 +7804,8 @@ function renderManage(){
     if(ctx.dupe.has(c.id)) tags.push(`<i class="tg dp">ตัวซ้ำ</i>`);
     if(isAway) tags.push(`<i class="tg aw">🧭 ออกเดินทาง</i>`);
     if(c.box) tags.push(`<i class="tg bx">📦 อยู่ในตู้ฝาก</i>`);
+    if(!baby && isCrown(c)) tags.push(`<i class="tg">👑 มงกุฎ</i>`);
+    if(!baby && lvOf(c) > 1) tags.push(`<i class="tg">📈 Lv ${lvOf(c)}</i>`);
 
     return `<div class="mgrow ${sel.has(c.id) ? 'on' : ''} ${isAway ? 'away' : ''} ${c.box ? 'boxed' : ''}">
       <button class="mgpick" data-mgsel="${c.id}" aria-pressed="${sel.has(c.id)}">
@@ -7426,7 +7868,8 @@ function renderManage(){
   });
 }
 
-const SHOP_PANES = { mon:"shopMon", mkt:"shopMkt", dust:"shopDust", scene:"shopScene", dec:"shopDec" };
+const SHOP_PANES = { mon:"shopMon", mkt:"shopMkt", dust:"shopDust", scene:"shopScene",
+  dec:"shopDec", shrine:"shopShrine" };
 function setLogMode(m){
   S.logMode = m === "log" ? "log" : "quest";
   const a = document.getElementById('paneQuest'), b = document.getElementById('paneLog');
@@ -7439,12 +7882,14 @@ document.querySelectorAll('#logMode [data-lmode]').forEach(b =>
   b.onclick = () => { sfx("tap"); setLogMode(b.dataset.lmode); });
 
 function setBossMode(m){
-  S.bossMode = ["tower","dg"].indexOf(m) >= 0 ? m : "daily";
+  S.bossMode = ["tower","dg","abyss"].indexOf(m) >= 0 ? m : "daily";
   const a = document.getElementById('paneDaily'), b = document.getElementById('paneTower'),
-        c = document.getElementById('paneDg');
+        c = document.getElementById('paneDg'), d = document.getElementById('paneAbyss');
   if(a) a.style.display = S.bossMode === "daily" ? "" : "none";
   if(b) b.style.display = S.bossMode === "tower" ? "" : "none";
   if(c) c.style.display = S.bossMode === "dg" ? "" : "none";
+  if(d) d.style.display = S.bossMode === "abyss" ? "" : "none";
+  if(S.bossMode === "abyss") renderAbyss();
   document.querySelectorAll('#bossMode [data-bmode]').forEach(x =>
     x.setAttribute('aria-pressed', x.dataset.bmode === S.bossMode));
 }
@@ -7469,6 +7914,9 @@ function setBookMode(m){
   $('#paneManage').style.display = m === "manage" ? "" : "none";
   $('#paneStats').style.display  = m === "stats" ? "" : "none";
   $('#paneGuide').style.display  = m === "guide" ? "" : "none";
+  const pc = $('#paneCollect');
+  if(pc) pc.style.display = m === "collect" ? "" : "none";
+  if(m === "collect") renderCollect();
   document.querySelectorAll('#bookMode [data-mode]').forEach(b =>
     b.setAttribute('aria-pressed', b.dataset.mode === m));
 }
@@ -7516,7 +7964,7 @@ function render(){
   const seenCb = seenIds.filter(isCollab).length;
   $('#dexCount').textContent = `${seenBase} / ${nBase} สายพันธุ์ · ✦ ${seenLg}/${LEGEND_LIST.length} · ◈ ${seenPz}/${PRIZE_LIST.length} · ✧ ${seenCb}/${COLLAB_LIST.length}`;
   S.dexTab = S.dexTab || "all";
-  renderPenTabs(); renderPenPage(); renderSel(); renderShop(); renderBreed(); renderMyth(); renderDust(); renderBoss(); renderTower(); renderDungeon(); renderTradeEgg(); renderTrip(); renderDex(); renderManage(); renderStats(); renderGuide(); renderQuests(); renderBook();
+  renderPenTabs(); renderPenPage(); renderSel(); renderShop(); renderBreed(); renderMyth(); renderDust(); renderBoss(); renderTower(); renderAbyss(); renderDungeon(); renderTradeEgg(); renderTrip(); renderDex(); renderManage(); renderStats(); renderGuide(); renderQuests(); renderBook();
   setBookMode(S.bookMode || 'dex');
   setShopMode(S.shopMode || 'mon');
   setBossMode(S.bossMode || 'daily');

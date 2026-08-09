@@ -773,7 +773,6 @@ h2 + h2{margin-top:20px}
 .elchip.sm{font-size:9.5px;padding:2px 5px;border-width:1px;margin:0 2px 1px 0}
 .eldot{display:inline-flex;align-items:center;justify-content:center;font-style:normal;
   width:15px;height:15px;font-size:9px;border-radius:999px;border:1px solid;line-height:1}
-.wel{position:absolute;left:2px;top:2px;display:flex;gap:1px;pointer-events:none}
 .bxcell .bxel{position:absolute;top:1px;left:2px;display:flex;gap:1px}
 .boxbar{background:#F3F0FF;border:1.5px solid #DCD3F3;border-radius:14px;padding:10px 12px;margin:0 0 10px}
 .boxbar h4{font-family:var(--display);font-size:13.5px;margin:0 0 3px;color:#57459A}
@@ -3054,7 +3053,7 @@ function evolve(c){
 
 /* ---- จอโชว์ตัวที่เพิ่งแปลงร่าง จะได้ไม่ต้องไปไล่จิ้มหาในทุ่ง ---- */
 function showGrown(list){
-  if(!list || !list.length) return;
+  if(!list || !list.length || inBatch()) return;
   const m = document.createElement('div');
   m.className = 'mask';
   const cards = list.map(c => {
@@ -3882,6 +3881,7 @@ function dustCost(id){
 }
 
 function showSpin(r){
+  if(inBatch()) return;               // ตีรัวอยู่ ไม่เด้งหน้าต่างระหว่างทาง
   const m = document.createElement('div');
   m.className = 'mask';
   m.innerHTML = `<div class="result">
@@ -8080,6 +8080,32 @@ function bumpBossTry(){
   S.bossTry = (S.bossTry || 0) + 1;
 }
 
+/* หน้าสรุปรวมของการตีรัว — กดรับครั้งเดียวจบ */
+function batchSheet(kind, done, asked, d){
+  const rows = [
+    ["🪙 เหรียญ", d.coins], ["💠 ผงตุ้ยนุ้ย", d.dust], ["🥚 ไข่ที่ได้", d.eggs ? d.eggs + " ฟอง" : 0],
+    ["💎 แกนพลัง", d.core], ["🌟 ผงดาว", d.star], ["🍃 เกสร", d.pollen], ["🔮 ผลึกจิต", d.shard]
+  ].filter(x => x[1]);
+  const m = document.createElement('div');
+  m.className = 'mask';
+  m.innerHTML = `<div class="result">
+    <h2>⚡ ตีรัว ${done} รอบจบแล้ว</h2>
+    <p class="xplab">${kind === "boss" ? "บอสรายวัน" : "ดันเจี้ยน"}
+      ${done < asked ? ` · สั่งไป ${asked} รอบ ทำได้ ${done} รอบ (ทีมหรือเงื่อนไขไม่พอ)` : ""}
+      · รวมที่ฟาร์มมาทั้งหมด ${S.farmRounds || 0} รอบ</p>
+    <div class="rew">${rows.length
+      ? rows.map(([k, v]) => `<div class="rw">${k} ${v}</div>`).join('')
+      : `<div class="rw">รอบนี้ไม่ได้ของเลย</div>`}</div>
+    ${kind === "boss" ? `<p class="note" style="margin:8px 0 0">รอบถัดไปได้รางวัล ${Math.round(repeatMul()*100)}%
+      · วันนี้ตีไป ${bossTries()} รอบ</p>`
+      : `<p class="note" style="margin:8px 0 0">ชั้นลึกตอนนี้ ${dgLv(S.dgCur || DUNGEONS[0].id)}</p>`}
+    <button class="btn sun" id="closeBatch">รับทั้งหมด</button></div>`;
+  document.body.appendChild(m);
+  const close = () => m.remove();
+  m.querySelector('#closeBatch').onclick = close;
+  m.onclick = e => { if(e.target === m) close(); };
+}
+
 /* ⚡ ตีรัวหลายรอบ · รวมผลทีเดียว ไม่โชว์ฉากระหว่างทาง */
 function batchRun(kind, n){
   const before = {
@@ -8117,9 +8143,8 @@ function batchRun(kind, n){
     d.pollen ? `🍃 ${d.pollen}` : null, d.shard ? `🔮 ${d.shard}` : null].filter(Boolean);
   logf(`⚡ ตีรัว ${done} รอบ — ${bits.join(" · ")}`, "good");
   sfx("win");
-  showSpin({ emoji:"⚡", title:`ตีรัว ${done} รอบจบแล้ว`,
-    detail:bits.join(" · ") + `<br>รวมทั้งหมดที่ฟาร์มมา ${S.farmRounds} รอบ`, big:true });
   save(); render();
+  batchSheet(kind, done, n, d);
 }
 
 /* ---- ผู้พิทักษ์ประตู ---- */
@@ -8463,6 +8488,7 @@ function showArena(B, D, log, ev, units, boss, R, opt){
 }
 
 function showFight(B, D, log, R, art){
+  if(inBatch()) return;               // ตีรัวอยู่ รวมผลไปแสดงทีเดียวตอนจบ
   const FN = { grass:"🌿 หญ้าสด", fruit:"🍎 ผลไม้ป่า", cake:"🍰 ขนมพิเศษ" };
   const m = document.createElement('div');
   m.className = 'mask';
@@ -10127,7 +10153,6 @@ function startPen(){
       ${c.shiny ? '<div class="spk"><i>✦</i><i>✦</i><i>✧</i><i>✦</i><i>✧</i></div>' : ''}
       ${c.myth ? '<div class="mythfx"><i>✧</i><i>✧</i><i>✧</i></div>' : ''}
       ${talFX(c)}
-      <div class="wel">${elDot(c)}</div>
       <div class="flip"><div class="body" style="${filt};animation-duration:${rnd(2.3,3.4).toFixed(2)}s">
         ${baby ? babySVG(sp, h) : `<img src="${ART[c.sid]}" alt="${sp.name}" style="height:${h}px">`}
       </div></div>${baby ? `<div class="xp"><i style="width:${c.exp/EXP_NEED*100}%"></i></div>` : ''}`;

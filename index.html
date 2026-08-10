@@ -11384,6 +11384,12 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 .ajrole u{text-decoration:none;font-weight:800;color:#6a4fa8}
 .bxcell .ajrl{position:absolute;left:2px;top:2px;z-index:3;font-size:10px;font-style:normal;
   line-height:14px;padding:0 3px;border-radius:6px;background:rgba(0,0,0,.42);color:#fff}
+
+/* ---------- ยาบำรุงไข่ ---------- */
+.ajnrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 0;
+  border-top:1px dashed #c6ddbf}
+.ajnrow b{font-size:12px;min-width:104px}
+.ajnrow span{flex:1;min-width:130px;font-size:10.5px;color:#547a4f;line-height:1.35}
 </style>
 <script id="ajJs">
 /* =====================================================================
@@ -12599,6 +12605,7 @@ if(typeof oldRender === "function")
     try{ ajFixBuilds(); }catch(e){}
     const r = oldRender.apply(this, arguments);
     try{ ajBtns(); }catch(e){}
+    try{ ajNestBar(); }catch(e){}
     return r;
   };
 setTimeout(() => { try{ if(ajFixBuilds() && typeof save === "function") save(); }catch(e){} }, 300);
@@ -12873,6 +12880,239 @@ function ajBoxMulti(){
   }
   ajBulkBar();
 }
+/* =====================================================================
+   9) ฟักไข่ออกมาเป็นตัวเต็มวัยทันที + ฟักหลายฟองด้วยคลิกเดียว
+   ===================================================================== */
+function ajGrowNow(c){
+  if(!c || c.stage !== "baby") return c;
+  c.nur = c.nur || { pull:0, pw:0, tal:0 };
+  c.exp = (typeof EXP_NEED !== "undefined") ? EXP_NEED : 500;
+  c.expTotal = Math.max(c.expTotal || 0, c.exp);
+  c.qSum = c.qSum || c.exp * 2;
+  try{ evolve(c); }catch(e){
+    c.stage = "adult";
+    if(!c.stars) c.stars = 2;
+    c.bs = null;
+    try{ ensureBattle(c); }catch(err){}
+  }
+  return c;
+}
+/* ทุกทางที่เกิดตุ้ยนุ้ยใหม่ผ่าน makeBaby หมด ครอบที่นี่ทีเดียวจบ */
+const oldMakeBaby = window.makeBaby;
+if(typeof oldMakeBaby === "function")
+  window.makeBaby = function(){
+    const c = oldMakeBaby.apply(this, arguments);
+    try{ ajFeedEgg(c); }catch(e){}
+    ajGrowNow(c);
+    return c;
+  };
+/* รอให้ป๊อปตัวตำนานปิดก่อน แล้วค่อยโชว์หน้าสเตตัสโตเต็มวัย */
+function ajShowGrown(list, tries){
+  if(!list || !list.length) return;
+  if(document.querySelector('.legendpop')){
+    if((tries || 0) > 80) return;
+    setTimeout(() => ajShowGrown(list, (tries || 0) + 1), 400);
+    return;
+  }
+  try{ showGrown(list.filter(c => S.creatures.indexOf(c) >= 0)); }catch(e){}
+}
+const oldHatch = window.hatch;
+if(typeof oldHatch === "function")
+  window.hatch = function(){
+    const seen = new Set((S.creatures || []).map(c => c.id));
+    oldHatch.apply(this, arguments);
+    const born = (S.creatures || []).filter(c => !seen.has(c.id));
+    if(born.length) setTimeout(() => ajShowGrown(born), 80);
+  };
+
+/* ---- ยาบำรุงไข่: ซื้อเก็บไว้ แล้วใช้กับไข่อัตโนมัติตอนฟัก ---- */
+const NUR_FOODS = ["feast", "elixir", "meat", "honey"];      /* ของแรงก่อน */
+const ajNurCfg = () => (S.ajNur = S.ajNur || { on:true, lim:10 });
+const bagOf = id => ((S.bag || {})[id] || 0);
+function ajNurUseful(f, nur){
+  if(!f || !f.nur) return 0;
+  let gain = 0;
+  Object.keys(f.nur).forEach(k => {
+    const cap = NUR_CAP[k] || 0;
+    gain += Math.max(0, Math.min(cap - (nur[k] || 0), f.nur[k]));
+  });
+  return gain;
+}
+/* ใช้ยาที่มีในกระเป๋ากับตัวที่เพิ่งออกจากไข่ */
+function ajFeedEgg(c){
+  const cfg = ajNurCfg();
+  if(!c || !cfg.on || typeof FOODS === "undefined") return;
+  S.bag = S.bag || {};
+  c.nur = c.nur || { pull:0, pw:0, tal:0 };
+  const used = {};
+  for(let n = 0; n < (cfg.lim || 10); n++){
+    let best = null, score = 0;
+    NUR_FOODS.forEach(id => {
+      if(bagOf(id) <= 0) return;
+      const f = FOODS.find(x => x.id === id);
+      const g = ajNurUseful(f, c.nur);
+      if(g > score){ score = g; best = f; }
+    });
+    if(!best) break;
+    S.bag[best.id] = bagOf(best.id) - 1;
+    used[best.id] = (used[best.id] || 0) + 1;
+    Object.keys(best.nur).forEach(k =>
+      c.nur[k] = Math.min(NUR_CAP[k], +((c.nur[k] || 0) + best.nur[k]).toFixed(4)));
+  }
+  if(Object.keys(used).length){
+    c.nurUsed = used;
+    logf(`🍼 ใช้ยาบำรุงกับไข่ — ${Object.keys(used).map(id => {
+      const f = FOODS.find(x => x.id === id); return `${f.emoji}×${used[id]}`; }).join(" ")}` +
+      ` · แนวโน้มดาว +${(c.nur.pull || 0).toFixed(2)} · พลังรวม +${Math.round((c.nur.pw || 0) * 100)}%` +
+      ` · ลุ้นพรสวรรค์ +${Math.round((c.nur.tal || 0) * 100)}%`, "");
+  }
+}
+function ajBuyFood(id, n){
+  const f = FOODS.find(x => x.id === id);
+  if(!f) return;
+  const cost = f.price * n;
+  if((S.coins || 0) < cost){ alert(`ไม่พอ — ต้องใช้ 🪙 ${cost.toLocaleString()}`); return; }
+  S.coins -= cost;
+  S.bag = S.bag || {};
+  S.bag[id] = bagOf(id) + n;
+  logf(`ซื้อ ${f.emoji} ${f.name} ×${n} — 🪙 ${cost.toLocaleString()}`, "");
+  sfx("buy"); save(); render();
+}
+/* เก็บสต็อกยากับการตั้งค่าลงเซฟ (ต่อท้ายเป็นช่องที่ 12 เซฟเก่ายังอ่านได้) */
+const oldPack = window.packSave;
+if(typeof oldPack === "function")
+  window.packSave = function(){
+    const s = oldPack.apply(this, arguments);
+    const cfg = ajNurCfg();
+    const extra = NUR_FOODS.map(id => bagOf(id)).concat([cfg.on ? 1 : 0, cfg.lim || 10]).join(".");
+    return s + "|" + extra;
+  };
+const oldUnpack = window.unpackSave;
+if(typeof oldUnpack === "function")
+  window.unpackSave = function(txt){
+    const S2 = oldUnpack.apply(this, arguments);
+    try{
+      const seg = String(txt).split("|")[11];
+      if(seg && S2){
+        const v = seg.split(".").map(x => parseInt(x, 10) || 0);
+        S2.bag = S2.bag || {};
+        NUR_FOODS.forEach((id, i) => S2.bag[id] = v[i] || 0);
+        S2.ajNur = { on:v[4] !== 0, lim:v[5] || 10 };
+      }
+    }catch(e){}
+    return S2;
+  };
+
+/* ---- ฟักหลายฟองรวดเดียว ---- */
+function ajReadyEggs(){
+  return (S.eggs || []).map((e, i) => i).filter(i => eggReady(S.eggs[i]));
+}
+function ajHatchMany(n){
+  if(!ajReadyEggs().length){ alert("ยังไม่มีไข่ที่พร้อมแตก"); return; }
+  if(freePen() < 0){ alert("ทุ่งเต็มทุกทุ่ง — ย้ายตัวเข้าตู้ฝากหรือเปิดทุ่งเพิ่มก่อน"); return; }
+  const seen = new Set((S.creatures || []).map(c => c.id));
+  const lgs = [];
+  let cnt = 0, stopFull = false;
+  while(cnt < n){
+    const idx = ajReadyEggs();
+    if(!idx.length) break;
+    const room = freePen();
+    if(room < 0){ stopFull = true; break; }
+    const lg = hatchSilent(idx[0], room);
+    if(lg) lgs.push(lg);
+    cnt++;
+    try{ qAdd("hatch"); qAdd("grow"); }catch(e){}
+  }
+  const born = (S.creatures || []).filter(c => !seen.has(c.id));
+  if(!cnt){ alert("ฟักไม่ได้ — ทุ่งเต็ม"); return; }
+  logf(`🐣 ฟักไข่รวดเดียว ${cnt} ฟอง — ได้ตุ้ยนุ้ยเต็มวัย ${born.length} ตัว` +
+    (stopFull ? " · หยุดเพราะทุ่งเต็ม" : ""), "good");
+  lgs.forEach(sp => logf(`✦ ตัวตำนานโผล่จากไข่ — ${sp.name}!`, "good"));
+  try{ fillSlots(); }catch(e){}
+  sfx(lgs.length ? "legend" : "hatch");
+  save();
+  if(typeof switchTab === "function") switchTab("field");
+  render();
+  if(lgs.length) setTimeout(() => showLegend(lgs[0]), 220);
+  setTimeout(() => ajShowGrown(born), 260);
+}
+/* ---- แถบเลือกจำนวนในหน้ารังฟักไข่ ---- */
+function ajNestBar(){
+  const tab = document.getElementById('tab-nest');
+  if(!tab) return;
+  let bar = document.getElementById('ajNest');
+  if(!bar){
+    const foot = tab.querySelector('.foot');
+    if(!foot) return;
+    bar = document.createElement('div');
+    bar.id = 'ajNest';
+    bar.className = 'ajbulk';
+    foot.after(bar);
+  }
+  const rdy = ajReadyEggs().length;
+  const room = freePen() >= 0;
+  bar.innerHTML = `<div class="ajbrow">
+      <span class="ajbnum">🐣 <b>ฟักรวดเดียว</b> · พร้อมแตก ${rdy} ฟอง${
+        room ? "" : " · ⚠️ ทุ่งเต็ม"}<br>
+        ฟักออกมาเป็น<b>ตัวเต็มวัยทันที</b> ไม่ต้องเลี้ยง ขึ้นหน้าสเตตัสให้ดูเลย</span>
+    </div>
+    <div class="ajbrow">${[1, 3, 5, 10].map(n =>
+      `<button class="ajbb" data-ajh="${n}" ${rdy && room ? "" : "disabled"}>×${n}</button>`).join('')}
+      <button class="ajbb" data-ajh="all" ${rdy && room ? "" : "disabled"}>ทั้งหมด (${rdy})</button>
+    </div>`;
+  bar.querySelectorAll('[data-ajh]').forEach(b => b.onclick = () => {
+    const v = b.dataset.ajh;
+    ajHatchMany(v === "all" ? ajReadyEggs().length : +v);
+  });
+  ajNurBar(bar);
+}
+/* ---- แผงยาบำรุงไข่ ---- */
+function ajNurBar(after){
+  const tab = document.getElementById('tab-nest');
+  if(!tab || typeof FOODS === "undefined") return;
+  let box = document.getElementById('ajNur');
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'ajNur';
+    box.className = 'ajbulk';
+    (after || tab).after(box);
+  }
+  const cfg = ajNurCfg();
+  const rows = NUR_FOODS.map(id => {
+      const f = FOODS.find(x => x.id === id);
+      if(!f) return '';
+      const k = Object.keys(f.nur)[0];
+      const lab = { pull:"แนวโน้มดาว", pw:"พลังรวม", tal:"ลุ้นพรสวรรค์" };
+      const gain = Object.keys(f.nur).map(x =>
+        `${lab[x]} +${x === "pull" ? f.nur[x] : Math.round(f.nur[x] * 100) + "%"}`).join(" · ");
+      return `<div class="ajnrow">
+        <b>${f.emoji} ${f.name}</b>
+        <span>มีอยู่ ${bagOf(id)} ชิ้น · ${gain} ต่อชิ้น</span>
+        <button class="ajbb" data-ajf="${id}" data-ajn="1">+1 🪙${f.price.toLocaleString()}</button>
+        <button class="ajbb" data-ajf="${id}" data-ajn="10">+10</button>
+      </div>`;
+    }).join('');
+  box.innerHTML = `<div class="ajbrow">
+      <button class="ajbb ${cfg.on ? 'on' : ''}" data-ajnt="1">${
+        cfg.on ? "🍼 ใช้ยากับไข่อัตโนมัติ: เปิด" : "🍼 ใช้ยากับไข่อัตโนมัติ: ปิด"}</button>
+      <button class="ajbb" data-ajnl="1">ใช้ได้ไม่เกิน ${cfg.lim} ชิ้น/ฟอง</button>
+    </div>
+    <div class="ajbrow"><span class="ajbnum">ซื้อเก็บไว้ในกระเป๋า พอไข่แตกระบบจะจ่ายยาให้เองตามที่มี
+      · เพดานรวม แนวโน้มดาว +${NUR_CAP.pull} · พลังรวม +${Math.round(NUR_CAP.pw*100)}%
+      · พรสวรรค์ +${Math.round(NUR_CAP.tal*100)}%</span></div>
+    ${rows}`;
+  box.querySelectorAll('[data-ajf]').forEach(b =>
+    b.onclick = () => ajBuyFood(b.dataset.ajf, +b.dataset.ajn));
+  box.querySelector('[data-ajnt]').onclick = () => {
+    cfg.on = !cfg.on; sfx("tap"); save(); render();
+  };
+  box.querySelector('[data-ajnl]').onclick = () => {
+    const steps = [3, 5, 10, 20];
+    cfg.lim = steps[(steps.indexOf(cfg.lim) + 1) % steps.length];
+    sfx("tap"); save(); render();
+  };
+}
+
 /* ---- ปรับราคา: ไข่ collab ใช้ผงตุ้ยนุ้ยแค่ 5000 ---- */
 try{ if(typeof COLLAB_COST !== "undefined") COLLAB_COST.dust = 5000; }catch(e){}
 
@@ -13141,6 +13381,8 @@ window.ajRole = ajRole;
 window.ajMovePool = ajMovePool;
 window.ajRoleCard = ajRoleCard;
 window.ROLES = ROLES;
+window.ajHatchMany = ajHatchMany;
+window.ajGrowNow = ajGrowNow;
 window.ajScene = ajScene;
 window.ajUltOf = ajUltOf;
 window.ajFormation = ajFormation;

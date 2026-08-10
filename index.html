@@ -11390,6 +11390,37 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
   border-top:1px dashed #c6ddbf}
 .ajnrow b{font-size:12px;min-width:104px}
 .ajnrow span{flex:1;min-width:130px;font-size:10.5px;color:#547a4f;line-height:1.35}
+
+/* ---------- หน้าคัดตัวซ้ำ ---------- */
+.ajdg{margin:10px 0 0;border-top:1px solid #ddc9a0;padding-top:8px}
+.ajdh{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.ajdh img{width:38px;height:38px;object-fit:contain;background:#efe2c4;border-radius:9px}
+.ajdh b{display:block;font-size:13.5px}
+.ajdh span{display:block;font-size:11px;color:#7d6a4b;line-height:1.35}
+.ajdr{display:flex;gap:8px;align-items:center;padding:4px 0 4px 6px;font-size:11.5px}
+.ajdr input{width:19px;height:19px;flex:0 0 auto;accent-color:#3f8b3c}
+.ajdr img{width:30px;height:30px;object-fit:contain;background:#f3e8ce;border-radius:7px}
+.ajdr span{flex:1;color:#5c4d33;line-height:1.3}
+.ajdr b{font-size:11px;color:#8a6320;white-space:nowrap}
+
+/* ---------- หน้าสรุปผลการฟัก ---------- */
+.ajhatch .in{max-height:86%}
+.ajhc{margin:9px 0;padding:8px;border-radius:12px;background:#fffaf0;
+  border:1px solid #ddc9a0}
+.ajhc.sh{background:linear-gradient(180deg,#fdf3ff,#f4e6ff);border-color:#d3b0ea}
+.ajhc.kept{box-shadow:0 0 0 2px #e8b93f inset}
+.ajhtop{display:flex;gap:9px;align-items:flex-start}
+.ajhtop img{width:64px;height:64px;object-fit:contain;background:#f0e5cb;border-radius:11px;flex:0 0 auto}
+.ajhinfo{flex:1;min-width:0}
+.ajhinfo b{font-size:14px}
+.ajhinfo i.nw{font-style:normal;font-size:9.5px;font-weight:800;color:#fff;background:#e0762c;
+  padding:1px 5px;border-radius:6px;vertical-align:middle}
+.ajhinfo span{display:block;font-size:11px;color:#6d5b3f;line-height:1.4}
+.ajhinfo span.tl{color:#96590a;font-weight:700}
+.ajhinfo span.pr{color:#8a6320;font-weight:700;margin-top:1px}
+.ajlk{width:42px;height:42px;flex:0 0 auto;border-radius:11px;font-size:18px;
+  border:2px solid #c2a172;background:#fffdf6}
+.ajlk.on{background:#ffeec2;border-color:#e0a827}
 </style>
 <script id="ajJs">
 /* =====================================================================
@@ -12606,6 +12637,7 @@ if(typeof oldRender === "function")
     const r = oldRender.apply(this, arguments);
     try{ ajBtns(); }catch(e){}
     try{ ajNestBar(); }catch(e){}
+    try{ ajBreedBar(); }catch(e){}
     return r;
   };
 setTimeout(() => { try{ if(ajFixBuilds() && typeof save === "function") save(); }catch(e){} }, 300);
@@ -12829,7 +12861,8 @@ function ajBoxMulti(){
       </div>
       <div class="ajbrow">
         <button class="ajbb" data-ajb="sort">🧭 จัดทุ่งตามธาตุ</button>
-        <span class="ajbnum" style="flex:1">รวมตัวธาตุเดียวกันไว้ทุ่งเดียวกันให้อัตโนมัติ</span>
+        <button class="ajbb" data-ajb="dup">♻️ คัดตัวซ้ำ</button>
+        <button class="ajbb warn" data-ajb="dupauto">♻️ ขายซ้ำทันที</button>
       </div>
       ${list.length ? `<div class="ajbrow">
         <button class="ajbb" data-ajb="page">เลือกทั้งหน้า</button>
@@ -12848,6 +12881,8 @@ function ajBoxMulti(){
     bar.querySelectorAll('[data-ajb]').forEach(b => b.onclick = () => {
       const k = b.dataset.ajb, ids2 = ajBoxIds();
       if(k === "sort"){ ajSortPens(); return; }
+      if(k === "dup"){ sfx("tap"); ajDupSheet(); return; }
+      if(k === "dupauto"){ ajDupAuto("sell"); return; }
       if(k === "mode"){ AJ.msel = !AJ.msel; if(!AJ.msel) AJ.sel.clear(); sfx("tap");
         ajBoxMulti(); ajBulkBar(); return; }
       if(k === "page"){ cells.forEach(x => AJ.sel.add(+x.dataset.bxc)); sfx("tap");
@@ -12906,24 +12941,117 @@ if(typeof oldMakeBaby === "function")
     ajGrowNow(c);
     return c;
   };
-/* รอให้ป๊อปตัวตำนานปิดก่อน แล้วค่อยโชว์หน้าสเตตัสโตเต็มวัย */
-function ajShowGrown(list, tries){
-  if(!list || !list.length) return;
-  if(document.querySelector('.legendpop')){
+/* ---- หน้าสรุปผลการฟัก: ดูสเตตัสทุกตัว ล็อกเก็บ ขาย/ปล่อยที่เหลือ ---- */
+function ajHatchResult(list, tries){
+  list = (list || []).filter(c => c && S.creatures.indexOf(c) >= 0);
+  if(!list.length) return;
+  if(document.querySelector('.legendpop')){            /* รอฉากตัวตำนานปิดก่อน */
     if((tries || 0) > 80) return;
-    setTimeout(() => ajShowGrown(list, (tries || 0) + 1), 400);
+    setTimeout(() => ajHatchResult(list, (tries || 0) + 1), 400);
     return;
   }
-  try{ showGrown(list.filter(c => S.creatures.indexOf(c) >= 0)); }catch(e){}
+  if(document.querySelector('.ajhatch')) return;
+  S.seenAdult = S.seenAdult || {};
+  const isNew = {};
+  list.forEach(c => { isNew[c.id] = !S.seenAdult[c.sid]; S.seenAdult[c.sid] = 1; });
+  /* ตัวดีเด่นล็อกไว้ให้ก่อนเลย */
+  list.forEach(c => {
+    const sp = SP[c.sid] || {};
+    if(c.shiny || c.myth || sp.legend || sp.prize || c.tal || c.stars >= 5) c.lock = true;
+  });
+
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajhatch';
+  d.innerHTML = `<div class="in"><h3>🐣 ผลการฟัก ${list.length} ตัว</h3><div id="ajHR"></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajHR');
+
+  function draw(){
+    const alive = list.filter(c => S.creatures.indexOf(c) >= 0);
+    const free = alive.filter(c => !c.lock);
+    const coin = free.reduce((a, c) => a + priceOf(c), 0);
+    const dust = free.reduce((a, c) => a + dustOf(c), 0);
+    body.innerHTML = `
+      <p class="sub">แตะ 🔒 เพื่อเก็บตัวที่ชอบไว้ · ตัวที่ไม่ล็อกขายหรือปล่อยทีเดียวได้ด้านล่าง<br>
+        ไชนี่ ✨ · ตำนาน · อมตะ · มีพรสวรรค์ · 5★ ระบบล็อกไว้ให้แล้ว</p>
+      <div class="ajbrow">
+        <button class="ajbb" data-hla="1">🔒 ล็อกทั้งหมด</button>
+        <button class="ajbb" data-hlu="1">🔓 ปลดล็อกทั้งหมด</button>
+        <span class="ajbnum">ล็อกไว้ ${alive.length - free.length}/${alive.length} ตัว</span>
+      </div>
+      ${alive.map(c => {
+        const sp = SP[c.sid], b = ensureBattle(c), r = roleOf(c);
+        const nat = (typeof NT !== "undefined" && NT[c.nature]) || null;
+        const ivs = (() => { try{ return BSTATS.reduce((s, x) => s + ivOf(c)[x.k], 0); }
+          catch(e){ return 0; } })();
+        return `<div class="ajhc ${c.shiny ? 'sh' : ''} ${c.lock ? 'kept' : ''}">
+          <div class="ajhtop">
+            <img src="${ART[c.sid]}" style="${shinyFilter(c)}" alt="">
+            <div class="ajhinfo">
+              <b>${sp.name}${c.shiny ? ' ✨' : ''}${isNew[c.id] ? ' <i class="nw">ตัวใหม่!</i>' : ''}</b>
+              <span>${starStr(c.stars).slice(0, c.stars)} · ${elsOf(c).join(" + ")}
+                · ${r.emoji} ${r.name.replace("สาย", "")}</span>
+              <span>พลังรวม <b>${b.total}</b> · ค่าแฝง ${ivs}/${(typeof IV_MAX !== "undefined" ? IV_MAX : 31) * 6}
+                ${nat ? " · " + nat.emoji + " " + nat.name : ""}</span>
+              ${c.tal && TAL[c.tal] ? `<span class="tl">${TAL[c.tal].emoji} พรสวรรค์${TAL[c.tal].name}</span>` : ''}
+              ${c.shiny ? `<span class="tl">ไชนี่ ${shinyName(c)}</span>` : ''}
+              <span class="pr">ขาย 🪙 ${priceOf(c).toLocaleString()} · ปล่อย 💠 ${dustOf(c)}</span>
+            </div>
+            <button class="ajlk ${c.lock ? 'on' : ''}" data-hlk="${c.id}">${c.lock ? '🔒' : '🔓'}</button>
+          </div>
+          <div class="ajstat">${BSTATS.map(x => `<div><span>${x.short}</span>
+            <i><b style="width:${clamp2(b[x.k] / 190 * 100, 5, 100)}%;background:${x.color || '#6fbe5a'}"></b></i>
+            <u>${b[x.k]}</u></div>`).join('')}</div>
+        </div>`;
+      }).join('')}
+      <div class="ajbrow" style="margin-top:10px">
+        <button class="ajbb warn" data-hsell="1" ${free.length ? "" : "disabled"}>
+          🏷 ขายที่ไม่ล็อก ${free.length} ตัว · 🪙 ${coin.toLocaleString()}</button>
+        <button class="ajbb warn" data-hrel="1" ${free.length ? "" : "disabled"}>
+          ปล่อยที่ไม่ล็อก · 💠 ${dust.toLocaleString()}</button>
+      </div>
+      <button class="cls">เก็บทั้งหมดไว้ในทุ่ง</button>`;
+    body.querySelectorAll('[data-hlk]').forEach(x => x.onclick = () => {
+      const c = S.creatures.find(y => y.id === +x.dataset.hlk);
+      if(!c) return;
+      c.lock = !c.lock; sfx("tap"); save(); draw();
+    });
+    body.querySelector('[data-hla]').onclick = () => {
+      list.forEach(c => c.lock = true); sfx("tap"); save(); draw(); };
+    body.querySelector('[data-hlu]').onclick = () => {
+      list.forEach(c => { const sp = SP[c.sid] || {};
+        if(!(c.shiny || c.myth || sp.legend || sp.prize)) c.lock = false; });
+      sfx("tap"); save(); draw(); };
+    const sell = body.querySelector('[data-hsell]'), rel = body.querySelector('[data-hrel]');
+    if(sell) sell.onclick = () => {
+      const ids = list.filter(c => !c.lock && S.creatures.indexOf(c) >= 0).map(c => c.id);
+      if(!ids.length) return;
+      if(sellForCoins(ids)){ d.remove(); render(); }
+    };
+    if(rel) rel.onclick = () => {
+      const ids = list.filter(c => !c.lock && S.creatures.indexOf(c) >= 0).map(c => c.id);
+      if(!ids.length) return;
+      S.mgSel = ids.slice();
+      mgReleaseSel();
+      d.remove(); render();
+    };
+    body.querySelector('.cls').onclick = () => { d.remove(); save(); render(); };
+  }
+  draw();
 }
-const oldHatch = window.hatch;
-if(typeof oldHatch === "function")
-  window.hatch = function(){
+const ajShowGrown = ajHatchResult;
+
+["hatch", "autoHatch", "hatchToBox"].forEach(name => {
+  const orig = window[name];
+  if(typeof orig !== "function") return;
+  window[name] = function(){
     const seen = new Set((S.creatures || []).map(c => c.id));
-    oldHatch.apply(this, arguments);
+    const r = orig.apply(this, arguments);
     const born = (S.creatures || []).filter(c => !seen.has(c.id));
-    if(born.length) setTimeout(() => ajShowGrown(born), 80);
+    if(born.length) setTimeout(() => ajHatchResult(born), 120);
+    return r;
   };
+});
 
 /* ---- ยาบำรุงไข่: ซื้อเก็บไว้ แล้วใช้กับไข่อัตโนมัติตอนฟัก ---- */
 const NUR_FOODS = ["feast", "elixir", "meat", "honey"];      /* ของแรงก่อน */
@@ -13036,6 +13164,52 @@ function ajHatchMany(n){
   if(lgs.length) setTimeout(() => showLegend(lgs[0]), 220);
   setTimeout(() => ajShowGrown(born), 260);
 }
+/* ---- ผสมพันธุ์หลายฟองด้วยคลิกเดียว ---- */
+function ajBreedMany(n){
+  const a = (S.creatures || []).find(x => x.id === S.brA);
+  const b = (S.creatures || []).find(x => x.id === S.brB);
+  if(!a || !b || !canPair(a, b)){ alert("เลือกคู่ที่ผสมกันได้ก่อน"); return; }
+  const room = NEST_MAX - (S.eggs || []).length;
+  if(room <= 0){ alert("รังเต็มแล้ว ฟักไข่ในรังก่อน"); return; }
+  const want = Math.min(n, room);
+  const each = breedCost(a, b);
+  if(!confirm(`ผสมคู่นี้ ${want} ครั้งรวดเดียว?\n\n` +
+    `ค่าใช้จ่ายไม่เกิน 🪙 ${(each * want).toLocaleString()} (ฟองละ 🪙 ${each.toLocaleString()})\n` +
+    `รังตอนนี้ ${S.eggs.length}/${NEST_MAX} ฟอง` +
+    (want < n ? `\n\nรังเหลือที่แค่ ${room} ฟอง จะผสมได้เท่านั้น` : ""))) return;
+  let got = 0;
+  for(let i = 0; i < want; i++){
+    const before = S.eggs.length;
+    try{ breed(); }catch(e){ break; }
+    if(S.eggs.length === before) break;
+    got++;
+  }
+  logf(`💞 ผสมรวดเดียว — ได้ไข่ ${got} ฟอง · รังตอนนี้ ${S.eggs.length}/${NEST_MAX}`, "good");
+  if(got < want) logf(`หยุดที่ ${got} ฟอง — เหรียญ วัสดุ หรือที่ในรังไม่พอ`, "");
+  save(); render();
+}
+function ajBreedBar(){
+  const anchorBtn = document.getElementById('brLoop');
+  if(!anchorBtn || document.getElementById('ajBr3')) return;
+  const row = anchorBtn.parentNode;
+  [3, 5, 10].forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'dtab';
+    b.id = 'ajBr' + n;
+    b.textContent = `💞 ×${n}`;
+    b.disabled = anchorBtn.disabled;
+    b.onclick = () => ajBreedMany(n);
+    row.insertBefore(b, anchorBtn);
+  });
+}
+const oldRenderBreed = window.renderBreed;
+if(typeof oldRenderBreed === "function")
+  window.renderBreed = function(){
+    const r = oldRenderBreed.apply(this, arguments);
+    try{ ajBreedBar(); }catch(e){}
+    return r;
+  };
+
 /* ---- แถบเลือกจำนวนในหน้ารังฟักไข่ ---- */
 function ajNestBar(){
   const tab = document.getElementById('tab-nest');
@@ -13294,6 +13468,156 @@ const pnName = p => typeof penName === "function" ? penName(p) : "ทุ่ง�
 const pnCap = () => typeof penCap === "function" ? penCap() : 14;
 const pnCount = p => typeof penCount === "function" ? penCount(p)
   : (S.creatures || []).filter(c => c.pen === p && !c.box).length;
+/* =====================================================================
+   10) คัดตัวซ้ำ — เก็บตัวที่ดีที่สุดของสายพันธุ์ ที่เหลือเลือกขาย/ปล่อย
+   ===================================================================== */
+const ajDupCfg = () => (AJ.dup = AJ.dup || { keep:1, tal:true, iv:false });
+function ajQScore(c){
+  const b = (c.bs && c.bs.total) || (() => { try{ return statsOf(c).total; }catch(e){ return 0; } })();
+  const iv = (() => { try{ return BSTATS.reduce((s, x) => s + ivOf(c)[x.k], 0); }catch(e){ return 0; } })();
+  return (c.shiny ? 5e8 : 0) + (c.myth ? 2e8 : 0) + (c.awk || 0) * 1e6
+    + (c.stars || 0) * 1e6 + b * 100 + iv * 10 + (c.lv || 1);
+}
+function ajInAnyTeam(id){
+  const t = [].concat(S.team || [], S.dgTeam || [], S.twTeam || [], S.gateTeam || [],
+    (S.ab && S.ab.team) || []);
+  return t.indexOf(id) >= 0;
+}
+/* จัดกลุ่มตามสายพันธุ์ แล้วบอกว่าตัวไหนควรเก็บ ตัวไหนซ้ำ */
+function ajDupScan(){
+  const cfg = ajDupCfg();
+  const away = typeof awaySet === "function" ? awaySet() : new Set();
+  const adults = (S.creatures || []).filter(c => c.stage === "adult");
+  const groups = {};
+  adults.forEach(c => (groups[c.sid] = groups[c.sid] || []).push(c));
+  const out = [];
+  const safeOf = c => {
+    if(c.lock || away.has(c.id) || ajInAnyTeam(c.id)) return true;     /* ล็อก/เดินทาง/อยู่ในทีม */
+    if(c.shiny || c.myth) return true;                                 /* ไชนี่กับอมตะไม่แตะ */
+    const sp = SP[c.sid] || {};
+    if(sp.legend || sp.prize || sp.god) return true;
+    if(cfg.tal && c.tal) return true;                                  /* กันตัวมีพรสวรรค์ */
+    return false;
+  };
+  Object.keys(groups).forEach(sid => {
+    const g = groups[sid].slice().sort((a, b) => ajQScore(b) - ajQScore(a));
+    const safe = g.filter(safeOf);                    /* ตัวหวงห้าม เก็บไว้เสมอ ไม่นับโควตา */
+    const pool = g.filter(c => !safeOf(c));
+    if(pool.length <= cfg.keep) return;
+    const keep = pool.slice(0, cfg.keep);
+    const dup = pool.slice(cfg.keep);
+    if(dup.length) out.push({ sid, keep, dup, safe });
+  });
+  return out.sort((a, b) => b.dup.length - a.dup.length);
+}
+/* ---- หน้าคัดตัวซ้ำ ---- */
+function ajDupSheet(){
+  const groups = ajDupScan();
+  const cfg = ajDupCfg();
+  const picked = new Set();
+  groups.forEach(g => g.dup.forEach(c => picked.add(c.id)));
+  const d = document.createElement('div');
+  d.className = 'ajsheet';
+  d.innerHTML = `<div class="in"><h3>♻️ คัดตัวซ้ำ</h3><div id="ajDupBody"></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajDupBody');
+
+  function draw(){
+    const list = Array.from(picked);
+    const coin = list.reduce((a, id) => {
+      const c = S.creatures.find(x => x.id === id); return a + (c ? priceOf(c) : 0); }, 0);
+    const dust = list.reduce((a, id) => {
+      const c = S.creatures.find(x => x.id === id); return a + (c ? dustOf(c) : 0); }, 0);
+    body.innerHTML = `
+      <p class="sub">เก็บตัวที่ดีที่สุดของแต่ละสายพันธุ์ไว้ ที่เหลือติ๊กออกได้ตามใจ<br>
+        ตัวที่ 🔒 ล็อก · ไชนี่ ✨ · อมตะ · ตำนาน · อยู่ในทีม · ออกลาดตระเวน จะไม่ถูกคัดเลย</p>
+      <div class="ajbrow">
+        <button class="ajbb" data-dk="1">เก็บไว้ ${cfg.keep} ตัว/สายพันธุ์</button>
+        <button class="ajbb ${cfg.tal ? 'on' : ''}" data-dt="1">${
+          cfg.tal ? "กันตัวมีพรสวรรค์: เปิด" : "กันตัวมีพรสวรรค์: ปิด"}</button>
+      </div>
+      <div class="ajbrow" style="margin-top:6px">
+        <button class="ajbb" data-da="1">ติ๊กทั้งหมด</button>
+        <button class="ajbb" data-dn="1">ล้างติ๊ก</button>
+        <span class="ajbnum">เลือกไว้ ${list.length} ตัว · ขายได้ 🪙 ${coin.toLocaleString()}
+          · ปล่อยได้ 💠 ${dust.toLocaleString()}</span>
+      </div>
+      ${groups.length ? groups.map(g => {
+        const sp = SP[g.sid];
+        const best = g.keep[0];
+        return `<div class="ajdg">
+          <div class="ajdh"><img src="${ART[g.sid]}" style="${shinyFilter(best)}" alt="">
+            <div><b>${sp.name}</b>
+            <span>เก็บ ${starStr(best.stars).slice(0, best.stars)} พลัง ${
+              (best.bs && best.bs.total) || statsOf(best).total}${best.tal ? " · มีพรสวรรค์" : ""}
+              · ซ้ำอีก ${g.dup.length} ตัว${g.safe && g.safe.length
+                ? ` · หวงห้าม ${g.safe.length} ตัว (ไม่นับโควตา)` : ""}</span></div></div>
+          ${g.dup.map(c => `<label class="ajdr">
+            <input type="checkbox" data-dup="${c.id}" ${picked.has(c.id) ? "checked" : ""}>
+            <img src="${ART[c.sid]}" style="${shinyFilter(c)}" alt="">
+            <span>${starStr(c.stars).slice(0, c.stars)} · พลัง ${
+              (c.bs && c.bs.total) || statsOf(c).total} · Lv.${lvOf(c)}${
+              c.tal ? " · " + TAL[c.tal].emoji : ""}${c.box ? " · 📦" : ""}</span>
+            <b>🪙 ${priceOf(c).toLocaleString()}</b></label>`).join('')}
+        </div>`;
+      }).join('') : `<p class="sub">ไม่มีตัวซ้ำที่คัดได้ตอนนี้</p>`}
+      <div class="ajbrow" style="margin-top:10px">
+        <button class="ajbb warn" data-dsell="1" ${list.length ? "" : "disabled"}>
+          🏷 ขายที่ติ๊ก · 🪙 ${coin.toLocaleString()}</button>
+        <button class="ajbb warn" data-drel="1" ${list.length ? "" : "disabled"}>
+          ปล่อยกลับป่า · 💠 ${dust.toLocaleString()}</button>
+      </div>
+      <button class="cls">ปิด</button>`;
+    body.querySelectorAll('[data-dup]').forEach(x => x.onchange = () => {
+      const id = +x.dataset.dup;
+      if(x.checked) picked.add(id); else picked.delete(id);
+      draw();
+    });
+    body.querySelector('[data-dk]').onclick = () => {
+      cfg.keep = cfg.keep >= 3 ? 1 : cfg.keep + 1;
+      reload();
+    };
+    body.querySelector('[data-dt]').onclick = () => { cfg.tal = !cfg.tal; reload(); };
+    body.querySelector('[data-da]').onclick = () => {
+      groups.forEach(g => g.dup.forEach(c => picked.add(c.id))); draw();
+    };
+    body.querySelector('[data-dn]').onclick = () => { picked.clear(); draw(); };
+    const sell = body.querySelector('[data-dsell]'), rel = body.querySelector('[data-drel]');
+    if(sell) sell.onclick = () => {
+      const ids = Array.from(picked);
+      if(!ids.length) return;
+      if(sellForCoins(ids)){ d.remove(); render(); }
+    };
+    if(rel) rel.onclick = () => {
+      const ids = Array.from(picked);
+      if(!ids.length) return;
+      S.mgSel = ids.slice();
+      mgReleaseSel();
+      d.remove(); render();
+    };
+    body.querySelector('.cls').onclick = () => d.remove();
+  }
+  function reload(){
+    const g2 = ajDupScan();
+    groups.length = 0;
+    g2.forEach(x => groups.push(x));
+    picked.clear();
+    groups.forEach(g => g.dup.forEach(c => picked.add(c.id)));
+    sfx("tap"); draw();
+  }
+  draw();
+}
+/* ขายตัวซ้ำทั้งหมดทันที เก็บตัวดีที่สุดไว้ */
+function ajDupAuto(kind){
+  const groups = ajDupScan();
+  const ids = [];
+  groups.forEach(g => g.dup.forEach(c => ids.push(c.id)));
+  if(!ids.length){ alert("ไม่มีตัวซ้ำที่คัดได้ — ทุกสายพันธุ์เหลือตัวที่ดีที่สุดอยู่แล้ว"); return; }
+  if(kind === "rel"){ S.mgSel = ids.slice(); mgReleaseSel(); }
+  else sellForCoins(ids);
+  render();
+}
+
 /* ---- โหมดจัดทุ่ง: รวมตัวธาตุเดียวกันไว้ทุ่งเดียวกัน ---- */
 function ajPenPlan(){
   const away = typeof awaySet === "function" ? awaySet() : new Set();
@@ -13381,6 +13705,11 @@ window.ajRole = ajRole;
 window.ajMovePool = ajMovePool;
 window.ajRoleCard = ajRoleCard;
 window.ROLES = ROLES;
+window.ajHatchResult = ajHatchResult;
+window.ajDupSheet = ajDupSheet;
+window.ajDupScan = ajDupScan;
+window.ajDupAuto = ajDupAuto;
+window.ajBreedMany = ajBreedMany;
 window.ajHatchMany = ajHatchMany;
 window.ajGrowNow = ajGrowNow;
 window.ajScene = ajScene;

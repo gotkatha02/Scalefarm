@@ -1723,10 +1723,10 @@ function migrate(){                                  // เซฟเก่าย
   S.workerBonus = S.workerBonus || 0;
   if(!S.seenAdult){                                  // เซฟเก่า: ถือว่าที่มีอยู่แล้วคือเคยเห็นแล้ว
     S.seenAdult = {};
-    (S.creatures || []).forEach(c => { if(c.stage === "adult") S.seenAdult[c.sid] = true; });
+    ((typeof S !== "undefined" && S && S.creatures) || []).forEach(c => { if(c.stage === "adult") S.seenAdult[c.sid] = true; });
   }
   S.slotBonus = S.slotBonus || 0;
-  (S.creatures || []).forEach(c => {                 // เซฟเก่า: แจกเพศให้ตัวที่ยังไม่มี
+  ((typeof S !== "undefined" && S && S.creatures) || []).forEach(c => {                 // เซฟเก่า: แจกเพศให้ตัวที่ยังไม่มี
     if(!c.sex) c.sex = rollSex(c.sid, c.myth);
     if(!c.iv) c.iv = rollIV();
     if(!c.ev) c.ev = zeroEV();
@@ -1740,7 +1740,7 @@ function migrate(){                                  // เซฟเก่าย
   if(S.brB == null) S.brB = null;
   if(!S.bag) S.bag = { grass:0, fruit:0, cake:0 };
   // ของการันตีแบบเก่าเปลี่ยนเป็น "พร" ที่ยังต้องลุ้น
-  (S.creatures || []).forEach(c => {
+  ((typeof S !== "undefined" && S && S.creatures) || []).forEach(c => {
     if(c.lucky) delete c.lucky;
     if(c.luck) delete c.luck;                        // ของดันไชนี่แบบเก่าถูกยกเลิก
     if(c.star5){ c.starPull = Math.max(c.starPull || 0, 1.3); delete c.star5; }
@@ -1842,7 +1842,7 @@ function packSave(){
   let seen = "";
   for(let i = 0; i < bits.length; i += 25) seen += (i ? "." : "") + c36(parseInt(bits.substr(i, 25), 2));
 
-  const cre = (S.creatures || []).map(c => [
+  const cre = ((typeof S !== "undefined" && S && S.creatures) || []).map(c => [
     c36(SIDX[c.sid] || 0), c.stage === "adult" ? 1 : 0, c36(c.stars || 1), c36(c.pen || 0),
     c36(c.exp), c36(c.expTotal), c36(c.qSum), c36(c.pets), c36(NIDX[c.nature] || 0),
     c.shiny ? 1 : 0,
@@ -1896,7 +1896,7 @@ function packSave(){
     e.ped ? e.ped.map(x => x && SIDX[x] != null ? c36(SIDX[x]) : "").join(".") : ""
   ].join(",")).join(";");
 
-  const IDX = {}; (S.creatures || []).forEach((c, i) => IDX[c.id] = i);
+  const IDX = {}; ((typeof S !== "undefined" && S && S.creatures) || []).forEach((c, i) => IDX[c.id] = i);
   const dgs = DUNGEONS.map(x => c36(dgLv(x.id))).join(".") + "," + c36(S.dgWins || 0);
   const tw = [ c36(towerBest()),
     towerRun() ? c36(towerRun().floor) : "",
@@ -4308,7 +4308,7 @@ function eggPeek(e){
 }
 const MOVE_COST = 150;                       // เปลี่ยนท่าหนึ่งช่อง
 function setMove(cid, slot, id){
-  const c = (S.creatures || []).find(x => x.id === cid);
+  const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === cid);
   if(!c || !MV[id]) return;
   const cur = mvOf(c);
   if(cur[slot] === id) return;
@@ -5757,7 +5757,7 @@ const HELD = [
 const HELDMAP = Object.fromEntries(HELD.map(x => [x.id, x]));
 const heldOf   = c => (c && c.it && HELDMAP[c.it]) || null;
 const heldOwn  = id => (S.hbag && S.hbag[id]) || 0;
-const heldUsed = id => (S.creatures || []).filter(c => c.it === id).length;
+const heldUsed = id => ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.it === id).length;
 const heldFree = id => Math.max(0, heldOwn(id) - heldUsed(id));
 const hasHeld  = (a, b, id) => (a && a.it === id) || (b && b.it === id);
 function buyHeld(id){
@@ -5771,7 +5771,7 @@ function buyHeld(id){
   sfx("buy"); save(); render();
 }
 function setHeld(cid, id){
-  const c = (S.creatures || []).find(x => x.id === cid);
+  const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === cid);
   if(!c) return;
   if(!id){ c.it = null; }
   else if(c.it === id){ /* ถืออยู่แล้ว */ }
@@ -5806,7 +5806,7 @@ const MASUDA_MUL = 6;
 const isForeign = c => !!(c && SP[c.sid] && SP[c.sid].collab);
 
 /* ==== 🔥 กายอบอุ่น อยู่ในฟาร์มแล้วไข่ฟักเร็วขึ้น + ตัวที่ออกลาดตระเวนช่วยเร่งอีกนิด ==== */
-const warmCut = () => Math.min(0.5, (S.creatures || [])
+const warmCut = () => Math.min(0.5, ((typeof S !== "undefined" && S && S.creatures) || [])
   .filter(c => c.stage === "adult" && talG(c, "hatch", 0))
   .reduce((a, c) => a + talG(c, "hatch", 0), 0));
 const patrolCut = () => Math.min(0.2, awaySet().size * 0.02);
@@ -12572,7 +12572,7 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
    5) ต่อเข้าเกมเดิม: แทน battleGo ให้ทุกโหมด (บอส/ดันเจี้ยน/หอคอย/ถ้ำ/ประตู)
    ===================================================================== */
 /* ---- ใครลงสนามได้บ้าง / ได้กี่ตัว แยกตามโหมดที่กำลังเปิดอยู่ ---- */
-const adultPool = () => (S.creatures || []).filter(c => c.stage === "adult" && !c.box);
+const adultPool = () => ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.stage === "adult" && !c.box);
 function modeCfg(){
   const m = (S && S.bossMode) || "daily";
   const safe = (f, d) => { try{ const r = f(); return (r && r.length) ? r : d; }catch(e){ return d; } };
@@ -12685,7 +12685,7 @@ function ajMount(){
     const ks = Object.keys(AJDIFF);
     AJ.diff = ks[(ks.indexOf(AJ.diff) + 1) % ks.length];
     lsSet("ajDiff", AJ.diff);
-    (S.creatures || []).forEach(c => c.bs && (c.bs = c.bs));
+    ((typeof S !== "undefined" && S && S.creatures) || []).forEach(c => c.bs && (c.bs = c.bs));
     sfx("tap"); paintDif();
     try{ render(); }catch(e){}
   };
@@ -12705,7 +12705,7 @@ function ajLockBtn(){
   if(!box) return;
   const row = box.querySelector('.moveRow');
   if(!row) return;
-  const c = (S.creatures || []).find(x => x.id === S.selId);
+  const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === S.selId);
   if(!c) return;
   const sell = box.querySelector('#btnSellOne'), rel = box.querySelector('#btnRelease');
   const b = document.createElement('button');
@@ -12770,7 +12770,7 @@ if(typeof oldRenderSel === "function")
 const oldRelease = window.release;
 if(typeof oldRelease === "function")
   window.release = function(){
-    const c = (S.creatures || []).find(x => x.id === S.selId);
+    const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === S.selId);
     if(c && c.lock){ alert("ตัวนี้ล็อกอยู่ 🔒 ปลดล็อกก่อนถึงจะปล่อยกลับป่าได้"); return; }
     return oldRelease.apply(this, arguments);
   };
@@ -12784,7 +12784,7 @@ AJ.sel = new Set();
 AJ.msel = false;
 function ajBoxRefresh(){ (window.renderBoxView || renderBoxView)(); }
 function ajBoxIds(){
-  return Array.from(AJ.sel).filter(id => (S.creatures || []).some(c => c.id === id));
+  return Array.from(AJ.sel).filter(id => ((typeof S !== "undefined" && S && S.creatures) || []).some(c => c.id === id));
 }
 function ajBoxMulti(){
   const box = document.getElementById('boxViewBox');
@@ -12793,7 +12793,7 @@ function ajBoxMulti(){
   if(!grid) return;
   const cells = Array.from(grid.querySelectorAll('[data-bxc]'));
   const away = typeof awaySet === "function" ? awaySet() : new Set();
-  const cOf = id => (S.creatures || []).find(x => x.id === id);
+  const cOf = id => ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === id);
 
   /* ---- ทำเครื่องหมายบนช่องที่เลือกไว้ ---- */
   cells.forEach(b => {
@@ -12990,7 +12990,7 @@ function ajNoteBirth(c){
   }, 500);
 }
 function ajLastHatchList(){
-  return (AJ.lastHatch || []).map(id => (S.creatures || []).find(x => x.id === id))
+  return (AJ.lastHatch || []).map(id => ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === id))
     .filter(Boolean);
 }
 function ajLastHatchSheet(){
@@ -13203,7 +13203,7 @@ function ajReadyEggs(){
 function ajHatchMany(n){
   if(!ajReadyEggs().length){ alert("ยังไม่มีไข่ที่พร้อมแตก"); return; }
   if(freePen() < 0){ alert("ทุ่งเต็มทุกทุ่ง — ย้ายตัวเข้าตู้ฝากหรือเปิดทุ่งเพิ่มก่อน"); return; }
-  const seen = new Set((S.creatures || []).map(c => c.id));
+  const seen = new Set(((typeof S !== "undefined" && S && S.creatures) || []).map(c => c.id));
   const lgs = [];
   let cnt = 0, stopFull = false;
   while(cnt < n){
@@ -13216,7 +13216,7 @@ function ajHatchMany(n){
     cnt++;
     try{ qAdd("hatch"); qAdd("grow"); }catch(e){}
   }
-  const born = (S.creatures || []).filter(c => !seen.has(c.id));
+  const born = ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => !seen.has(c.id));
   if(!cnt){ alert("ฟักไม่ได้ — ทุ่งเต็ม"); return; }
   logf(`🐣 ฟักไข่รวดเดียว ${cnt} ฟอง — ได้ตุ้ยนุ้ยเต็มวัย ${born.length} ตัว` +
     (stopFull ? " · หยุดเพราะทุ่งเต็ม" : ""), "good");
@@ -13231,8 +13231,8 @@ function ajHatchMany(n){
 }
 /* ---- ผสมพันธุ์หลายฟองด้วยคลิกเดียว ---- */
 function ajBreedMany(n){
-  const a = (S.creatures || []).find(x => x.id === S.brA);
-  const b = (S.creatures || []).find(x => x.id === S.brB);
+  const a = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === S.brA);
+  const b = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === S.brB);
   if(!a || !b || !canPair(a, b)){ alert("เลือกคู่ที่ผสมกันได้ก่อน"); return; }
   const room = NEST_MAX - (S.eggs || []).length;
   if(room <= 0){ alert("รังเต็มแล้ว ฟักไข่ในรังก่อน"); return; }
@@ -13449,7 +13449,7 @@ const ROLE_BD = { tank:"tank", atk:"pow", mage:"mag", sup:"sup" };
 function ajFixBuilds(){
   if(typeof BUILD_SPEC === "undefined") return;
   let n = 0;
-  (S.creatures || []).forEach(c => {
+  ((typeof S !== "undefined" && S && S.creatures) || []).forEach(c => {
     if(!c || !c.sid || !SP[c.sid]) return;
     const want = ROLE_BD[roleOf(c).id];
     if(want && BUILD_SPEC[want] && c.bd !== want){ c.bd = want; c.bs = null; n++; }
@@ -13460,7 +13460,7 @@ function ajFixBuilds(){
 const oldSetBuild = window.setBuild;
 if(typeof oldSetBuild === "function")
   window.setBuild = function(cid){
-    const c = (S.creatures || []).find(x => x.id === cid);
+    const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === cid);
     if(!c) return;
     const r = roleOf(c);
     alert(`สายปั้นถูกกำหนดจากสายพันธุ์แล้ว\n\n${SP[c.sid].name} เป็น ${r.emoji} ${r.name}` +
@@ -13522,7 +13522,7 @@ if(typeof oldLearnable === "function")
 const oldSetMove = window.setMove;
 if(typeof oldSetMove === "function")
   window.setMove = function(cid, slot, id){
-    const c = (S.creatures || []).find(x => x.id === cid);
+    const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === cid);
     if(c && MV[id] && ajMovePool(c).indexOf(id) < 0 && (c.mv || []).indexOf(id) < 0){
       const r = roleOf(c);
       alert(`${SP[c.sid].name} เป็น ${r.emoji} ${r.name}\n\nเรียน "${MV[id].n}" ไม่ได้ — ` +
@@ -13572,7 +13572,7 @@ function ajRoleCard(c){
 const pnName = p => typeof penName === "function" ? penName(p) : "ทุ่งที่ " + (p + 1);
 const pnCap = () => typeof penCap === "function" ? penCap() : 14;
 const pnCount = p => typeof penCount === "function" ? penCount(p)
-  : (S.creatures || []).filter(c => c.pen === p && !c.box).length;
+  : ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.pen === p && !c.box).length;
 /* =====================================================================
    10) คัดตัวซ้ำ — เก็บตัวที่ดีที่สุดของสายพันธุ์ ที่เหลือเลือกขาย/ปล่อย
    ===================================================================== */
@@ -13592,7 +13592,7 @@ function ajInAnyTeam(id){
 function ajDupScan(){
   const cfg = ajDupCfg();
   const away = typeof awaySet === "function" ? awaySet() : new Set();
-  const adults = (S.creatures || []).filter(c => c.stage === "adult");
+  const adults = ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.stage === "adult");
   const groups = {};
   adults.forEach(c => (groups[c.sid] = groups[c.sid] || []).push(c));
   const out = [];
@@ -13779,7 +13779,7 @@ function ajMoveSel(pen){
   const cap = pnCap();
   let n = 0, full = 0, lock = 0;
   ajBoxIds().forEach(id => {
-    const c = (S.creatures || []).find(x => x.id === id);
+    const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === id);
     if(!c || away.has(id)){ lock++; return; }
     if(c.pen === pen && !c.box) return;
     if(pnCount(pen) >= cap){ full++; return; }
@@ -13930,7 +13930,7 @@ if(typeof S === "undefined" || typeof ART === "undefined") return;
 
 const KIND_ORDER = ["ghost","prism","pale","vivid","tint"];   /* หายากสุดขึ้นก่อน */
 const rank = k => { const i = KIND_ORDER.indexOf(k); return i < 0 ? 9 : i; };
-const shList = () => (S.creatures || []).filter(c => c.shiny && c.stage === "adult");
+const shList = () => ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.shiny && c.stage === "adult");
 let sortBy = "new";
 
 function powOf(c){
@@ -13962,7 +13962,7 @@ function shHall(){
     const kinds = {};
     all.forEach(c => { const k = shinyOf(c).k; kinds[k] = (kinds[k] || 0) + 1; });
     const species = new Set(all.map(c => c.sid)).size;
-    const totalAdult = (S.creatures || []).filter(c => c.stage === "adult").length || 1;
+    const totalAdult = ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.stage === "adult").length || 1;
     const best = list.slice().sort((a,b) => rank(shinyOf(a).k) - rank(shinyOf(b).k))[0];
     body.innerHTML = `
       <p class="sub">แตะการ์ดเพื่อทำ<b>รูปการ์ดอวด</b> เซฟลงเครื่องหรือแชร์ต่อได้<br>
@@ -14008,7 +14008,7 @@ function shHall(){
       sfx("tap"); save(); draw();
     };
     body.querySelectorAll('[data-shc]').forEach(el => el.onclick = () => {
-      const c = (S.creatures || []).find(x => x.id === +el.dataset.shc);
+      const c = ((typeof S !== "undefined" && S && S.creatures) || []).find(x => x.id === +el.dataset.shc);
       if(c) shCard(c);
     });
     body.querySelector('.cls').onclick = () => d.remove();
@@ -14160,6 +14160,7 @@ function shCard(c){
 window.ajShinyHall = shHall;
 window.ajShinyCard = shCard;
 function mount(){
+  if(typeof S === "undefined" || !S) return setTimeout(mount, 900);
   const box = document.getElementById('ajBox');
   if(!box) return setTimeout(mount, 900);
   if(document.getElementById('ajShBtn')) return;
@@ -14173,6 +14174,40 @@ function mount(){
   box.insertBefore(b, box.firstChild);
 }
 mount();
+})();
+</script>
+<script id="ajMountJs">
+/* ปุ่มเข้าตู้โชว์ไชนี่กับสมุดภาพโลก 2 ไปโผล่ในแท็บสมุดภาพด้วย หาง่ายกว่า */
+(function(){
+function add(){
+  if(typeof S === "undefined" || !S) return setTimeout(add, 900);
+  const bar = document.getElementById('bookMode');
+  if(!bar) return setTimeout(add, 900);
+  if(!document.getElementById('ajBmSh') && window.ajShinyHall){
+    const b = document.createElement('button');
+    b.className = 'dtab big'; b.id = 'ajBmSh';
+    const n = ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.shiny && c.stage === "adult").length;
+    b.textContent = `✨ ตู้โชว์ไชนี่${n ? " " + n : ""}`;
+    b.onclick = () => window.ajShinyHall();
+    bar.appendChild(b);
+  }
+  if(!document.getElementById('ajBmW2') && window.ajW2Sheet){
+    const b2 = document.createElement('button');
+    b2.className = 'dtab big'; b2.id = 'ajBmW2';
+    b2.textContent = `🏺 สมุดภาพโลก 2`;
+    b2.onclick = () => window.ajW2Sheet();
+    bar.appendChild(b2);
+  }
+  const sh = document.getElementById('ajBmSh');
+  if(sh){
+    const n = ((typeof S !== "undefined" && S && S.creatures) || []).filter(c => c.shiny && c.stage === "adult").length;
+    sh.textContent = `✨ ตู้โชว์ไชนี่${n ? " " + n : ""}`;
+  }
+}
+add();
+const oldR = window.render;
+if(typeof oldR === "function")
+  window.render = function(){ const r = oldR.apply(this, arguments); try{ add(); }catch(e){} return r; };
 })();
 </script>
 </body>

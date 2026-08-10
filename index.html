@@ -11340,7 +11340,7 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 /* ---------- แผ่นข้อมูลสกิล ---------- */
 .ajsheet{position:fixed;inset:0;z-index:320;display:flex;align-items:flex-end;
   background:rgba(0,0,0,.55)}
-.ajsheet .in{width:100%;max-height:78%;overflow:auto;background:#fdf6e4;color:#3a2c18;
+.ajsheet .in{width:100%;max-height:82%;overflow:auto;background:#fdf6e4;color:#3a2c18;
   border-radius:18px 18px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 14px)}
 .ajsheet h3{margin:0 0 2px;font-size:17px}
 .ajsheet .sub{font-size:12px;color:#7d6a4b;margin:0 0 10px}
@@ -11404,7 +11404,12 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 .ajdr b{font-size:11px;color:#8a6320;white-space:nowrap}
 
 /* ---------- หน้าสรุปผลการฟัก ---------- */
-.ajhatch .in{max-height:86%}
+.ajhatch .in{max-height:88%;display:flex;flex-direction:column;overflow:hidden}
+.ajhscroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:2px}
+.ajhfoot{position:sticky;bottom:0;display:flex;gap:6px;flex-wrap:wrap;
+  padding:9px 0 2px;margin-top:2px;background:#fdf6e4;border-top:1px solid #ddc9a0}
+.ajhfoot .ajbb{flex:1 1 46%;min-height:44px;font-size:12.5px;line-height:1.25}
+.ajhfoot .ajbb.keep{flex:1 1 100%;background:#3f8b3c;border-color:#2f6a2d;color:#fff;font-size:15px}
 .ajhc{margin:9px 0;padding:8px;border-radius:12px;background:#fffaf0;
   border:1px solid #ddc9a0}
 .ajhc.sh{background:linear-gradient(180deg,#fdf3ff,#f4e6ff);border-color:#d3b0ea}
@@ -12985,84 +12990,98 @@ function ajHatchResult(list, tries){
     if(c.shiny || c.myth || sp.legend || sp.prize || c.tal || c.stars >= 5) c.lock = true;
   });
 
+  const card = c => {
+    const sp = SP[c.sid], b = ensureBattle(c), r = roleOf(c);
+    const nat = (typeof NT !== "undefined" && NT[c.nature]) || null;
+    const ivs = (() => { try{ return BSTATS.reduce((s, x) => s + ivOf(c)[x.k], 0); }
+      catch(e){ return 0; } })();
+    return `<div class="ajhc ${c.shiny ? 'sh' : ''} ${c.lock ? 'kept' : ''}" data-hid="${c.id}">
+      <div class="ajhtop">
+        <img src="${ART[c.sid]}" style="${shinyFilter(c)}" alt="">
+        <div class="ajhinfo">
+          <b>${sp.name}${c.shiny ? ' ✨' : ''}${isNew[c.id] ? ' <i class="nw">ตัวใหม่!</i>' : ''}</b>
+          <span>${starStr(c.stars).slice(0, c.stars)} · ${elsOf(c).join(" + ")}
+            · ${r.emoji} ${r.name.replace("สาย", "")}</span>
+          <span>พลังรวม <b>${b.total}</b> · ค่าแฝง ${ivs}/${(typeof IV_MAX !== "undefined" ? IV_MAX : 31) * 6}
+            ${nat ? " · " + nat.emoji + " " + nat.name : ""}</span>
+          ${c.tal && TAL[c.tal] ? `<span class="tl">${TAL[c.tal].emoji} พรสวรรค์${TAL[c.tal].name}</span>` : ''}
+          ${c.shiny ? `<span class="tl">ไชนี่ ${shinyName(c)}</span>` : ''}
+          <span class="pr">ขาย 🪙 ${priceOf(c).toLocaleString()} · ปล่อย 💠 ${dustOf(c)}</span>
+        </div>
+        <button class="ajlk ${c.lock ? 'on' : ''}" data-hlk="${c.id}">${c.lock ? '🔒' : '🔓'}</button>
+      </div>
+      <div class="ajstat">${BSTATS.map(x => `<div><span>${x.short}</span>
+        <i><b style="width:${clamp2(b[x.k] / 190 * 100, 5, 100)}%;background:${x.color || '#6fbe5a'}"></b></i>
+        <u>${b[x.k]}</u></div>`).join('')}</div>
+    </div>`;
+  };
+
   const d = document.createElement('div');
   d.className = 'ajsheet ajhatch';
-  d.innerHTML = `<div class="in"><h3>🐣 ผลการฟัก ${list.length} ตัว</h3><div id="ajHR"></div></div>`;
+  d.innerHTML = `<div class="in">
+    <h3>🐣 ผลการฟัก ${list.length} ตัว</h3>
+    <p class="sub">แตะ 🔒 เก็บตัวที่ชอบไว้ · ปุ่มล่างขาย/ปล่อยทีเดียวทุกตัวที่ไม่ล็อก<br>
+      ไชนี่ ✨ · ตำนาน · อมตะ · มีพรสวรรค์ · 5★ ระบบล็อกไว้ให้แล้ว</p>
+    <div class="ajbrow">
+      <button class="ajbb" data-hla="1">🔒 ล็อกทั้งหมด</button>
+      <button class="ajbb" data-hlu="1">🔓 ปลดล็อกทั้งหมด</button>
+      <span class="ajbnum" id="ajhCnt"></span>
+    </div>
+    <div class="ajhscroll">${list.map(card).join('')}</div>
+    <div class="ajhfoot">
+      <button class="ajbb warn" data-hsell="1"></button>
+      <button class="ajbb warn" data-hrel="1"></button>
+      <button class="ajbb keep" data-hkeep="1">✅ เก็บทั้งหมด</button>
+    </div>
+  </div>`;
   document.body.appendChild(d);
-  const body = d.querySelector('#ajHR');
+  const q = s => d.querySelector(s);
 
-  function draw(){
+  const freeList = () => list.filter(c => !c.lock && S.creatures.indexOf(c) >= 0);
+  function sync(){
     const alive = list.filter(c => S.creatures.indexOf(c) >= 0);
-    const free = alive.filter(c => !c.lock);
+    const free = freeList();
     const coin = free.reduce((a, c) => a + priceOf(c), 0);
     const dust = free.reduce((a, c) => a + dustOf(c), 0);
-    body.innerHTML = `
-      <p class="sub">แตะ 🔒 เพื่อเก็บตัวที่ชอบไว้ · ตัวที่ไม่ล็อกขายหรือปล่อยทีเดียวได้ด้านล่าง<br>
-        ไชนี่ ✨ · ตำนาน · อมตะ · มีพรสวรรค์ · 5★ ระบบล็อกไว้ให้แล้ว</p>
-      <div class="ajbrow">
-        <button class="ajbb" data-hla="1">🔒 ล็อกทั้งหมด</button>
-        <button class="ajbb" data-hlu="1">🔓 ปลดล็อกทั้งหมด</button>
-        <span class="ajbnum">ล็อกไว้ ${alive.length - free.length}/${alive.length} ตัว</span>
-      </div>
-      ${alive.map(c => {
-        const sp = SP[c.sid], b = ensureBattle(c), r = roleOf(c);
-        const nat = (typeof NT !== "undefined" && NT[c.nature]) || null;
-        const ivs = (() => { try{ return BSTATS.reduce((s, x) => s + ivOf(c)[x.k], 0); }
-          catch(e){ return 0; } })();
-        return `<div class="ajhc ${c.shiny ? 'sh' : ''} ${c.lock ? 'kept' : ''}">
-          <div class="ajhtop">
-            <img src="${ART[c.sid]}" style="${shinyFilter(c)}" alt="">
-            <div class="ajhinfo">
-              <b>${sp.name}${c.shiny ? ' ✨' : ''}${isNew[c.id] ? ' <i class="nw">ตัวใหม่!</i>' : ''}</b>
-              <span>${starStr(c.stars).slice(0, c.stars)} · ${elsOf(c).join(" + ")}
-                · ${r.emoji} ${r.name.replace("สาย", "")}</span>
-              <span>พลังรวม <b>${b.total}</b> · ค่าแฝง ${ivs}/${(typeof IV_MAX !== "undefined" ? IV_MAX : 31) * 6}
-                ${nat ? " · " + nat.emoji + " " + nat.name : ""}</span>
-              ${c.tal && TAL[c.tal] ? `<span class="tl">${TAL[c.tal].emoji} พรสวรรค์${TAL[c.tal].name}</span>` : ''}
-              ${c.shiny ? `<span class="tl">ไชนี่ ${shinyName(c)}</span>` : ''}
-              <span class="pr">ขาย 🪙 ${priceOf(c).toLocaleString()} · ปล่อย 💠 ${dustOf(c)}</span>
-            </div>
-            <button class="ajlk ${c.lock ? 'on' : ''}" data-hlk="${c.id}">${c.lock ? '🔒' : '🔓'}</button>
-          </div>
-          <div class="ajstat">${BSTATS.map(x => `<div><span>${x.short}</span>
-            <i><b style="width:${clamp2(b[x.k] / 190 * 100, 5, 100)}%;background:${x.color || '#6fbe5a'}"></b></i>
-            <u>${b[x.k]}</u></div>`).join('')}</div>
-        </div>`;
-      }).join('')}
-      <div class="ajbrow" style="margin-top:10px">
-        <button class="ajbb warn" data-hsell="1" ${free.length ? "" : "disabled"}>
-          🏷 ขายที่ไม่ล็อก ${free.length} ตัว · 🪙 ${coin.toLocaleString()}</button>
-        <button class="ajbb warn" data-hrel="1" ${free.length ? "" : "disabled"}>
-          ปล่อยที่ไม่ล็อก · 💠 ${dust.toLocaleString()}</button>
-      </div>
-      <button class="cls">เก็บทั้งหมดไว้ในทุ่ง</button>`;
-    body.querySelectorAll('[data-hlk]').forEach(x => x.onclick = () => {
-      const c = S.creatures.find(y => y.id === +x.dataset.hlk);
+    q('#ajhCnt').textContent = `ล็อกไว้ ${alive.length - free.length}/${alive.length} ตัว`;
+    d.querySelectorAll('[data-hid]').forEach(el => {
+      const c = list.find(x => x.id === +el.dataset.hid);
       if(!c) return;
-      c.lock = !c.lock; sfx("tap"); save(); draw();
+      el.classList.toggle('kept', !!c.lock);
+      const lk = el.querySelector('[data-hlk]');
+      lk.textContent = c.lock ? '🔒' : '🔓';
+      lk.classList.toggle('on', !!c.lock);
     });
-    body.querySelector('[data-hla]').onclick = () => {
-      list.forEach(c => c.lock = true); sfx("tap"); save(); draw(); };
-    body.querySelector('[data-hlu]').onclick = () => {
-      list.forEach(c => { const sp = SP[c.sid] || {};
-        if(!(c.shiny || c.myth || sp.legend || sp.prize)) c.lock = false; });
-      sfx("tap"); save(); draw(); };
-    const sell = body.querySelector('[data-hsell]'), rel = body.querySelector('[data-hrel]');
-    if(sell) sell.onclick = () => {
-      const ids = list.filter(c => !c.lock && S.creatures.indexOf(c) >= 0).map(c => c.id);
-      if(!ids.length) return;
-      if(sellForCoins(ids)){ d.remove(); render(); }
-    };
-    if(rel) rel.onclick = () => {
-      const ids = list.filter(c => !c.lock && S.creatures.indexOf(c) >= 0).map(c => c.id);
-      if(!ids.length) return;
-      S.mgSel = ids.slice();
-      mgReleaseSel();
-      d.remove(); render();
-    };
-    body.querySelector('.cls').onclick = () => { d.remove(); save(); render(); };
+    const s1 = q('[data-hsell]'), s2 = q('[data-hrel]');
+    s1.textContent = `🏷 ขายที่ไม่ล็อก ${free.length} ตัว · 🪙 ${coin.toLocaleString()}`;
+    s2.textContent = `🍃 ปล่อยที่ไม่ล็อก ${free.length} ตัว · 💠 ${dust.toLocaleString()}`;
+    s1.disabled = s2.disabled = !free.length;
   }
-  draw();
+  d.querySelectorAll('[data-hlk]').forEach(x => x.onclick = () => {
+    const c = S.creatures.find(y => y.id === +x.dataset.hlk);
+    if(!c) return;
+    c.lock = !c.lock; sfx("tap"); save(); sync();
+  });
+  q('[data-hla]').onclick = () => { list.forEach(c => c.lock = true); sfx("tap"); save(); sync(); };
+  q('[data-hlu]').onclick = () => {
+    list.forEach(c => { const sp = SP[c.sid] || {};
+      if(!(c.shiny || c.myth || sp.legend || sp.prize)) c.lock = false; });
+    sfx("tap"); save(); sync();
+  };
+  q('[data-hsell]').onclick = () => {
+    const ids = freeList().map(c => c.id);
+    if(!ids.length) return;
+    if(sellForCoins(ids)){ d.remove(); render(); } else sync();
+  };
+  q('[data-hrel]').onclick = () => {
+    const ids = freeList().map(c => c.id);
+    if(!ids.length) return;
+    S.mgSel = ids.slice();
+    mgReleaseSel();
+    d.remove(); render();
+  };
+  q('[data-hkeep]').onclick = () => { d.remove(); save(); render(); };
+  sync();
 }
 const ajShowGrown = ajHatchResult;
 
@@ -13586,13 +13605,13 @@ function ajDupSheet(){
             <b>🪙 ${priceOf(c).toLocaleString()}</b></label>`).join('')}
         </div>`;
       }).join('') : `<p class="sub">ไม่มีตัวซ้ำที่คัดได้ตอนนี้</p>`}
-      <div class="ajbrow" style="margin-top:10px">
+      <div class="ajhfoot">
         <button class="ajbb warn" data-dsell="1" ${list.length ? "" : "disabled"}>
-          🏷 ขายที่ติ๊ก · 🪙 ${coin.toLocaleString()}</button>
+          🏷 ขายที่ติ๊ก ${list.length} ตัว · 🪙 ${coin.toLocaleString()}</button>
         <button class="ajbb warn" data-drel="1" ${list.length ? "" : "disabled"}>
-          ปล่อยกลับป่า · 💠 ${dust.toLocaleString()}</button>
-      </div>
-      <button class="cls">ปิด</button>`;
+          🍃 ปล่อยที่ติ๊ก ${list.length} ตัว · 💠 ${dust.toLocaleString()}</button>
+        <button class="ajbb keep cls">ปิด</button>
+      </div>`;
     body.querySelectorAll('[data-dup]').forEach(x => x.onchange = () => {
       const id = +x.dataset.dup;
       if(x.checked) picked.add(id); else picked.delete(id);

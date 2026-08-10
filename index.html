@@ -11368,7 +11368,8 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 .ajbb{font-family:inherit;font-size:11.5px;font-weight:700;padding:6px 10px;border-radius:10px;
   border:1px solid #b6d3ae;background:#fff;color:#2f5b2c;cursor:pointer}
 .ajbb.on{background:#3f8b3c;border-color:#2f6a2d;color:#fff}
-.ajbb.warn{border-color:#e0b48a;color:#8a5a22}
+.ajbb.ajw{border-color:#d98f3f;background:#fff6e6;color:#8a5a22}
+.ajbb.ajw:active{background:#ffe9c6}
 .ajbb:disabled{opacity:.45}
 .bxcell.ajsel{box-shadow:0 0 0 3px #3FA246 inset,0 0 8px rgba(63,162,70,.5)}
 .bxcell .ajck{position:absolute;right:2px;bottom:2px;z-index:3;width:17px;height:17px;
@@ -11408,7 +11409,7 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 .ajhscroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:2px}
 .ajhfoot{position:sticky;bottom:0;display:flex;gap:6px;flex-wrap:wrap;
   padding:9px 0 2px;margin-top:2px;background:#fdf6e4;border-top:1px solid #ddc9a0}
-.ajhfoot .ajbb{flex:1 1 46%;min-height:44px;font-size:12.5px;line-height:1.25}
+.ajhfoot .ajbb{flex:1 1 46%;min-height:46px;font-size:12.5px;line-height:1.25}
 .ajhfoot .ajbb.keep{flex:1 1 100%;background:#3f8b3c;border-color:#2f6a2d;color:#fff;font-size:15px}
 .ajhc{margin:9px 0;padding:8px;border-radius:12px;background:#fffaf0;
   border:1px solid #ddc9a0}
@@ -12869,7 +12870,7 @@ function ajBoxMulti(){
       <div class="ajbrow">
         <button class="ajbb" data-ajb="sort">🧭 จัดทุ่งตามธาตุ</button>
         <button class="ajbb" data-ajb="dup">♻️ คัดตัวซ้ำ</button>
-        <button class="ajbb warn" data-ajb="dupauto">♻️ ขายซ้ำทันที</button>
+        <button class="ajbb ajw" data-ajb="dupauto">♻️ ขายซ้ำทันที</button>
       </div>
       ${list.length ? `<div class="ajbrow">
         <button class="ajbb" data-ajb="page">เลือกทั้งหน้า</button>
@@ -12877,8 +12878,8 @@ function ajBoxMulti(){
         <button class="ajbb" data-ajb="lock">${allLock ? "🔓 ปลดล็อก" : "🔒 ล็อก"}</button>
         <button class="ajbb" data-ajb="box">${inBoxN > list.length / 2
           ? "📤 ดึงออกจากตู้" : "📦 เก็บเข้าตู้"}</button>
-        <button class="ajbb warn" data-ajb="sell" ${free.length ? "" : "disabled"}>🏷 ส่งขาย</button>
-        <button class="ajbb warn" data-ajb="rel" ${free.length ? "" : "disabled"}>ปล่อยกลับป่า</button>
+        <button class="ajbb ajw" data-ajb="sell" ${free.length ? "" : "disabled"}>🏷 ส่งขาย</button>
+        <button class="ajbb ajw" data-ajb="rel" ${free.length ? "" : "disabled"}>ปล่อยกลับป่า</button>
       </div>
       <div class="ajbrow">${Array.from({ length:Math.max(1, S.penCount || 1) }, (_, i) =>
         `<button class="ajbb" data-ajmv="${i}">➡️ ${pnName(i)} (${pnCount(i)}/${pnCap()})</button>`
@@ -13029,8 +13030,8 @@ function ajHatchResult(list, tries){
     </div>
     <div class="ajhscroll">${list.map(card).join('')}</div>
     <div class="ajhfoot">
-      <button class="ajbb warn" data-hsell="1"></button>
-      <button class="ajbb warn" data-hrel="1"></button>
+      <button class="ajbb ajw" data-hsell="1"></button>
+      <button class="ajbb ajw" data-hrel="1"></button>
       <button class="ajbb keep" data-hkeep="1">✅ เก็บทั้งหมด</button>
     </div>
   </div>`;
@@ -13606,9 +13607,9 @@ function ajDupSheet(){
         </div>`;
       }).join('') : `<p class="sub">ไม่มีตัวซ้ำที่คัดได้ตอนนี้</p>`}
       <div class="ajhfoot">
-        <button class="ajbb warn" data-dsell="1" ${list.length ? "" : "disabled"}>
+        <button class="ajbb ajw" data-dsell="1" ${list.length ? "" : "disabled"}>
           🏷 ขายที่ติ๊ก ${list.length} ตัว · 🪙 ${coin.toLocaleString()}</button>
-        <button class="ajbb warn" data-drel="1" ${list.length ? "" : "disabled"}>
+        <button class="ajbb ajw" data-drel="1" ${list.length ? "" : "disabled"}>
           🍃 ปล่อยที่ติ๊ก ${list.length} ตัว · 💠 ${dust.toLocaleString()}</button>
         <button class="ajbb keep cls">ปิด</button>
       </div>`;

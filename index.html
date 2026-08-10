@@ -11256,14 +11256,14 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
   padding:10px 10px calc(env(safe-area-inset-bottom,0px) + 10px);
   box-shadow:0 -8px 24px rgba(0,0,0,.35)}
 .ajhint{font-size:11.5px;color:#7d6a4b;margin:0 2px 8px;line-height:1.45}
-.ajroster{display:grid;grid-auto-flow:column;grid-auto-columns:88px;grid-template-rows:repeat(1,auto);
+.ajroster{display:grid;grid-auto-flow:column;grid-auto-columns:92px;grid-template-rows:repeat(1,auto);
   gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
 .ajroster.two{grid-template-rows:repeat(2,auto)}
-.ajcard{position:relative;height:114px;border-radius:11px;padding:0 0 2px;overflow:hidden;
+.ajcard{position:relative;height:136px;border-radius:11px;padding:0 0 2px;overflow:hidden;
   text-align:center;border:2px solid #b98b4e;background:linear-gradient(180deg,#a97fd6,#7d55ad)}
 .ajcard.r2{background:linear-gradient(180deg,#e8b45c,#c1852f);border-color:#8c5f22}
 .ajcard.r1{background:linear-gradient(180deg,#9fc3e8,#5f8ec2);border-color:#3f679a}
-.ajcard img{width:100%;height:54px;object-fit:contain;display:block;
+.ajcard img{width:100%;height:52px;object-fit:contain;display:block;
   background:rgba(255,255,255,.12);filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
 .ajcard b{display:block;font-size:9.5px;line-height:12px;color:#fff;padding:2px 3px 0;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.5)}
@@ -11271,6 +11271,10 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
   text-shadow:0 1px 2px rgba(0,0,0,.5);line-height:12px}
 .ajcard em{display:block;font-size:9px;font-style:normal;font-weight:800;line-height:12px;
   text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.ajcard small.rl{font-size:9.5px;color:#fff9d6}
+.ajcard small.el{font-size:9px;color:#dff3ff}
+.ajcard .rw{position:absolute;left:3px;bottom:3px;z-index:2;font-size:11px;line-height:15px;
+  background:rgba(0,0,0,.45);border-radius:6px;padding:0 4px}
 .ajcard .lv{position:absolute;left:3px;top:3px;z-index:2;font-size:8.5px;font-weight:800;
   background:rgba(0,0,0,.5);color:#fff;padding:0 5px;border-radius:7px;line-height:14px}
 .ajcard.on{border-color:#5ecb46;box-shadow:0 0 0 2px #5ecb46 inset}
@@ -11370,6 +11374,16 @@ let rzT; window.addEventListener('resize', () => { clearTimeout(rzT); rzT = setT
 .bxcell .ajck{position:absolute;right:2px;bottom:2px;z-index:3;width:17px;height:17px;
   border-radius:50%;background:#3f9b34;color:#fff;font-size:12px;font-weight:900;font-style:normal;
   display:flex;align-items:center;justify-content:center;border:1.5px solid #eaffe4}
+
+/* ---------- ป้ายสายของสายพันธุ์ ---------- */
+.ajrole{margin:8px 0;padding:9px 11px;border-radius:12px;line-height:1.5;
+  background:linear-gradient(180deg,#f6f1ff,#ece2fb);border:1px solid #c9b6e8;color:#3d3059}
+.ajrole b{display:block;font-size:14px;margin-bottom:2px}
+.ajrole b small{font-weight:600;font-size:11px;opacity:.75}
+.ajrole span{display:block;font-size:11.5px;color:#564a72;margin-top:3px}
+.ajrole u{text-decoration:none;font-weight:800;color:#6a4fa8}
+.bxcell .ajrl{position:absolute;left:2px;top:2px;z-index:3;font-size:10px;font-style:normal;
+  line-height:14px;padding:0 3px;border-radius:6px;background:rgba(0,0,0,.42);color:#fff}
 </style>
 <script id="ajJs">
 /* =====================================================================
@@ -11536,15 +11550,17 @@ function ajFormation(pool, picked, cap, foes, foe, opt, go, back){
       const rar = SP[c.sid].rarity || 1, b = statsOf(c), pl = place[c.id];
       const tops = BSTATS.slice(1).sort((x, y) => b[y.k] - b[x.k]).slice(0, 2)
         .map(x => x.short).join("+");
+      const r = roleOf(c);
       return `<button class="ajcard r${rar} ${pl ? 'on' : ''} ${sel === c.id ? 'sel' : ''}"
         data-cid="${c.id}">
         <span class="lv">Lv. ${lvOf(c)}</span>
+        ${pl ? `<span class="rw">${ROWS[pl.r].emoji}</span>` : ''}
         <img src="${artOf(c)}" style="${shinyFilter(c)}" alt="">
         <b>${SP[c.sid].name}</b>
-        <small>${starStr(c.stars).slice(0, c.stars)} · พลัง ${b.total}</small>
-        ${muTag(mulVs(c, foeEls))}
-        <small style="opacity:.9">${pl ? ROWS[pl.r].emoji + " " + ROWS[pl.r].name
-          : "เด่น " + tops}</small></button>`;
+        <small class="rl">${r.emoji} ${r.name.replace("สาย", "")}</small>
+        <small class="el">${elsOf(c).join(" + ")}</small>
+        <small>${starStr(c.stars).slice(0, c.stars)} · ${b.total}</small>
+        ${muTag(mulVs(c, foeEls))}</button>`;
     }).join('');
     ros.querySelectorAll('[data-cid]').forEach(b => {
       b.onclick = () => {
@@ -11674,7 +11690,18 @@ function ajUltOf(c){
   const dmg = mvs.filter(m => m.pw > 0).sort((a, b) => b.pw - a.pw)[0];
   const b = statsOf(c), spec = b.spa > b.atk;
   const st = mvs.find(m => m.st);
+  const role = roleOf(c).id;
   let u;
+  if(role === "sup" || role === "tank" || !dmg){
+    u = role === "tank"
+      ? { n:"ตั้งกำแพงสู้", k:"sup", heal:.18, stg:{ def:2, spd:2 }, el:null, basic:true,
+          note:"ฟื้นเลือดทีม 18% และเพิ่มเกราะกับต้านทานทั้งทีม 2 ขั้น" }
+      : { n:"พลังใจตุ้ยนุ้ย", k:"sup", heal:.28, stg:{ atk:1, def:1 }, el:null, basic:true,
+          note:"ฟื้นเลือดทั้งทีม 28% และเพิ่ม ATK/DEF ให้ทุกตัว" };
+    try{ Object.defineProperty(c, "_bult", { value:u, enumerable:false, writable:true }); }
+    catch(e){ c._bult = u; }
+    return u;
+  }
   if(dmg){
     u = { n:dmg.n + "สุดพลัง", k:"atk", pw:Math.round(dmg.pw * 1.9), spec:spec,
           el:dmg.el || SP[c.sid].el, st:st ? st.st : null, basic:true,
@@ -11718,7 +11745,8 @@ function ajSheet(c){
   d.className = 'ajsheet';
   d.innerHTML = `<div class="in">
     <h3>${SP[c.sid].name} · Lv. ${lvOf(c)}</h3>
-    <p class="sub">${elsOf(c).join(" + ")} · ${rowOf(c).emoji} ${rowOf(c).name}
+    <p class="sub">${roleOf(c).emoji} ${roleOf(c).name} · ${elsOf(c).join(" + ")}
+      · ${rowOf(c).emoji} ${rowOf(c).name}
       · พลังรวม ${b.total.toLocaleString()}${isRanged(rowOf(c).id) ? " · ยิงไกล" : " · ประชิด"}</p>
     <div class="ajstat">${BSTATS.map(x => `<div><span>${x.short}</span>
       <i><b style="width:${clamp2(b[x.k] / 190 * 100, 5, 100)}%;background:${x.color || '#6fbe5a'}"></b></i>
@@ -11967,6 +11995,7 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
       x:w.x, y:w.y, hx:w.x, hy:w.y,
       en:0, ult:ajUltOf(c), pas:ajPassives(c), hits:0, healT:0,
       st:null, stT:0, dot:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 },
+      role:roleOf(c),
       item:opt.noItem ? null : (typeof battleItem === "function" ? battleItem(c) : null),
       dmgMul:opt.dmgMul || 1, critAdd:opt.critAdd || 0,
       cd:0.4 + Math.random()*0.5, lunge:0, flash:0, dead:false, ranged:isRanged(x.r),
@@ -12031,6 +12060,11 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
     const D = (spec ? d.b.spd : d.b.def) * stgM(spec ? d.stg.spd : d.stg.def);
     let mu = elMulOf(a, d) * (o.el !== undefined ? (typeof wxMul === "function" ? wxMul(o.el) : 1) : 1)
       * (a.row ? (spec ? a.row.spec : a.row.phys) : 1) * (a.dmgMul || 1) * (o.mul || 1);
+    if(a.role){                                            /* โบนัสตามสายของสายพันธุ์ */
+      if(a.role.id === "atk" && !spec) mu *= 1.08;
+      if(a.role.id === "mage" && spec) mu *= 1.10;
+    }
+    if(d.role && d.role.id === "tank") mu *= 0.90;          /* แท็งก์ทนกว่า */
     if(a.item === "orb") mu *= 1.30;
     if(a.item === "band" && !spec) mu *= 1.25;
     if(a.item === "specs" && spec) mu *= 1.25;
@@ -12070,8 +12104,9 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
     if(u.ranged){                                          // ตัวยิงไกลเลือกตัวที่เลือดน้อยสุด
       return foesOf.slice().sort((a, b) => (a.hp / a.max) - (b.hp / b.max))[0];
     }
-    return foesOf.slice().sort((a, b) =>
-      (dist(u, a) - a.row.aggro / 200) - (dist(u, b) - b.row.aggro / 200))[0];
+    const wt = x => dist(u, x) - x.row.aggro / 200
+      - (x.role && x.role.id === "tank" ? 0.7 : 0);          /* แท็งก์ถูกเล็งก่อน */
+    return foesOf.slice().sort((a, b) => wt(a) - wt(b))[0];
   }
   const range = u => u.ranged ? 3.1 : 0.78;
   const ivOfU = u => clamp2(1.5 * Math.pow(refSpe /
@@ -12372,7 +12407,8 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
         rings.push({ x:u.x, y:u.y, t:0, c:"#8ef07a" });
       }
       /* พลังงานไหลเองช้าๆ + ออโต้ปล่อยไม้ตาย */
-      if(u.ult) u.en = Math.min(100, u.en + d * 2);
+      if(u.ult) u.en = Math.min(100, u.en + d * 2
+        * (u.role && u.role.id === "sup" ? 1.6 : 1));
       if(u.ult && u.en >= 100 && (AJ.auto || !u.ally)) fireUltAJ(u);
       if(STATUS[u.st] && STATUS[u.st].skip && Math.random() < d * 0.9) return;   // ขยับไม่ได้
       /* เดินหา / โจมตี */
@@ -12559,8 +12595,13 @@ function ajBtns(){
 }
 const oldRender = window.render;
 if(typeof oldRender === "function")
-  window.render = function(){ const r = oldRender.apply(this, arguments);
-    try{ ajBtns(); }catch(e){} return r; };
+  window.render = function(){
+    try{ ajFixBuilds(); }catch(e){}
+    const r = oldRender.apply(this, arguments);
+    try{ ajBtns(); }catch(e){}
+    return r;
+  };
+setTimeout(() => { try{ if(ajFixBuilds() && typeof save === "function") save(); }catch(e){} }, 300);
 
 /* คำอธิบายระบบต่อสู้ในแท็บบอส (แปะเพิ่ม ไม่แตะโค้ดเดิม) */
 function ajMount(){
@@ -12606,13 +12647,41 @@ function ajLockBtn(){
     if(typeof save === "function") save();
     (window.renderSel || renderSel)();
   };
-  if(sell) row.insertBefore(b, sell); else row.appendChild(b);
+  const sortb = document.createElement('button');
+  sortb.id = 'ajSortPen';
+  sortb.className = 'btn ghost sm';
+  sortb.textContent = "🧭 จัดทุ่งตามธาตุ";
+  sortb.onclick = () => ajSortPens();
+  if(sell){ row.insertBefore(b, sell); row.insertBefore(sortb, sell); }
+  else { row.appendChild(b); row.appendChild(sortb); }
   /* ล็อกแล้วขาย/ปล่อยไม่ได้ */
   [sell, rel].forEach(x => {
     if(!x) return;
     x.disabled = !!c.lock;
     x.title = c.lock ? "ตัวนี้ล็อกอยู่ ปลดล็อกก่อน" : "";
   });
+  /* เอาแผง "🧱 สายปั้น" ออก แล้ววางการ์ดบอกสายของสายพันธุ์แทน */
+  const ub = box.querySelector('.ultbox');
+  if(ub){
+    const kids = Array.from(ub.children);
+    const i = kids.findIndex(el => el.tagName === "H4" && /สายปั้น/.test(el.textContent));
+    if(i >= 0){
+      const del = [kids[i]];
+      for(let n = i + 1; n < kids.length && kids[n].tagName !== "H4"; n++) del.push(kids[n]);
+      del.forEach(e => e.remove());
+    }
+  }
+  if(!box.querySelector('.ajrole')){
+    const holder = document.createElement('div');
+    holder.innerHTML = ajRoleCard(c);
+    const node = holder.firstChild;
+    if(ub) ub.insertBefore(node, ub.firstChild);
+    else {
+      const mv = box.querySelector('.mvbox');
+      if(mv) mv.parentNode.insertBefore(node, mv);
+      else row.parentNode.insertBefore(node, row);
+    }
+  }
   /* ป้าย 🔒 ข้างชื่อ */
   const h = box.querySelector('.who h3') || box.querySelector('.who h4') || box.querySelector('.who b');
   if(h && c.lock && h.textContent.indexOf("🔒") < 0) h.textContent = "🔒 " + h.textContent;
@@ -12662,6 +12731,11 @@ function ajBoxMulti(){
     if(on && !ck){ ck = document.createElement('i'); ck.className = 'ajck'; ck.textContent = '✓';
       b.appendChild(ck); }
     if(!on && ck) ck.remove();
+    if(!b.querySelector('.ajrl')){                      /* ป้ายบอกสาย ดูง่ายตอนหาตัวมาปั้น */
+      const c = cOf(id);
+      if(c){ const r = document.createElement('i'); r.className = 'ajrl';
+        r.textContent = roleOf(c).emoji; r.title = roleOf(c).name; b.appendChild(r); }
+    }
   });
 
   /* ---- แตะ: โหมดเลือกอยู่ก็ติ๊ก ไม่ก็เปิดดูรายละเอียดเหมือนเดิม ---- */
@@ -12746,6 +12820,10 @@ function ajBoxMulti(){
         <span class="ajbnum">${list.length ? `เลือก ${list.length} ตัว · 🪙 ${coin} · 💠 ${dust}`
           : "ลากนิ้วผ่านรูปเพื่อเลือกหลายตัวรวดเดียว"}</span>
       </div>
+      <div class="ajbrow">
+        <button class="ajbb" data-ajb="sort">🧭 จัดทุ่งตามธาตุ</button>
+        <span class="ajbnum" style="flex:1">รวมตัวธาตุเดียวกันไว้ทุ่งเดียวกันให้อัตโนมัติ</span>
+      </div>
       ${list.length ? `<div class="ajbrow">
         <button class="ajbb" data-ajb="page">เลือกทั้งหน้า</button>
         <button class="ajbb" data-ajb="clear">ล้าง</button>
@@ -12754,9 +12832,15 @@ function ajBoxMulti(){
           ? "📤 ดึงออกจากตู้" : "📦 เก็บเข้าตู้"}</button>
         <button class="ajbb warn" data-ajb="sell" ${free.length ? "" : "disabled"}>🏷 ส่งขาย</button>
         <button class="ajbb warn" data-ajb="rel" ${free.length ? "" : "disabled"}>ปล่อยกลับป่า</button>
-      </div>` : ''}`;
+      </div>
+      <div class="ajbrow">${Array.from({ length:Math.max(1, S.penCount || 1) }, (_, i) =>
+        `<button class="ajbb" data-ajmv="${i}">➡️ ${pnName(i)} (${pnCount(i)}/${pnCap()})</button>`
+        ).join('')}</div>` : ''}`;
+    bar.querySelectorAll('[data-ajmv]').forEach(b =>
+      b.onclick = () => ajMoveSel(+b.dataset.ajmv));
     bar.querySelectorAll('[data-ajb]').forEach(b => b.onclick = () => {
       const k = b.dataset.ajb, ids2 = ajBoxIds();
+      if(k === "sort"){ ajSortPens(); return; }
       if(k === "mode"){ AJ.msel = !AJ.msel; if(!AJ.msel) AJ.sel.clear(); sfx("tap");
         ajBoxMulti(); ajBulkBar(); return; }
       if(k === "page"){ cells.forEach(x => AJ.sel.add(+x.dataset.bxc)); sfx("tap");
@@ -12789,6 +12873,259 @@ function ajBoxMulti(){
   }
   ajBulkBar();
 }
+/* ---- ปรับราคา: ไข่ collab ใช้ผงตุ้ยนุ้ยแค่ 5000 ---- */
+try{ if(typeof COLLAB_COST !== "undefined") COLLAB_COST.dust = 5000; }catch(e){}
+
+/* =====================================================================
+   8) สายของสายพันธุ์ (บทบาท) — แต่ละสายพันธุ์เป็นสายไหน
+      และเรียนได้เฉพาะท่า/ไม้ตายของสายนั้น
+   ===================================================================== */
+const ROLES = {
+  tank:{ id:"tank", emoji:"🛡", name:"สายแท็งก์",
+    note:"ทนตีแทนทีม · ยืนแถวหน้าดีที่สุด · เรียนท่าป้องกันกับท่ากดค่าศัตรู",
+    perk:"รับดาเมจน้อยลง 10% และศัตรูประชิดเล็งมาก่อน" },
+  atk:{ id:"atk", emoji:"⚔️", name:"สายโจมตี",
+    note:"ตีกายภาพหนัก · แถวหน้าหรือกลาง · เรียนท่ากายภาพกับท่าปลุกพลัง",
+    perk:"ดาเมจกายภาพ +8%" },
+  mage:{ id:"mage", emoji:"🔮", name:"สายเวทย์",
+    note:"ตีพลังพิเศษไกลๆ · เหมาะกับแถวหลัง · เรียนท่าธาตุหนักกับท่าสถานะ",
+    perk:"ดาเมจพลังพิเศษ +10%" },
+  sup:{ id:"sup", emoji:"💚", name:"สายซัพพอร์ต",
+    note:"ฟื้นเลือด บัฟทีม กดค่าศัตรู · เรียนท่าฟื้นฟูกับท่าบัฟ",
+    perk:"เก็บพลังงานไม้ตายเร็วขึ้น 60%" }
+};
+const ROLE_W = {
+  "ไฟ":[1,5,3,1], "น้ำ":[4,2,2,2], "พืช":[2,1,2,5], "ไฟฟ้า":[1,3,4,2],
+  "น้ำแข็ง":[4,1,3,2], "เหล็ก":[4,4,1,1], "ดิน":[4,2,1,3], "หิน":[5,2,1,2],
+  "ลม":[1,3,2,3], "แมลง":[2,3,1,3], "พิษ":[2,2,2,4], "จิต":[1,1,5,3],
+  "รัตติกาล":[1,4,4,1], "วิญญาณ":[1,2,5,2], "ประกาย":[1,1,3,5], "มังกร":[2,4,3,1]
+};
+const ROLE_KEYS = ["tank","atk","mage","sup"];
+const roleCache = {};
+function ajRole(sid){
+  const sp = typeof sid === "string" ? SP[sid] : sid;
+  if(!sp) return ROLES.atk;
+  if(roleCache[sp.id]) return roleCache[sp.id];
+  const w = ROLE_W[sp.el] || [1, 1, 1, 1];
+  const bag = [];
+  w.forEach((n, i) => { for(let k = 0; k < n; k++) bag.push(ROLE_KEYS[i]); });
+  let h = 2166136261;
+  for(let i = 0; i < sp.id.length; i++){ h ^= sp.id.charCodeAt(i); h = (h * 16777619) >>> 0; }
+  return roleCache[sp.id] = ROLES[bag[h % bag.length]];
+}
+const roleOf = c => ajRole(c && c.sid);
+
+/* สายปั้น (ค่าพลัง) ผูกกับสายของสายพันธุ์ ไม่ต้องเลือกเองอีก */
+const ROLE_BD = { tank:"tank", atk:"pow", mage:"mag", sup:"sup" };
+(function addSupSpec(){
+  try{
+    if(typeof BUILD_SPECS === "undefined" || BUILD_SPEC.sup) return;
+    const sup = { id:"sup", emoji:"💚", name:"สายซัพพอร์ต", dust:0,
+      mod:{ spd:1.22, hp:1.14, spe:1.10, atk:0.88, spa:0.94 },
+      note:"ต้านทานกับเลือดดี อยู่ช่วยทีมได้นาน แลกกับพลังโจมตี" };
+    BUILD_SPECS.push(sup);
+    BUILD_SPEC.sup = sup;
+  }catch(e){}
+})();
+function ajFixBuilds(){
+  if(typeof BUILD_SPEC === "undefined") return;
+  let n = 0;
+  (S.creatures || []).forEach(c => {
+    if(!c || !c.sid || !SP[c.sid]) return;
+    const want = ROLE_BD[roleOf(c).id];
+    if(want && BUILD_SPEC[want] && c.bd !== want){ c.bd = want; c.bs = null; n++; }
+  });
+  return n;
+}
+/* ปิดการเลือกสายปั้นเอง */
+const oldSetBuild = window.setBuild;
+if(typeof oldSetBuild === "function")
+  window.setBuild = function(cid){
+    const c = (S.creatures || []).find(x => x.id === cid);
+    if(!c) return;
+    const r = roleOf(c);
+    alert(`สายปั้นถูกกำหนดจากสายพันธุ์แล้ว\n\n${SP[c.sid].name} เป็น ${r.emoji} ${r.name}` +
+      ` — ค่าพลังจะปรับตามสายนี้อัตโนมัติ`);
+  };
+
+/* ---- คลังท่าของแต่ละสาย ---- */
+function ajMovePool(c){
+  const sp = SP[c.sid], r = roleOf(c).id;
+  const els = [sp.el, c.el2].filter(Boolean);
+  const uni = { tank:["tackle","guard","screech","rest"],
+                atk:["tackle","slash","quick","focus"],
+                mage:["tackle","focus","screech","guard"],
+                sup:["tackle","guard","screech","rest","focus"] }[r];
+  const suf = { tank:["a","c"], atk:["a","b"], mage:["b","c"], sup:["c","a"] }[r];
+  const out = [];
+  els.forEach(el => { if(EL_MOVE[el]) suf.forEach(x => out.push(elKey(el) + x)); });
+  uni.forEach(id => out.push(id));                  /* ท่าธาตุขึ้นก่อน แล้วต่อด้วยท่าไร้ธาตุ */
+  return out.filter(id => MV[id]);
+}
+/* ชุดท่าเริ่มต้นที่เข้ากับสาย */
+function ajStarter(c){
+  const sp = SP[c.sid], k = EL_MOVE[sp.el] ? elKey(sp.el) : null;
+  const E = x => k ? k + x : null;
+  const want = { atk:[E("a"), "slash", "quick", "focus"],
+                 mage:[E("b"), E("c"), "focus", "tackle"],
+                 tank:[E("a"), "guard", E("c"), "rest"],
+                 sup:[E("c"), "rest", "guard", "screech"] }[roleOf(c).id] || [];
+  const pool = ajMovePool(c);
+  const out = [];
+  want.concat(pool).forEach(id => {
+    if(id && MV[id] && pool.indexOf(id) >= 0 && out.indexOf(id) < 0) out.push(id);
+  });
+  return out;
+}
+/* ---- ไม้ตายของแต่ละสาย ---- */
+const ULT_ROLE = {
+  u_slash:["atk","tank"], u_burst:["mage"], u_drain:["mage","sup"],
+  u_heal:["sup"], u_guard:["tank","sup"], u_rage:["sup","atk"],
+  u_haste:["sup","mage"], u_cleanse:["sup","tank"], u_break:["atk","tank"]
+};
+function ajUltRoles(u){
+  if(ULT_ROLE[u.id]) return ULT_ROLE[u.id];
+  if(/a$/.test(u.id)) return ["atk", "mage"];       /* อวสาน… ดาเมจหนัก */
+  return ["mage", "tank", "sup"];                    /* ตราสาป… ใส่สถานะ/กดค่า */
+}
+
+/* ---- ครอบฟังก์ชันเดิม: กรองตามสาย แต่ท่าที่เคยเรียนไว้แล้วยังใช้ได้ ---- */
+const oldLearnable = window.learnable;
+if(typeof oldLearnable === "function")
+  window.learnable = function(c){
+    const all = oldLearnable(c);
+    if(!c || !c.sid || !SP[c.sid]) return all;
+    const pool = ajMovePool(c);
+    const keep = (c.mv || []).filter(id => MV[id]);
+    const ok = all.filter(id => pool.indexOf(id) >= 0 || keep.indexOf(id) >= 0);
+    return ok.length ? ok : all;
+  };
+const oldSetMove = window.setMove;
+if(typeof oldSetMove === "function")
+  window.setMove = function(cid, slot, id){
+    const c = (S.creatures || []).find(x => x.id === cid);
+    if(c && MV[id] && ajMovePool(c).indexOf(id) < 0 && (c.mv || []).indexOf(id) < 0){
+      const r = roleOf(c);
+      alert(`${SP[c.sid].name} เป็น ${r.emoji} ${r.name}\n\nเรียน "${MV[id].n}" ไม่ได้ — ` +
+        `สายนี้เรียนได้แต่ท่าของสายตัวเอง`);
+      if(typeof render === "function") render();
+      return;
+    }
+    return oldSetMove.apply(this, arguments);
+  };
+const oldUltLearnable = window.ultLearnable;
+if(typeof oldUltLearnable === "function")
+  window.ultLearnable = function(c){
+    const all = oldUltLearnable(c);
+    if(!c || !c.sid || !SP[c.sid]) return all;
+    const r = roleOf(c).id;
+    const ok = all.filter(u => ajUltRoles(u).indexOf(r) >= 0 || c.ult === u.id);
+    return ok.length ? ok : all;
+  };
+/* ท่าเริ่มต้นของตัวใหม่ ให้ตรงสายตั้งแต่แรก */
+const oldDefaultMoves = window.defaultMoves;
+if(typeof oldDefaultMoves === "function")
+  window.defaultMoves = function(c){
+    try{
+      if(c && c.sid && SP[c.sid]){
+        const start = ajStarter(c);
+        const egg = c.mvEgg && MV[c.mvEgg] ? [c.mvEgg] : [];
+        const set = egg.concat(start.filter(id => egg.indexOf(id) < 0));
+        if(set.length >= 4) return set.slice(0, 4);
+      }
+    }catch(e){}
+    return oldDefaultMoves.apply(this, arguments);
+  };
+
+/* ---- ป้ายบอกสายในหน้าสเตตัส ---- */
+function ajRoleCard(c){
+  const r = roleOf(c);
+  const pool = ajMovePool(c).map(id => MV[id].n).join(" · ");
+  const ults = (window.ultLearnable || ultLearnable)(c).map(u => u.n).slice(0, 8).join(" · ");
+  return `<div class="ajrole">
+    <b>${r.emoji} ${r.name} <small>· สายประจำสายพันธุ์${SP[c.sid].name}</small></b>
+    <span>${r.note}<br>ในสนาม: ${r.perk}</span>
+    <span><u>ท่าที่เรียนได้</u> ${pool}</span>
+    <span><u>ไม้ตายที่เรียนได้</u> ${ults || "—"}</span></div>`;
+}
+
+/* ตัวช่วยเรื่องทุ่ง (มีสำรองเผื่อเวอร์ชันเกมไม่มีฟังก์ชันนี้) */
+const pnName = p => typeof penName === "function" ? penName(p) : "ทุ่งที่ " + (p + 1);
+const pnCap = () => typeof penCap === "function" ? penCap() : 14;
+const pnCount = p => typeof penCount === "function" ? penCount(p)
+  : (S.creatures || []).filter(c => c.pen === p && !c.box).length;
+/* ---- โหมดจัดทุ่ง: รวมตัวธาตุเดียวกันไว้ทุ่งเดียวกัน ---- */
+function ajPenPlan(){
+  const away = typeof awaySet === "function" ? awaySet() : new Set();
+  const nPen = Math.max(1, S.penCount || 1), cap = pnCap();
+  const stay = S.creatures.filter(c => !c.box && away.has(c.id));   /* ตัวออกเดินทางย้ายไม่ได้ */
+  const move = S.creatures.filter(c => !c.box && !away.has(c.id));
+  const room = Array.from({ length:nPen }, (_, p) => cap - stay.filter(c => c.pen === p).length);
+  const plan = Array.from({ length:nPen }, () => []);
+  const used = () => plan.map(a => a.length);
+  const groups = {};
+  move.forEach(c => { const el = SP[c.sid].el; (groups[el] = groups[el] || []).push(c); });
+  const order = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+  const left = [];
+  order.forEach(el => {
+    const g = groups[el].slice().sort((a, b) => statsOf(b).total - statsOf(a).total);
+    /* หาทุ่งที่รับกลุ่มนี้ได้ทั้งกลุ่ม เพื่อให้ธาตุเดียวกันอยู่ด้วยกัน */
+    let p = plan.findIndex((a, i) => room[i] - a.length >= g.length);
+    if(p < 0){                                        /* กลุ่มใหญ่เกินทุ่งเดียว ค่อยไล่เติม */
+      g.forEach(c => {
+        let q = plan.findIndex((a, i) => room[i] - a.length > 0);
+        if(q < 0){ left.push(c); return; }
+        plan[q].push({ c, el });
+      });
+      return;
+    }
+    g.forEach(c => plan[p].push({ c, el }));
+  });
+  return { plan, left, cap, nPen, stay, used:used() };
+}
+function ajSortPens(){
+  const R = ajPenPlan();
+  let moves = 0;
+  const lines = R.plan.map((arr, p) => {
+    const by = {};
+    arr.forEach(it => by[it.el] = (by[it.el] || 0) + 1);
+    R.stay.filter(c => c.pen === p).forEach(c =>
+      by[SP[c.sid].el + " (เดินทาง)"] = (by[SP[c.sid].el + " (เดินทาง)"] || 0) + 1);
+    arr.forEach(it => { if(it.c.pen !== p) moves++; });
+    const inner = Object.keys(by).map(k => `${k} ${by[k]}`).join(" · ") || "ว่าง";
+    return `${pnName(p)} → ${inner}`;
+  });
+  if(!moves && !R.left.length){ alert("ทุ่งจัดตามธาตุเรียบร้อยอยู่แล้ว"); return; }
+  const msg = `จัดทุ่งตามธาตุ? จะย้าย ${moves} ตัว\n\n${lines.join("\n")}` +
+    (R.left.length ? `\n\n⚠️ ทุ่งไม่พอ ${R.left.length} ตัวจะอยู่ที่เดิม (เปิดทุ่งเพิ่มหรือเก็บเข้าตู้ฝากก่อน)` : "") +
+    `\n\nตัวที่ออกลาดตระเวนจะไม่ถูกย้าย`;
+  if(!confirm(msg)) return;
+  R.plan.forEach((arr, p) => arr.forEach(it => it.c.pen = p));
+  logf(`🧭 จัดทุ่งตามธาตุ — ย้าย ${moves} ตัว`, "good");
+  sfx("tap"); save(); render();
+}
+/* ---- ย้ายตัวที่เลือกไปทุ่งที่ระบุ (ดึงออกจากตู้ฝากให้ด้วย) ---- */
+function ajMoveSel(pen){
+  const away = typeof awaySet === "function" ? awaySet() : new Set();
+  const cap = pnCap();
+  let n = 0, full = 0, lock = 0;
+  ajBoxIds().forEach(id => {
+    const c = (S.creatures || []).find(x => x.id === id);
+    if(!c || away.has(id)){ lock++; return; }
+    if(c.pen === pen && !c.box) return;
+    if(pnCount(pen) >= cap){ full++; return; }
+    c.box = false; c.pen = pen; n++;
+  });
+  if(n){
+    AJ.sel.clear();
+    logf(`ย้ายตุ้ยนุ้ย ${n} ตัวไป${pnName(pen)}`, "");
+    sfx("tap"); save();
+  }
+  if(full) alert(`${pnName(pen)} เต็มแล้ว (จุได้ ${cap} ตัว) — ย้ายได้ ${n} ตัว เหลืออีก ${full} ตัว`);
+  else if(!n && lock) alert("ตัวที่เลือกออกลาดตระเวนอยู่ ย้ายไม่ได้");
+  render();
+}
+
 const oldRenderBoxView = window.renderBoxView;
 if(typeof oldRenderBoxView === "function")
   window.renderBoxView = function(){
@@ -12797,6 +13134,13 @@ if(typeof oldRenderBoxView === "function")
     return r;
   };
 
+window.ajSortPens = ajSortPens;
+window.ajPenPlan = ajPenPlan;
+window.ajMoveSel = ajMoveSel;
+window.ajRole = ajRole;
+window.ajMovePool = ajMovePool;
+window.ajRoleCard = ajRoleCard;
+window.ROLES = ROLES;
 window.ajScene = ajScene;
 window.ajUltOf = ajUltOf;
 window.ajFormation = ajFormation;

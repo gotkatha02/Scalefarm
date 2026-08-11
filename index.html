@@ -9029,7 +9029,13 @@ function godFight(){
             logf(`🌟 ล้มเทพเจ้าปฐมกาลได้! เทพยอมมาอยู่ในฟาร์ม · โลกที่สองเปิดแล้ว`, "good");
             showSpin({ emoji:"🌟", title:"ล้มเทพเจ้าปฐมกาลได้!",
               detail:`🌟 ${GOD_SP.name} มาอยู่ในฟาร์มแล้ว (6 ดาว เลเวล 50)` +
-                `<br>🌍 ประตูสู่โลกที่สองเปิดถาวร`, big:true });
+                `<br>🌍 ประตูสู่โลกที่สองเปิดถาวร` +
+                `<br><br>🏺 ดินแดนฟาโรห์รออยู่อีกฝั่งของประตู`, big:true });
+            setTimeout(() => {
+              if(confirm("🚪 ประตูเปิดแล้ว — เข้าดินแดนฟาโรห์เลยไหม?\n\n" +
+                "เข้าทีหลังได้ที่หน้าประตูโลก หรือแท็บ 📖 สมุดภาพ → 🏺 ดินแดนฟาโรห์")
+                && window.ajZoneMap) window.ajZoneMap();
+            }, 1200);
           } else {
             addMat("shard", 8); addMat("star", 10);
             logf(`🌟 ล้มเทพเจ้าปฐมกาลอีกครั้ง — ได้ 🔮 ×8 · 🌟 ×10`, "good");
@@ -9064,6 +9070,9 @@ function renderGate(){
       <span>${world2() ? "🌍 โลกที่สองเปิดแล้ว" : "ผ่านทุกข้อแล้วประตูจะเปิด"}</span></div>
     <div class="gbox">${list.map(x =>
       `<div class="dl"><span>${x.ok ? "✅" : "⬜"}</span><b>${x.t}</b></div>`).join('')}</div>
+    ${world2() ? `<button class="btn sun" id="btnToW2" style="width:100%;margin:10px 0">
+      🏺 เข้าดินแดนฟาโรห์ (โลกที่ 2)</button>
+      <p class="note" style="margin:0 0 10px">เข้าได้อีกทางที่แท็บ 📖 สมุดภาพ → 🏺 ดินแดนฟาโรห์</p>` : ''}
     ${!gateOpen() ? `<p class="note">ยังเปิดสู้ไม่ได้ — ต้องเก็บภารกิจถาวรให้ครบและดันเจี้ยนชั้นลึก ${GATE_DG_LV} ทุกถ้ำก่อน
       (ดูรายการภารกิจถาวรได้ในแท็บภารกิจ)</p>` : ''}
     ${gateOpen() ? `
@@ -9109,6 +9118,9 @@ function renderGate(){
     S.gateTeam = S.gateTeam.includes(id) ? S.gateTeam.filter(x => x !== id) : S.gateTeam.concat([id]);
     sfx("tap"); renderGate();
   });
+  const w2b = box.querySelector('#btnToW2');
+  if(w2b) w2b.onclick = () => { if(window.ajZoneMap) window.ajZoneMap();
+    else alert("ยังโหลดโลกที่สองไม่เสร็จ ลองรีเฟรชหน้าอีกครั้ง"); };
   const bg = box.querySelector('#btnGate');
   if(bg) bg.onclick = gateFight;
   const bgd = box.querySelector('#btnGod');
@@ -14723,6 +14735,11 @@ function zoneMap(){
     });
   }
   draw();
+  const tick = setInterval(() => {
+    if(!d.isConnected) return clearInterval(tick);
+    const e = d.querySelector('#ajZEn');
+    if(e) e.textContent = `⚡ ${energy()}/${EN_MAX}${enNext()}`;
+  }, 5000);
 }
 
 /* ---------- ฉากประจำโซน ---------- */
@@ -14783,6 +14800,7 @@ function scene(z){
 /* ---------- เดินสำรวจ ---------- */
 function explore(z){
   if(document.querySelector('.ajex')) return;
+  if(S.__ajManual === undefined) S.__ajManual = S.manualBattle;
   const w = W2();
   if(energy() < 1){ alert("แรงสำรวจหมด"); return; }
   w.en -= 1; w.enAt = w.enAt || Date.now(); save();
@@ -14871,7 +14889,7 @@ function explore(z){
     const img = el.querySelector('img');
     if(img) img.style.transform = o.dir < 0 ? "scaleX(-1)" : "scaleX(1)";
   }
-  const meEl = mk("ajme", lead ? ART[lead.sid] : (ART[pool[0] && pool[0].id] || ""),
+  const meEl = mk("ajme", (lead && ART[lead.sid]) || (pool[0] && ART[pool[0].id]) || "",
     lead ? shinyFilter(lead) : "", null, false);
 
   field.addEventListener('pointerdown', e => {
@@ -14888,18 +14906,25 @@ function explore(z){
   });
 
   function meet(o){
-    if(busy) return;
+    if(busy || !d.isConnected) return;
     busy = true;
     d.querySelector('#ajExH').textContent = `เจอ ${o.sp.name} ป่า!`;
     setTimeout(() => wildFight(o, z, () => {
-      o.el.remove();
+      if(o.el) o.el.remove();
       const i = wilds.indexOf(o); if(i >= 0) wilds.splice(i, 1);
       busy = false;
       found++;
-      d.querySelector('#ajExH').textContent = "แตะพื้นเพื่อเดินต่อ";
+      const h = d.querySelector('#ajExH');
+      if(h) h.textContent = "แตะพื้นเพื่อเดินต่อ";
     }), 220);
   }
   function step(now){
+    if(!d.isConnected){ cancelAnimationFrame(raf); return; }   /* จอถูกปิดไปแล้ว */
+    if(window.__ajDuck){                                       /* จอต่อสู้ของเกมกำลังเปิด */
+      last = now;
+      raf = requestAnimationFrame(step);
+      return;
+    }
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
     last = now;
     W = field.clientWidth || W; H = field.clientHeight || H;
@@ -14951,6 +14976,7 @@ function explore(z){
   d.querySelector('#ajExX').onclick = () => {
     cancelAnimationFrame(raf);
     d.remove();
+    if(S.__ajManual !== undefined){ S.manualBattle = S.__ajManual; S.__ajManual = undefined; }
     save(); render();
     zoneMap();
   };
@@ -15004,7 +15030,7 @@ function explore(z){
     });
   }
   function hitNpc(o){
-    if(busy || o.cool > 0) return;
+    if(busy || o.cool > 0 || !d.isConnected) return;
     busy = true;
     o.cool = 6;
     window.ajTrainerCard(o.tr, () => {
@@ -15076,10 +15102,25 @@ function mount(){
   if(document.getElementById('ajBmZone')) return;
   const b = document.createElement('button');
   b.className = 'dtab big'; b.id = 'ajBmZone';
-  b.textContent = '🏺 ดินแดนฟาโรห์';
-  b.onclick = () => zoneMap();
+  const opened = () => !!S.w2;
+  b.textContent = (opened() ? '🏺 ดินแดนฟาโรห์' : '🔒 ดินแดนฟาโรห์');
+  b.onclick = () => {
+    if(!opened() && !confirm("🚪 ประตูโลกยังไม่เปิด\n\n" +
+      "ทางปกติคือ แท็บ ⚔️ บอส → 🚪 ประตูโลก → เก็บเงื่อนไขให้ครบ " +
+      "ล้มผู้พิทักษ์สามตัว แล้วล้ม 🌟 เทพเจ้าปฐมกาล\n\n" +
+      "จะเข้าไปดูก่อนเลยไหม?")) return;
+    zoneMap();
+  };
   bar.insertBefore(b, bar.firstChild.nextSibling || null);
 }
+function paint(){
+  const b = document.getElementById('ajBmZone');
+  if(b) b.textContent = (S && S.w2) ? '🏺 ดินแดนฟาโรห์' : '🔒 ดินแดนฟาโรห์';
+}
+const oldR = window.render;
+if(typeof oldR === "function")
+  window.render = function(){ const r = oldR.apply(this, arguments);
+    try{ mount(); paint(); }catch(e){} return r; };
 mount();
 })();
 </script>
@@ -16052,6 +16093,40 @@ window.ajTrainerDone = trDone;
 window.ajLure = lure;
 window.ajLureInfo = z => LURE[z];
 window.ajLureOk = lureOk;
+})();
+</script>
+<style id="ajFixCss">
+.ajsheet.ajduck, .ajmask.ajduck{ display:none !important; }
+</style>
+<script id="ajFixJs">
+/* =====================================================================
+   แก้อาการค้างของโลก 2: จอต่อสู้ของเกม (.mask z-index 88) เปิดอยู่ใต้จอของโมดูล
+   (z-index 300) → หลบจอโมดูลให้อัตโนมัติทุกครั้งที่มี .mask อยู่บนหน้า
+   ===================================================================== */
+(function(){
+const MINE = ".ajsheet, .ajmask";
+let ducking = false;
+function gameMask(){
+  return !!document.querySelector('.mask, .legendpop, .spinmask, .grewmask');
+}
+function apply(){
+  const on = gameMask();
+  if(on === ducking) return;
+  ducking = on;
+  window.__ajDuck = on;
+  document.querySelectorAll(MINE).forEach(el => el.classList.toggle('ajduck', on));
+}
+/* จอของโมดูลที่เพิ่งถูกสร้างตอนกำลังหลบ ก็ต้องหลบด้วย */
+const mo = new MutationObserver(muts => {
+  apply();
+  if(!ducking) return;
+  muts.forEach(m => (m.addedNodes || []).forEach(n => {
+    if(n.nodeType === 1 && n.matches && n.matches(MINE)) n.classList.add('ajduck');
+  }));
+});
+mo.observe(document.body, { childList:true });
+setInterval(apply, 400);                    /* กันพลาดกรณีที่ observer ไม่ทัน */
+window.ajDucking = () => ducking;
 })();
 </script>
 </body>

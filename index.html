@@ -12661,8 +12661,8 @@ window.battleGo = function(team, foe, opt, resolve){
     foe = Object.assign({}, foe, {
       hp:Math.max(30, Math.round(foe.hp * dif.hp)),
       pw:Math.max(5, Math.round(foe.pw * dif.pw)) });
-  if(opt.maxRound) opt = Object.assign({}, opt, { maxRound:opt.maxRound * 4 });
-  else opt = Object.assign({}, opt, { maxRound:80 });      /* เลิกบังคับจำนวนรอบ */
+  if(opt.maxRound) opt = Object.assign({}, opt, { maxRound:opt.maxRound * 3 });
+  else opt = Object.assign({}, opt, { maxRound:60 });      /* เลิกบังคับจำนวนรอบ */
   const batching = typeof inBatch === "function" && inBatch();
   if(!team || !team.length || batching)          /* ตีรัวหลายรอบ = คิดผลให้เลย ไม่ต้องเปิดฉาก */
     return oldBattleGo(team, foe, opt, resolve);
@@ -14670,6 +14670,7 @@ function zoneMap(){
       <span class="ank" id="ajZBall"></span>
       <span class="ank" id="ajZEn"></span>
       <span class="ank" id="ajZAnk"></span>
+      <button class="ajzbtn" id="ajZAuto"></button>
       <button class="ajzbtn" id="ajZRit">𓂀</button>
       <button class="ajzbtn" id="ajZMus">🏛</button>
       <button class="ajzbtn" id="ajZPap">📜</button>
@@ -14683,6 +14684,10 @@ function zoneMap(){
   d.querySelector('#ajZX').onclick = () => d.remove();
   d.querySelector('#ajZShop').onclick = () => { if(window.ajW2Shop) window.ajW2Shop(() => draw()); };
   d.querySelector('#ajZPap').onclick = () => { if(window.ajW2Papyrus) window.ajW2Papyrus(); };
+  const ab = d.querySelector('#ajZAuto');
+  const paintAuto = () => { ab.textContent = W2().auto ? "🤖 ออโต้" : "✋ สั่งเอง"; };
+  ab.onclick = () => { const w = W2(); w.auto = !w.auto; sfx("tap"); save(); paintAuto(); };
+  paintAuto();
   d.querySelector('#ajZRit').onclick = () => { if(window.ajRitual) window.ajRitual(); };
   d.querySelector('#ajZMus').onclick = () => { if(window.ajMuseum) window.ajMuseum(); };
 
@@ -14719,11 +14724,23 @@ function zoneMap(){
             })()}${MATS[z.id]} ×${mat}${
               w.god && w.god[z.id] ? ` · 👑 ล้มแล้ว ${w.god[z.id]} ครั้ง` : ""}</span>
           </div>
-          <div class="ajzmini">${list.slice(0, 14).map(s =>
+          ${(window.ajZoneTasks ? window.ajZoneTasks(z.id) : []).map(t => {
+            const done = window.ajTaskDone && window.ajTaskDone(t.id);
+            return `<div class="ajtask ${t.ok ? 'done' : ''}">${
+              done ? "✅" : t.ok ? "🎁" : "⬜"} ${t.t}${
+              t.ok && !done ? `<button data-task="${t.id}" data-tz="${z.id}">รับรางวัล</button>` : ""}
+              </div>`;
+          }).join('')}
+          <div class="ajzmini" style="margin-top:6px">${list.slice(0, 14).map(s =>
             `<img src="${ART[s.id]}" class="${seen(s.id) ? '' : 'miss'}" title="${
               seen(s.id) ? s.name : 'ยังไม่พบ'}" alt="">`).join('')}</div>
         </div></div>`;
     }).join('');
+    body.querySelectorAll('[data-task]').forEach(b => b.onclick = () => {
+      const z = +b.dataset.tz;
+      const t = (window.ajZoneTasks ? window.ajZoneTasks(z) : []).find(x => x.id === b.dataset.task);
+      if(t && window.ajClaimTask && window.ajClaimTask(t, z)) draw();
+    });
     body.querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
       const z = +b.dataset.go;
       if(energy() < 1){ alert("แรงสำรวจหมด — รอฟื้นหรือใช้ของเร่งในภายหลัง"); return; }
@@ -14855,7 +14872,8 @@ function explore(z){
     if(got){
       const t = d.querySelector('#ajExH');
       if(t) t.textContent = `🏛 ขุดได้ ${got.e} ${got.n}!`;
-      if(typeof sfx === "function") sfx("win");
+      if(window.ajToast) window.ajToast(field, `${got.e} ${got.n}`);
+      if(typeof sfx === "function") sfx("coin");
     }
   }
   function spawn(force){
@@ -14865,15 +14883,23 @@ function explore(z){
     if(!sp) return;
     const alpha = force ? !!force.alpha
       : Math.random() < (window.ajW2Alpha ? window.ajW2Alpha(z) : 0.03);
-    const lv = Math.max(3, Math.round((6 + z * 7) * (alpha ? 1.35 : 1) * (0.85 + Math.random() * 0.3)));
+    const lv = Math.max(3, Math.round((4 + z * 5) * (alpha ? 1.3 : 1) * (0.85 + Math.random() * 0.3)));
+    const mood = window.ajRollMood ? window.ajRollMood() : { id:"calm", emoji:"" };
     const el = mk("ajwild", ART[sp.id], "", (alpha ? "👑 " : "") + "Lv." + lv, alpha);
+    if(mood.emoji){
+      const mv = document.createElement('span');
+      mv.className = 'mood'; mv.textContent = mood.emoji;
+      el.appendChild(mv);
+    }
+    if(mood.id === "sleep") el.classList.add('sleep');
     const o = { sp, lv, alpha, el,
       x:force ? Math.max(14, Math.min(W - 90, me.x + (Math.random() - .5) * 80))
               : 20 + Math.random() * (W - 100),
       y:force ? Math.max(H * 0.34, Math.min(H - 80, me.y + (Math.random() - .5) * 70))
               : H * 0.34 + Math.random() * (H * 0.55),
-      tx:0, ty:0, wait:Math.random() * 2,
-      spd:9 + Math.random() * 10, dir:1, flee:0 };
+      tx:0, ty:0, wait:Math.random() * 2, mood,
+      spd:(mood.id === "sleep" ? 0 : mood.id === "shy" ? 16 : mood.id === "bold" ? 15 : 9)
+        + Math.random() * 8, dir:1, flee:0, hop:0 };
     o.tx = o.x; o.ty = o.y;
     wilds.push(o);
   }
@@ -14909,14 +14935,16 @@ function explore(z){
     if(busy || !d.isConnected) return;
     busy = true;
     d.querySelector('#ajExH').textContent = `เจอ ${o.sp.name} ป่า!`;
-    setTimeout(() => wildFight(o, z, () => {
+    const go2 = () => wildFight(o, z, () => {
       if(o.el) o.el.remove();
       const i = wilds.indexOf(o); if(i >= 0) wilds.splice(i, 1);
       busy = false;
       found++;
       const h = d.querySelector('#ajExH');
       if(h) h.textContent = "แตะพื้นเพื่อเดินต่อ";
-    }), 220);
+    });
+    if(window.ajEncounter) window.ajEncounter(field, o, go2);
+    else setTimeout(go2, 220);
   }
   function step(now){
     if(!d.isConnected){ cancelAnimationFrame(raf); return; }   /* จอถูกปิดไปแล้ว */
@@ -14941,12 +14969,45 @@ function explore(z){
       if(!busy){
         const dd = Math.hypot(o.x - me.x, o.y - me.y);
         if(dd < 42) return meet(o);
-        const dx = o.tx - o.x, dy = o.ty - o.y, dist = Math.hypot(dx, dy);
-        if(dist < 4){ o.wait -= dt; if(o.wait <= 0) target(o); }
-        else {
-          const k = Math.min(1, o.spd * dt / dist);
-          o.x += dx * k; o.y += dy * k;
-          if(Math.abs(dx) > 1) o.dir = dx > 0 ? 1 : -1;
+        /* เครื่องหมายตกใจเมื่อเราเข้าใกล้ */
+        const near = dd < 120;
+        if(near !== !!o.near){
+          o.near = near;
+          const old = o.el.querySelector('.bang');
+          if(near && !old && o.mood && o.mood.id !== "sleep"){
+            const b = document.createElement('span');
+            b.className = 'bang';
+            b.textContent = o.mood.id === "shy" ? "💨" : o.mood.id === "bold" ? "❗" : "❕";
+            o.el.appendChild(b);
+          } else if(!near && old) old.remove();
+        }
+        const m = o.mood ? o.mood.id : "calm";
+        if(m === "shy" && dd < 150){                      /* ขี้ตกใจ วิ่งหนี */
+          const ax = (o.x - me.x) / (dd || 1), ay = (o.y - me.y) / (dd || 1);
+          o.x = Math.max(10, Math.min(W - 80, o.x + ax * o.spd * dt * 1.7));
+          o.y = Math.max(H * 0.33, Math.min(H - 70, o.y + ay * o.spd * dt * 1.7));
+          o.dir = ax > 0 ? 1 : -1;
+          o.tx = o.x; o.ty = o.y;
+        } else if(m === "bold" && dd < 190){              /* ดุ วิ่งเข้าหา */
+          const ax = (me.x - o.x) / (dd || 1), ay = (me.y - o.y) / (dd || 1);
+          o.x += ax * o.spd * dt * 1.5; o.y += ay * o.spd * dt * 1.5;
+          o.dir = ax > 0 ? 1 : -1;
+          o.tx = o.x; o.ty = o.y;
+        } else if(m !== "sleep"){
+          const dx = o.tx - o.x, dy = o.ty - o.y, dist = Math.hypot(dx, dy);
+          if(dist < 4){
+            o.wait -= dt;
+            if(o.wait <= 0) target(o);
+            o.hop = (o.hop || 0) - dt;                    /* ยืนเฉยๆ ก็กระโดดเล่นเป็นระยะ */
+            if(o.hop <= 0){
+              o.hop = 2.5 + Math.random() * 4;
+              o.el.classList.remove('hop'); void o.el.offsetWidth; o.el.classList.add('hop');
+            }
+          } else {
+            const k = Math.min(1, o.spd * dt / dist);
+            o.x += dx * k; o.y += dy * k;
+            if(Math.abs(dx) > 1) o.dir = dx > 0 ? 1 : -1;
+          }
         }
       }
       place(o.el, o);
@@ -14956,7 +15017,13 @@ function explore(z){
     });
     npcs.forEach(o => {
       if(o.cool > 0) o.cool -= dt;
+      if(o.say > 0) o.say -= dt;
       if(!busy){
+        const dn0 = Math.hypot(o.x - me.x, o.y - me.y);
+        if(dn0 < 135 && (o.say || 0) <= 0 && window.ajNpcSay){
+          o.say = 16 + Math.random() * 10;
+          window.ajNpcSay(field, o.x + 29, o.y + 4, z);
+        }
         if(o.cool <= 0 && Math.hypot(o.x - me.x, o.y - me.y) < 46) return hitNpc(o);
         const dx = o.tx - o.x, dy = o.ty - o.y, dist = Math.hypot(dx, dy);
         if(dist < 4){ o.wait -= dt; if(o.wait <= 0){
@@ -14983,7 +15050,9 @@ function explore(z){
   const tw = window.ajW2Time ? window.ajW2Time() : { label:"", night:false };
   const wx = window.ajW2Wx ? window.ajW2Wx(z) : { emoji:"", name:"", note:"" };
   const wxb = d.querySelector('#ajExWx');
-  if(wxb) wxb.textContent = `${tw.label} · ${wx.emoji} ${wx.name}`;
+  if(wxb) wxb.textContent = `${tw.label} · ${wx.emoji} ${wx.name}` +
+    (W2().auto ? " · 🤖" : "");
+  if(window.ajAmbience) window.ajAmbience(field, z);
   if(tw.night){
     const ov = document.createElement('div');
     ov.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:2;" +
@@ -15043,6 +15112,14 @@ function explore(z){
   for(let i = 0; i < 3; i++) spawn();
   setInterval2(() => { if(!busy) spawn(); }, 5200, d);
   setInterval2(() => { if(!busy && Math.random() < 0.55) spawnRelic(); }, 11000, d);
+  setInterval2(() => {                                  /* เจอเหตุการณ์ระหว่างทาง */
+    if(busy || !window.ajEvent) return;
+    if(Math.random() < 0.34){
+      busy = true;
+      window.ajEvent(z, field);
+      setTimeout(() => { busy = false; }, 500);
+    }
+  }, 15000, d);
   setTimeout(() => { W = field.clientWidth || W; H = field.clientHeight || H;
     raf = requestAnimationFrame(step); }, 30);
 }
@@ -15060,12 +15137,12 @@ function wildFight(o, z, done){
     : CR().filter(c => c.stage === "adult" && !c.box)
         .sort((a,b) => (b.bs && b.bs.total || 0) - (a.bs && a.bs.total || 0)).slice(0, 3);
   if(!use.length){ alert("ยังไม่มีตุ้ยนุ้ยตัวเต็มวัยไปสู้"); done(); return; }
-  const pw = Math.round((16 + o.lv * 4.4) * (o.alpha ? 1.5 : 1));
-  const hp = Math.round((260 + o.lv * 95) * (o.alpha ? 1.9 : 1));
+  const pw = Math.round((8 + o.lv * 2.0) * (o.alpha ? 1.3 : 1));
+  const hp = Math.round((90 + o.lv * 20) * (o.alpha ? 1.7 : 1));
   const foe = { id:"w2_" + sp.id, name:(o.alpha ? "👑 " : "") + sp.name + " ป่า",
                 el:sp.el, el2:sp.el2 || null, hp, pw, art:ART[sp.id] };
   const prevManual = S.manualBattle;
-  S.manualBattle = true;                      /* โลก 2 สู้แบบผลัดกันตี */
+  S.manualBattle = !W2().auto;                /* โลก 2 ผลัดกันตี หรือให้ออโต้สู้ก็ได้ */
   const go = window.ajOldBattleGo || window.battleGo;
   go(use, foe, { maxRound:20, art:ART[sp.id] }, R => {
     S.manualBattle = prevManual;
@@ -15086,6 +15163,8 @@ function wildFight(o, z, done){
     } else msg.push("แพ้ — ยังบันทึกว่าพบตัวนี้แล้ว");
     logf(`🏺 ${sp.name} ป่า Lv.${o.lv}${o.alpha ? " (ตัวเด่น)" : ""} — ${msg.join(" · ")}`,
       R && R.win ? "good" : "");
+    const fld = document.querySelector('#ajExF');
+    if(window.ajToast && fld && R && R.win) window.ajToast(fld, msg);
     save();
     if(R && R.win && window.ajCapture) setTimeout(() => window.ajCapture(o, z, () => done()), 200);
     else setTimeout(done, 120);
@@ -15178,7 +15257,8 @@ function odds(o, bid){
   const mine = CR().filter(c => c.stage === "adult");
   const avg = mine.length ? mine.reduce((a,c) => a + lvOf(c), 0) / mine.length : 5;
   const gap = Math.max(-0.18, Math.min(0.38, (o.lv - avg) / 90));   /* เลเวลเราสูงกว่า = ง่ายขึ้น */
-  const wxm = (window.ajW2CatchMul && o.z) ? window.ajW2CatchMul(o.z) : 1;
+  const wxm = ((window.ajW2CatchMul && o.z) ? window.ajW2CatchMul(o.z) : 1)
+    * (o.mood && o.mood.id === "sleep" ? 1.25 : 1);
   const mb = window.ajMusBonus ? window.ajMusBonus() : { catch:0 };
   let p = (base + mb.catch) * b.mul * (1 - gap) * (o.alpha ? 0.42 : 1)
     * (o.god ? 0.16 : 1) * wxm;
@@ -15392,10 +15472,10 @@ function godFight(z){
   if(!team.length){ alert("ยังไม่มีตุ้ยนุ้ยตัวเต็มวัยไปสู้"); return; }
   const lv = 22 + z * 8;
   const foe = { id:"w2god_" + z, name:"👑 " + g.name, el:g.el, el2:g.el2 || null,
-    hp:Math.round(3200 + z * 2500), pw:Math.round(52 + z * 24),
+    hp:Math.round(900 + z * 750), pw:Math.round(20 + z * 9),
     art:ART[g.id], phases:z >= 5 };
   const prev = S.manualBattle;
-  S.manualBattle = true;
+  S.manualBattle = !W2().auto;
   const go = window.ajOldBattleGo || window.battleGo;
   go(team, foe, { maxRound:24, art:ART[g.id] }, R => {
     S.manualBattle = prev;
@@ -15955,11 +16035,11 @@ function trainers(z){
   };
   const list = (NAMES[z] || []).map((t, i) => ({
     id:`t${z}_${i}`, emoji:t[0], name:t[1], line:t[2], zone:z, rival:false,
-    lv:8 + z * 7 + i * 3,
+    lv:6 + z * 5 + i * 2,
     team:pickN(2 + (i % 2), i + 1)
   }));
   list.push({ id:`rv${z}`, emoji:RIVAL[0], name:RIVAL[1], line:RIVAL[2], zone:z, rival:true,
-    lv:14 + z * 8, team:pickN(3, z + 5) });
+    lv:10 + z * 6, team:pickN(3, z + 5) });
   return list;
 }
 const trDone = tr => (W2().tr || {})[tr.id] === today();
@@ -15983,10 +16063,10 @@ function trainerFight(tr, done){
     const lv = tr.lv + (i - 1) * 2;
     const foe = { id:`${tr.id}_${i}`, name:`${tr.name} · ${sp.name} (${i}/${n})`,
       el:sp.el, el2:sp.el2 || null,
-      hp:Math.round((240 + lv * 88) * (tr.rival ? 1.35 : 1)),
-      pw:Math.round((15 + lv * 4.2) * (tr.rival ? 1.25 : 1)),
+      hp:Math.round((110 + lv * 24) * (tr.rival ? 1.3 : 1)),
+      pw:Math.round((9 + lv * 2.2) * (tr.rival ? 1.15 : 1)),
       art:ART[sp.id] };
-    S.manualBattle = true;
+    S.manualBattle = !W2().auto;
     go(team, foe, { maxRound:20, hpFrac, art:ART[sp.id] }, R => {
       hpFrac = (R && R.hpFrac) || hpFrac;
       if(!(R && R.win)){ finish(false); return; }
@@ -16127,6 +16207,325 @@ const mo = new MutationObserver(muts => {
 mo.observe(document.body, { childList:true });
 setInterval(apply, 400);                    /* กันพลาดกรณีที่ observer ไม่ทัน */
 window.ajDucking = () => ducking;
+})();
+</script>
+<style id="ajLifeCss">
+/* ---------- ฉากมีชีวิต ---------- */
+.ajsky{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.ajcloud{position:absolute;opacity:.55;animation:ajDrift linear infinite}
+@keyframes ajDrift{0%{transform:translateX(-30%)}100%{transform:translateX(130%)}}
+.ajdust{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff4d0;
+  opacity:.5;animation:ajFloat linear infinite}
+@keyframes ajFloat{0%{transform:translate(0,0) scale(.6);opacity:0}
+  20%{opacity:.6}80%{opacity:.5}100%{transform:translate(50px,-90px) scale(1.15);opacity:0}}
+.ajstar{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;
+  animation:ajTwk ease-in-out infinite}
+@keyframes ajTwk{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.3)}}
+.ajorb{position:absolute;border-radius:50%;pointer-events:none;
+  filter:blur(1px);animation:ajOrb 8s ease-in-out infinite alternate}
+@keyframes ajOrb{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}
+.ajshim{position:absolute;left:0;right:0;bottom:0;height:38%;pointer-events:none;z-index:3;
+  background:linear-gradient(0deg,rgba(255,240,200,.22),transparent);
+  animation:ajShim 4.5s ease-in-out infinite}
+@keyframes ajShim{0%,100%{opacity:.35}50%{opacity:.85}}
+/* ---------- ตัวป่ามีชีวิต ---------- */
+.ajwild img{transition:filter .2s}
+.ajwild .bang{position:absolute;left:50%;top:-6px;transform:translateX(-50%);font-size:20px;
+  animation:ajBang .5s ease-out infinite alternate;filter:drop-shadow(0 1px 2px #000)}
+@keyframes ajBang{0%{transform:translateX(-50%) scale(.85)}100%{transform:translateX(-50%) scale(1.2)}}
+.ajwild .mood{position:absolute;left:-4px;top:8px;font-size:14px}
+.ajwild.sleep img{filter:brightness(.9) saturate(.85)}
+.ajwild.hop img{animation:ajHop .5s ease-out}
+@keyframes ajHop{0%,100%{transform:translateY(0)}45%{transform:translateY(-12px)}}
+/* ---------- ฉากเจอตัว ---------- */
+.ajenc{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;pointer-events:none;
+  background:radial-gradient(60% 60% at 50% 45%,rgba(255,240,190,.28),rgba(10,8,4,.72));
+  animation:ajEncIn .45s ease-out}
+@keyframes ajEncIn{0%{opacity:0}100%{opacity:1}}
+.ajenc img{width:186px;height:186px;object-fit:contain;animation:ajEncArt .7s cubic-bezier(.2,1.5,.4,1);
+  filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+@keyframes ajEncArt{0%{transform:scale(.25) rotate(-12deg);opacity:0}
+  60%{transform:scale(1.12) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+.ajenc b{margin-top:6px;font-size:20px;color:#fff;text-shadow:0 2px 6px #000;
+  animation:ajEncArt .6s .12s backwards}
+.ajenc span{font-size:13px;color:#ffe9a8;text-shadow:0 2px 5px #000}
+.ajflash{position:absolute;inset:0;z-index:59;background:#fff;pointer-events:none;
+  animation:ajFlash .38s ease-out forwards}
+@keyframes ajFlash{0%{opacity:.9}100%{opacity:0}}
+/* ---------- ป้ายรางวัลลอย ---------- */
+.ajtoast{position:absolute;left:50%;top:58px;transform:translateX(-50%);z-index:58;
+  display:flex;flex-direction:column;gap:5px;align-items:center;pointer-events:none}
+.ajtoast i{font-style:normal;font-size:13.5px;font-weight:800;color:#2b1d06;
+  background:linear-gradient(180deg,#ffe9a8,#e8c268);border:1.5px solid #8a6a2a;
+  border-radius:999px;padding:5px 13px;box-shadow:0 3px 8px rgba(0,0,0,.35);
+  animation:ajToast 2.4s ease-out forwards}
+@keyframes ajToast{0%{opacity:0;transform:translateY(14px) scale(.85)}
+  12%{opacity:1;transform:translateY(0) scale(1)}
+  75%{opacity:1}100%{opacity:0;transform:translateY(-22px)}}
+</style>
+<script id="ajLifeJs">
+/* =====================================================================
+   ทำให้โลกที่ 2 มีชีวิต: ฉากเคลื่อนไหว · ตัวป่ามีนิสัย · ฉากเจอตัว · ป้ายรางวัล
+   ===================================================================== */
+(function(){
+const W2 = () => window.ajW2State ? window.ajW2State() : (S.w2d = S.w2d || {});
+
+/* ---------- ชั้นบรรยากาศ ---------- */
+function ambience(field, z){
+  const night = window.ajW2Time ? window.ajW2Time().night : false;
+  const wx = window.ajW2Wx ? window.ajW2Wx(z) : { id:"clear" };
+  const sky = document.createElement('div');
+  sky.className = 'ajsky';
+  let h = "";
+  /* ดวงอาทิตย์ / ดวงจันทร์ */
+  h += `<div class="ajorb" style="left:${night ? 74 : 18}%;top:6%;width:${night ? 46 : 62}px;
+    height:${night ? 46 : 62}px;background:${night
+      ? "radial-gradient(circle at 35% 35%,#fffbe8,#cfd8ff)"
+      : "radial-gradient(circle at 35% 35%,#fff8c8,#ffcf62)"};
+    box-shadow:0 0 ${night ? 26 : 44}px ${night ? "#cfd8ff88" : "#ffd76aaa"}"></div>`;
+  /* เมฆลอยผ่าน */
+  for(let i = 0; i < 4; i++){
+    const w = 90 + i * 26, t = 4 + i * 5, dur = 46 + i * 17;
+    h += `<div class="ajcloud" style="top:${t}%;width:${w}px;height:${w * .34}px;
+      animation-duration:${dur}s;animation-delay:${-i * 11}s;
+      background:${night ? "rgba(150,160,210,.5)" : "rgba(255,255,255,.75)"};
+      border-radius:50%;filter:blur(${night ? 5 : 3}px)"></div>`;
+  }
+  /* ดาวตอนกลางคืน */
+  if(night) for(let i = 0; i < 26; i++)
+    h += `<div class="ajstar" style="left:${(i * 37) % 96 + 2}%;top:${(i * 23) % 26 + 2}%;
+      animation-duration:${1.6 + (i % 5) * .5}s;animation-delay:${-(i % 7) * .4}s"></div>`;
+  /* ฝุ่นทราย / ละอองวิญญาณ */
+  const dn = wx.id === "sand" ? 26 : (z >= 5 ? 16 : 12);
+  for(let i = 0; i < dn; i++){
+    h += `<div class="ajdust" style="left:${(i * 29) % 98}%;top:${45 + (i * 17) % 50}%;
+      animation-duration:${5 + (i % 6)}s;animation-delay:${-(i % 9) * .8}s;
+      background:${z >= 5 ? "#c8b6ff" : "#fff4d0"};
+      width:${wx.id === "sand" ? 7 : 5}px;height:${wx.id === "sand" ? 7 : 5}px"></div>`;
+  }
+  sky.innerHTML = h;
+  field.appendChild(sky);
+  if(!night && z <= 4){
+    const sh = document.createElement('div');
+    sh.className = 'ajshim';
+    field.appendChild(sh);
+  }
+}
+
+/* ---------- นิสัยตัวป่า ---------- */
+const MOODS = [
+  { id:"calm",  w:52, emoji:"",   note:"" },
+  { id:"shy",   w:18, emoji:"💨", note:"ขี้ตกใจ วิ่งหนีเมื่อเราเข้าใกล้" },
+  { id:"sleep", w:16, emoji:"💤", note:"หลับอยู่ จับง่ายขึ้น" },
+  { id:"bold",  w:14, emoji:"🔥", note:"ดุ วิ่งเข้าหาเราเอง" }
+];
+function rollMood(){
+  const t = MOODS.reduce((a, m) => a + m.w, 0);
+  let r = Math.random() * t;
+  for(const m of MOODS){ r -= m.w; if(r <= 0) return m; }
+  return MOODS[0];
+}
+
+/* ---------- ป้ายรางวัลลอย ---------- */
+function toast(field, lines){
+  if(!field || !field.isConnected) return;
+  let box = field.querySelector('.ajtoast');
+  if(!box){ box = document.createElement('div'); box.className = 'ajtoast'; field.appendChild(box); }
+  [].concat(lines).forEach((t, i) => {
+    const el = document.createElement('i');
+    el.textContent = t;
+    el.style.animationDelay = (i * 0.18) + "s";
+    box.appendChild(el);
+    setTimeout(() => el.remove(), 2700 + i * 200);
+  });
+}
+
+/* ---------- ฉากเจอตัวป่า ---------- */
+function encounter(field, o, after){
+  if(!field || !field.isConnected){ after(); return; }
+  const fl = document.createElement('div');
+  fl.className = 'ajflash';
+  field.appendChild(fl);
+  setTimeout(() => fl.remove(), 420);
+  const sp = o.sp;
+  const el = document.createElement('div');
+  el.className = 'ajenc';
+  el.innerHTML = `<img src="${ART[sp.id]}" alt="">
+    <b>${o.alpha ? "👑 " : ""}${sp.name} ป่า!</b>
+    <span>Lv.${o.lv}${o.alpha ? " · ตัวเด่น" : ""}${
+      o.mood && o.mood.note ? " · " + o.mood.note : ""}</span>`;
+  field.appendChild(el);
+  if(typeof sfx === "function") sfx(o.alpha ? "legend" : "crit");
+  setTimeout(() => { el.remove(); after(); }, o.alpha ? 1250 : 850);
+}
+
+window.ajAmbience = ambience;
+window.ajRollMood = rollMood;
+window.ajToast = toast;
+window.ajEncounter = encounter;
+})();
+</script>
+<style id="ajLv2Css">
+.ajev .in{background:linear-gradient(180deg,#f7ecd2,#e6d4ab);color:#3a2a10;max-height:80%}
+.ajevart{font-size:56px;text-align:center;margin:4px 0 2px;
+  filter:drop-shadow(0 4px 6px rgba(0,0,0,.25))}
+.ajevh{text-align:center;font-size:17px;font-weight:800;margin:0 0 6px}
+.ajevp{font-size:13px;line-height:1.85;color:#40301a;text-align:center;margin:0 0 8px;
+  white-space:pre-line}
+.ajevg{text-align:center;font-size:13.5px;font-weight:800;color:#8a6320;margin:0 0 4px}
+.ajsay{position:absolute;transform:translate(-50%,-100%);z-index:60;pointer-events:none;
+  max-width:190px;font-size:11px;font-weight:700;color:#2b1d06;background:#fff8e2;
+  border:2px solid #b3853a;border-radius:13px;padding:4px 9px;line-height:1.4;
+  animation:ajSay 3.4s forwards}
+.ajsay:after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);
+  width:0;height:0;border:6px solid transparent;border-top-color:#b3853a}
+@keyframes ajSay{0%{opacity:0;transform:translate(-50%,-80%) scale(.8)}
+  10%{opacity:1;transform:translate(-50%,-100%) scale(1)}
+  85%{opacity:1}100%{opacity:0;transform:translate(-50%,-115%)}}
+.ajtask{margin:5px 0 0;padding:7px 9px;border-radius:11px;font-size:11.5px;line-height:1.5;
+  background:#fff8ea;border:1px solid #ddc9a0;color:#5f4a24}
+.ajtask.done{background:linear-gradient(180deg,#eef8e6,#dcefd0);border-color:#a8cf94;color:#2f5b2c}
+.ajtask b{font-weight:800}
+.ajtask button{float:right;font-family:inherit;font-size:11px;font-weight:800;padding:3px 9px;
+  border-radius:9px;border:1px solid #8a6a2a;background:#ffd76a;color:#2b1d06;cursor:pointer}
+</style>
+<script id="ajLv2Js">
+/* =====================================================================
+   🏺 โลก 2 มีชีวิต (2) · เหตุการณ์ระหว่างทาง · NPC พูด · งานประจำโซน
+   ===================================================================== */
+(function(){
+const W2 = () => window.ajW2State ? window.ajW2State() : (S.w2d = S.w2d || {});
+const MATS = { 1:"เศษหินสลัก", 2:"น้ำศักดิ์สิทธิ์", 3:"ใบปาปิรัส",
+               4:"เกล็ดทอง", 5:"ผ้าพันมัมมี่", 6:"เศษบัลลังก์" };
+const SPW = () => window.SPECIES_W2 || [];
+
+/* ---------------- เหตุการณ์ระหว่างทาง ---------------- */
+const EV = {
+ 1:[["🐫","ซากคาราวาน","ของยังใหม่ น้ำในถังยังไม่ระเหย แต่ไม่มีศพแม้แต่ชิ้นเดียว\nคุณเก็บของที่ยังใช้ได้มาบ้าง",{ankh:4}],
+    ["🌵","กระบองเพชรออกผล","ผลสุกพอดี ตุ้ยนุ้ยในทีมแย่งกันกินจนหมดต้น",{mat:2}],
+    ["🕳","หลุมทรายยุบ","เกือบตกลงไปทั้งตัว ก้นหลุมมีอะไรวาวๆ อยู่",{relic:1}],
+    ["🦴","กระดูกอูฐทั้งตัว","ไม่มีรอยฟันสัตว์ ไม่มีรอยมีด มันแค่หยุดเดินแล้วอยู่ตรงนี้",{ankh:3}]],
+ 2:[["💧","บ่อน้ำเล็กใต้ปาล์ม","น้ำใสจนเห็นก้น ดื่มแล้วสดชื่นจนน่ากลัว",{ankh:4}],
+    ["🌴","ร่มปาล์มกลางวัน","พักสักครู่ ตื่นมาแดดยังอยู่ตำแหน่งเดิมเป๊ะ",{mat:2}],
+    ["🐟","ฝูงปลาว่ายเป็นวง","วนอยู่ตรงจุดเดียวเหมือนเฝ้าอะไรไว้ใต้น้ำ",{relic:1}],
+    ["🏺","ไหจมอยู่ก้นบ่อ","ในไหมีน้ำที่ไม่ใช่น้ำจากบ่อนี้",{ankh:3}]],
+ 3:[["⛏","รอยสิ่วบนผนัง","มีคนสกัดรูปอะไรออกไปจากผนังนี้ และทุบสิ่วทิ้งไว้ด้วย",{ankh:5}],
+    ["⚙️","เฟืองที่ยังหมุน","เครื่องกลใต้ดินยังทำงาน ทั้งที่ไม่มีใครเติมอะไรมาสามร้อยปี",{mat:3}],
+    ["🗿","รูปสลักหลุดออก","หินร่วงลงมาเผยช่องแคบข้างหลัง มีของวางอยู่",{relic:1}],
+    ["🕯","ทางเดินมีคนจุดไฟไว้","ไฟยังไม่ดับ แต่ไม่มีรอยเท้าใครทั้งขาไปและขากลับ",{ankh:4}]],
+ 4:[["🕯","ตะเกียงไม่มีน้ำมัน","ไฟยังลุกอยู่ คุณเอามือลองอังดู มันเย็น",{ankh:5}],
+    ["☀️","แดดเที่ยงเผาทราย","ทรายหลอมเป็นแก้วใส เก็บเศษมาได้หลายชิ้น",{mat:3}],
+    ["🔔","ระฆังวิหารดังเอง","ดังสามครั้ง ไม่มีใครอยู่ใกล้เชือกเลย",{relic:1}],
+    ["🥣","จานน้ำบนแท่นบูชา","เต็มอยู่เสมอ มีรอยลิ้นเลียที่ขอบจานยังไม่แห้ง",{ankh:4}]],
+ 5:[["🕸","ใยแมงมุมขาดใหม่ๆ","มีอะไรเพิ่งเดินผ่านไปทางนี้ ขนาดตัวประมาณเด็กสิบขวบ",{ankh:6}],
+    ["⚱️","โกศเรียงเป็นแถว","ชื่อบนโกศทุกใบเป็นชื่อตุ้ยนุ้ย ไม่มีชื่อคนแม้ใบเดียว",{mat:3}],
+    ["🦴","กระดูกเรียงเป็นวง","วางอย่างตั้งใจเหมือนเครื่องหมายบอกทาง หรือคำเตือน",{relic:1}],
+    ["👣","รอยเท้าเล็กๆ","วิ่งวนกลับไปกลับมาที่ประตูห้องเดียวกันนับพันรอบ",{ankh:5}]],
+ 6:[["👑","เงาบนบัลลังก์","เงาขยับก่อนที่คุณจะขยับ แล้วหยุดรอให้คุณตามมัน",{ankh:8}],
+    ["⏳","ทรายค้างกลางอากาศ","เม็ดทรายลอยนิ่งอยู่ตรงหน้า จับได้ด้วยมือเปล่า",{mat:4}],
+    ["📜","ม้วนที่ไม่มีใครอ่าน","ตัวอักษรจางไปหมดแล้ว เหลือคำเดียวตรงกลาง — ขอโทษ",{relic:1}],
+    ["🪑","บัลลังก์ตัวเล็กข้างบัลลังก์ใหญ่","ขนาดพอดีสำหรับสัตว์ตัวเท่าแมว มีเบาะบุนวมด้วย",{ankh:7}]]
+};
+function fireEvent(z, field){
+  const pool = EV[z] || EV[1], w = W2();
+  const e = pool[Math.floor(Math.random() * pool.length)];
+  const mb = window.ajMusBonus ? window.ajMusBonus() : { mats:1, ankh:1 };
+  const got = [];
+  if(e[3].ankh){ const n = Math.round(e[3].ankh * mb.ankh);
+    w.ankh = (w.ankh || 0) + n; got.push(`𓋹 +${n}`); }
+  if(e[3].mat){ const n = Math.round(e[3].mat * mb.mats);
+    w.mats[z] = (w.mats[z] || 0) + n; got.push(`${MATS[z]} +${n}`); }
+  if(e[3].relic && window.ajAddRelic){
+    const r = window.ajAddRelic(z);
+    if(r) got.push(`${r.e} ${r.n}`);
+  }
+  w.ev = (w.ev || 0) + 1;
+  save();
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajev';
+  d.innerHTML = `<div class="in">
+    <div class="ajevart">${e[0]}</div>
+    <p class="ajevh">${e[1]}</p>
+    <p class="ajevp">${e[2]}</p>
+    <p class="ajevg">${got.join(" · ") || "ไม่ได้อะไรเป็นชิ้นเป็นอัน"}</p>
+    <div class="ajhfoot"><button class="ajbb keep cls">เดินต่อ</button></div></div>`;
+  document.body.appendChild(d);
+  d.querySelector('.cls').onclick = () => {
+    d.remove();
+    if(window.ajToast && field && field.isConnected && got.length) window.ajToast(field, got);
+  };
+  if(typeof sfx === "function") sfx("win");
+}
+
+/* ---------------- NPC พูดตอนเดินผ่าน ---------------- */
+const SAY = {
+  1:["ลึกกว่านี้อย่าไปคนเดียวนะ","ข้าเดินทะเลทรายนี้สามสิบปี ยังไม่เคยเจอทางออก",
+     "เห็นตัวที่มีวงแหวนทองไหม อย่าปล่อยให้หนี","คาราวานที่หายไป ข้าเคยอยู่ในนั้น"],
+  2:["น้ำที่นี่ดื่มได้ แต่อย่าดื่มเยอะ","ข้าย้ายมาเมื่อฤดูก่อน... หรือฤดูไหนนะ",
+     "ต้นปาล์มนั้นข้าปลูกเอง เมื่อวานนี้","ลูกข้ายังเล็กอยู่เลย ยังไม่โตขึ้นเลยจริงๆ"],
+  3:["รูปสลักบนผนังเล่าไม่จบหรอก มีคนสกัดทิ้ง","เครื่องกลนี่ยังหมุนอยู่ ข้าไม่ได้ซ่อมมันเลย",
+     "กษัตริย์องค์นั้นเป็นคนดีนะ อย่าเชื่อที่คนอื่นเล่า"],
+  4:["ยืนกลางแดดนานๆ แล้วจะได้ยินเสียงระฆัง","จานน้ำบนแท่นนั่น ข้าไม่ได้เติมนะ",
+     "วิหารนี้สร้างเพื่อสัตว์ตัวเดียว ไม่ใช่เพื่อเทพ"],
+  5:["ข้ามีเพื่อนอยู่ในนี้ เขาไม่พูดแต่ฟังรู้เรื่อง","อย่าเรียกชื่อใครดังๆ ในสุสาน",
+     "ผ้าพันนั่นไม่ใช่ผ้าห่อศพ เป็นเชือกผูก"],
+  6:["ท่านนั่งอยู่บนนั้นมาสามร้อยปี","ถ้าเจอท่าน ช่วยฟังท่านก่อนสู้",
+     "ข้าจำวันที่พิธีเริ่มได้ ไม่มีใครจำได้อีกแล้ว"]
+};
+function npcSay(field, x, y, z){
+  const pool = SAY[z] || SAY[1];
+  const el = document.createElement('div');
+  el.className = 'ajsay';
+  el.style.left = x + "px"; el.style.top = y + "px";
+  el.textContent = pool[Math.floor(Math.random() * pool.length)];
+  field.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+/* ---------------- งานประจำโซน ---------------- */
+function tasks(z){
+  const w = W2(), list = SPW().filter(s => s.zone === z);
+  const dex = w.dex || {};
+  const caught = list.filter(s => (dex[s.id] || 0) > 0).length;
+  const own = (S.creatures || []).filter(c => {
+    const sp = SPW().find(x => x.id === c.sid); return sp && sp.zone === z; }).length;
+  const relics = w.relic || {};
+  const relDone = window.ajMusBonus && (() => {
+    const R = (window.__ajRelicList || []).filter(x => x.z === z);
+    return R.length ? R.every(x => relics[x.id]) : false;
+  })();
+  return [
+    { id:`t${z}a`, t:`พบตุ้ยนุ้ยในโซนนี้ ${caught}/${Math.min(6, list.length)} ชนิด`,
+      ok:caught >= Math.min(6, list.length), r:{ ankh:20, mat:3 } },
+    { id:`t${z}b`, t:`มีตุ้ยนุ้ยจากโซนนี้ในฟาร์ม ${own}/3 ตัว`,
+      ok:own >= 3, r:{ ankh:25, ball:"lamp" } },
+    { id:`t${z}c`, t:`ล้มเทพผู้พิทักษ์ ${((w.god || {})[z] || 0)}/1 ครั้ง`,
+      ok:((w.god || {})[z] || 0) >= 1, r:{ ankh:40, ball:"urn" } }
+  ];
+}
+function claim(t, z){
+  const w = W2();
+  w.task = w.task || {};
+  if(w.task[t.id] || !t.ok) return false;
+  w.task[t.id] = 1;
+  const out = [];
+  if(t.r.ankh){ w.ankh = (w.ankh || 0) + t.r.ankh; out.push(`𓋹 +${t.r.ankh}`); }
+  if(t.r.mat){ w.mats[z] = (w.mats[z] || 0) + t.r.mat; out.push(`${MATS[z]} +${t.r.mat}`); }
+  if(t.r.ball && window.ajW2Balls){
+    const b = window.ajW2Balls(); b[t.r.ball] = (b[t.r.ball] || 0) + 2;
+    out.push((t.r.ball === "urn" ? "⚱️ ผอบทอง" : "🪔 โคมไฟ") + " ×2");
+  }
+  logf(`🏺 รับรางวัลงานประจำโซน — ${out.join(" · ")}`, "good");
+  if(typeof sfx === "function") sfx("buy");
+  save();
+  return true;
+}
+window.ajEvent = fireEvent;
+window.ajNpcSay = npcSay;
+window.ajZoneTasks = tasks;
+window.ajClaimTask = claim;
+window.ajTaskDone = id => !!((W2().task || {})[id]);
 })();
 </script>
 </body>

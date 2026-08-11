@@ -1094,6 +1094,10 @@ h2 + h2{margin-top:20px}
   filter:drop-shadow(0 6px 18px rgba(200,160,40,.45))}
 .lgline{margin:4px 0;font-size:12px;color:var(--dim);line-height:1.55}
 @media (max-width:420px){ .lghero{max-height:150px} }
+
+.bxcell[data-ajrl]:before{content:attr(data-ajrl);position:absolute;left:2px;top:2px;z-index:3;
+  font-size:10px;line-height:14px;padding:0 3px;border-radius:6px;
+  background:rgba(0,0,0,.42);color:#fff}
 </style>
 </head>
 <body>
@@ -12695,6 +12699,8 @@ function ensureTeam(){
 });
 const FIGHT_BTNS = ["btnFight","btnDgGo","btnTwGo","btnGate","btnGod"];
 function ajBtns(){
+  const tb = document.getElementById('tab-boss');
+  if(tb && !tb.classList.contains('open') && tb.offsetParent === null) return;
   const cfg = modeCfg();
   if(!cfg.pool || !cfg.pool.length) return;
   FIGHT_BTNS.forEach(id => {
@@ -12705,17 +12711,31 @@ function ajBtns(){
   });
 }
 const oldRender = window.render;
+let ajExtraAt = 0, ajBdAt = 0;
 if(typeof oldRender === "function")
   window.render = function(){
-    try{ ajFixBuilds(); }catch(e){}
+    const now = Date.now();
+    if(now - ajBdAt > 8000){ ajBdAt = now; try{ ajFixBuilds(); }catch(e){} }
     const r = oldRender.apply(this, arguments);
-    try{ ajBtns(); }catch(e){}
-    try{ ajNestBar(); }catch(e){}
-    try{ ajRebind(); }catch(e){}
-    try{ ajBreedBar(); }catch(e){}
+    if(now - ajExtraAt > 260){          /* งานเสริมไม่ต้องวิ่งทุกครั้งที่วาดจอ */
+      ajExtraAt = now;
+      try{ ajBtns(); }catch(e){}
+      try{ ajNestBar(); }catch(e){}
+      try{ ajRebind(); }catch(e){}
+      try{ ajBreedBar(); }catch(e){}
+    }
     return r;
   };
-setTimeout(() => { try{ if(ajFixBuilds() && typeof save === "function") save(); }catch(e){} }, 300);
+(function bdBoot(){                        /* ทยอยปรับสายปั้นตอนเครื่องว่าง */
+  let saved = false;
+  const tick = () => {
+    let n = 0;
+    try{ n = ajFixBuilds(); }catch(e){}
+    if(n && !saved){ saved = true; try{ save(); }catch(e){} }
+    if(ajBdI > 0) setTimeout(tick, 600);
+  };
+  setTimeout(tick, 1800);
+})();
 
 /* คำอธิบายระบบต่อสู้ในแท็บบอส (แปะเพิ่ม ไม่แตะโค้ดเดิม) */
 function ajMount(){
@@ -12868,10 +12888,9 @@ function ajBoxMulti(){
     if(on && !ck){ ck = document.createElement('i'); ck.className = 'ajck'; ck.textContent = '✓';
       b.appendChild(ck); }
     if(!on && ck) ck.remove();
-    if(!b.querySelector('.ajrl')){                      /* ป้ายบอกสาย ดูง่ายตอนหาตัวมาปั้น */
+    if(!b.dataset.ajrl){                                /* ป้ายบอกสาย ทำด้วย CSS ไม่สร้าง element */
       const c = cOf(id);
-      if(c){ const r = document.createElement('i'); r.className = 'ajrl';
-        r.textContent = roleOf(c).emoji; r.title = roleOf(c).name; b.appendChild(r); }
+      if(c) b.dataset.ajrl = roleOf(c).emoji;
     }
   });
 
@@ -13348,6 +13367,7 @@ if(typeof oldRenderBreed === "function")
 function ajNestBar(){
   const tab = document.getElementById('tab-nest');
   if(!tab) return;
+  if(!tab.classList.contains('open') && tab.offsetParent === null) return;
   let bar = document.getElementById('ajNest');
   if(!bar){
     const foot = tab.querySelector('.foot');
@@ -13514,9 +13534,16 @@ if(typeof oldStatsOf === "function")
     if(!b) return oldStatsOf.apply(this, arguments);
     const m = 1 + (lvOf(c) - 1) * DIF().lv;
     if(m === 1) return b;
+    /* แคชผลไว้ในตัวตุ้ยนุ้ย ล้างเองเมื่อค่าพื้นฐาน เลเวล หรือความยากเปลี่ยน */
+    const key = b.total + ":" + (c.lv || 1) + ":" + AJ.diff;
+    if(c.__sc && c.__sk === key) return c.__sc;
     const out = {};
     BSTATS.forEach(x => out[x.k] = Math.round(b[x.k] * m));
     out.total = BSTATS.reduce((a, x) => a + out[x.k], 0);
+    try{
+      Object.defineProperty(c, "__sc", { value:out, enumerable:false, writable:true, configurable:true });
+      Object.defineProperty(c, "__sk", { value:key, enumerable:false, writable:true, configurable:true });
+    }catch(e){ c.__sc = out; c.__sk = key; }
     return out;
   };
 /* ได้ EXP เร็วขึ้น เลเวลจะไล่ทันเนื้อหา */
@@ -13580,14 +13607,21 @@ const ROLE_BD = { tank:"tank", atk:"pow", mage:"mag", sup:"sup" };
     BUILD_SPEC.sup = sup;
   }catch(e){}
 })();
-function ajFixBuilds(){
-  if(typeof BUILD_SPEC === "undefined") return;
-  let n = 0;
-  ((typeof S !== "undefined" && S && S.creatures) || []).forEach(c => {
-    if(!c || !c.sid || !SP[c.sid]) return;
+let ajBdI = 0;
+function ajFixBuilds(all){
+  if(typeof BUILD_SPEC === "undefined") return 0;
+  const list = ((typeof S !== "undefined" && S && S.creatures) || []);
+  if(!list.length) return 0;
+  const step = all ? list.length : 60;    /* ทำเป็นก้อนเล็ก ไม่ให้ค้างตอนเปิดเกม */
+  let n = 0, done = 0;
+  while(done < step){
+    if(ajBdI >= list.length){ ajBdI = 0; break; }
+    const c = list[ajBdI++];
+    done++;
+    if(!c || !c.sid || !SP[c.sid]) continue;
     const want = ROLE_BD[roleOf(c).id];
     if(want && BUILD_SPEC[want] && c.bd !== want){ c.bd = want; c.bs = null; n++; }
-  });
+  }
   return n;
 }
 /* ปิดการเลือกสายปั้นเอง */
@@ -14359,8 +14393,14 @@ function add(){
 }
 add();
 const oldR = window.render;
+let atR = 0;
 if(typeof oldR === "function")
-  window.render = function(){ const r = oldR.apply(this, arguments); try{ add(); }catch(e){} return r; };
+  window.render = function(){
+    const r = oldR.apply(this, arguments);
+    const n = Date.now();
+    if(n - atR > 400){ atR = n; try{ add(); }catch(e){} }
+    return r;
+  };
 })();
 </script>
 <style id="ajYdCss">
@@ -15139,13 +15179,19 @@ function wildFight(o, z, done){
   if(!use.length){ alert("ยังไม่มีตุ้ยนุ้ยตัวเต็มวัยไปสู้"); done(); return; }
   const pw = Math.round((8 + o.lv * 2.0) * (o.alpha ? 1.3 : 1));
   const hp = Math.round((90 + o.lv * 20) * (o.alpha ? 1.7 : 1));
-  const foe = { id:"w2_" + sp.id, name:(o.alpha ? "👑 " : "") + sp.name + " ป่า",
+  const foe = { id:"w2_" + sp.id,
+                name:(o.alpha ? "👑 " : "") + sp.name + " ป่า Lv." + o.lv,
                 el:sp.el, el2:sp.el2 || null, hp, pw, art:ART[sp.id] };
   const prevManual = S.manualBattle;
-  S.manualBattle = !W2().auto;                /* โลก 2 ผลัดกันตี หรือให้ออโต้สู้ก็ได้ */
+  const auto = !!W2().auto;
+  S.manualBattle = !auto;                     /* โลก 2 ผลัดกันตี หรือให้ออโต้สู้ก็ได้ */
+  o.z = z;
+  if(window.ajW2SetFoe) window.ajW2SetFoe(o);
   const go = window.ajOldBattleGo || window.battleGo;
   go(use, foe, { maxRound:20, art:ART[sp.id] }, R => {
     S.manualBattle = prevManual;
+    const caught = window.ajW2Caught && window.ajW2Caught();
+    if(window.ajW2ClearFoe) window.ajW2ClearFoe();
     const first = !seen(sp.id);
     w.dex[sp.id] = (w.dex[sp.id] || 0) + 1;
     w.kill[sp.id] = (w.kill[sp.id] || 0) + (R && R.win ? 1 : 0);
@@ -15166,8 +15212,17 @@ function wildFight(o, z, done){
     const fld = document.querySelector('#ajExF');
     if(window.ajToast && fld && R && R.win) window.ajToast(fld, msg);
     save();
-    if(R && R.win && window.ajCapture) setTimeout(() => window.ajCapture(o, z, () => done()), 200);
-    else setTimeout(done, 120);
+    const next = () => {
+      if(caught){                              /* จับติดกลางศึกไปแล้ว */
+        if(window.ajW2Give) window.ajW2Give(o, z);
+        setTimeout(done, 120);
+        return;
+      }
+      if(R && R.win && window.ajCapture) setTimeout(() => window.ajCapture(o, z, () => done()), 200);
+      else setTimeout(done, 120);
+    };
+    if(auto && window.ajW2Summary) window.ajW2Summary(o, R, next);
+    else next();
   });
 }
 
@@ -15197,9 +15252,14 @@ function paint(){
   if(b) b.textContent = (S && S.w2) ? '🏺 ดินแดนฟาโรห์' : '🔒 ดินแดนฟาโรห์';
 }
 const oldR = window.render;
+let atZ = 0;
 if(typeof oldR === "function")
-  window.render = function(){ const r = oldR.apply(this, arguments);
-    try{ mount(); paint(); }catch(e){} return r; };
+  window.render = function(){
+    const r = oldR.apply(this, arguments);
+    const n = Date.now();
+    if(n - atZ > 400){ atZ = n; try{ mount(); paint(); }catch(e){} }
+    return r;
+  };
 mount();
 })();
 </script>
@@ -15520,6 +15580,8 @@ function afterGod(z, first){
     if(z >= 6 && window.ajW2Ending) setTimeout(window.ajW2Ending, 300);
   }), 900);
 }
+window.ajW2Give = give;
+window.ajBallInfo = id => BALLS.find(b => b.id === id);
 window.ajCapture = capture;
 window.ajW2Shop = shop;
 window.ajGodSheet = godSheet;
@@ -16196,16 +16258,15 @@ function apply(){
   window.__ajDuck = on;
   document.querySelectorAll(MINE).forEach(el => el.classList.toggle('ajduck', on));
 }
-/* จอของโมดูลที่เพิ่งถูกสร้างตอนกำลังหลบ ก็ต้องหลบด้วย */
-const mo = new MutationObserver(muts => {
+/* เดิมใช้ MutationObserver แต่มันทำให้การวาดจอของเกมช้าลงเท่าตัว
+   (ทุกครั้งที่เกมเซ็ต innerHTML เบราว์เซอร์ต้องไล่หา observer ให้ทุกโนดที่เพิ่ม)
+   จึงเปลี่ยนมาเช็คเป็นจังหวะสั้นๆ แทน ได้ผลเหมือนกันแต่ไม่กินแรง */
+function sweep(){
   apply();
   if(!ducking) return;
-  muts.forEach(m => (m.addedNodes || []).forEach(n => {
-    if(n.nodeType === 1 && n.matches && n.matches(MINE)) n.classList.add('ajduck');
-  }));
-});
-mo.observe(document.body, { childList:true });
-setInterval(apply, 400);                    /* กันพลาดกรณีที่ observer ไม่ทัน */
+  document.querySelectorAll(MINE).forEach(el => el.classList.add('ajduck'));
+}
+setInterval(sweep, 220);
 window.ajDucking = () => ducking;
 })();
 </script>
@@ -16526,6 +16587,132 @@ window.ajNpcSay = npcSay;
 window.ajZoneTasks = tasks;
 window.ajClaimTask = claim;
 window.ajTaskDone = id => !!((W2().task || {})[id]);
+})();
+</script>
+<style id="ajW2fCss">
+.ajcatchbtn{grid-column:1/-1;font-family:inherit;font-weight:800;font-size:14px;
+  padding:11px 10px;border-radius:13px;border:2px solid #b3853a;
+  background:linear-gradient(180deg,#ffe9a8,#e8b24c);color:#3a2a10;cursor:pointer}
+.ajcatchbtn small{display:block;font-weight:600;font-size:10.5px;color:#6b5326;margin-top:1px}
+.ajcatchbtn:disabled{opacity:.5}
+.ajsum .in{background:linear-gradient(180deg,#f7ecd2,#e6d4ab);color:#3a2a10}
+.ajsumrow{display:flex;gap:10px;align-items:center;margin:4px 0 8px}
+.ajsumrow img{width:74px;height:74px;object-fit:contain;background:#efe2c4;border-radius:12px}
+.ajsumrow div{flex:1}
+.ajsumrow b{display:block;font-size:15px}
+.ajsumrow span{display:block;font-size:11.5px;color:#6d5b3f;line-height:1.5}
+.ajsumhp{height:9px;border-radius:99px;background:#d6c294;overflow:hidden;margin-top:4px}
+.ajsumhp i{display:block;height:100%;background:linear-gradient(90deg,#e2503f,#b3243c)}
+</style>
+<script id="ajW2fJs">
+/* =====================================================================
+   🏺 โลก 2 · ทำให้คอมแบทมีเนื้อ: จับกลางศึก · เห็นเลเวล/เลือด · สรุปศึกตอนออโต้
+   ===================================================================== */
+(function(){
+const W2 = () => window.ajW2State ? window.ajW2State() : (S.w2d = S.w2d || {});
+let PEND = null;                 /* ตัวป่าที่กำลังสู้อยู่ */
+
+/* ---------- ปุ่มจับกลางศึก ---------- */
+function odds(o, bid){
+  const b = (window.ajBallInfo ? window.ajBallInfo(bid) : null) ||
+    { jar:{mul:1}, lamp:{mul:1.7}, urn:{mul:2.6} }[bid] || { mul:1 };
+  const base = { 1:0.62, 2:0.44, 3:0.30 }[o.sp.rarity] || 0.4;
+  const mine = (S.creatures || []).filter(c => c.stage === "adult");
+  const avg = mine.length ? mine.reduce((a, c) => a + lvOf(c), 0) / mine.length : 5;
+  const gap = Math.max(-0.18, Math.min(0.38, (o.lv - avg) / 90));
+  const mb = window.ajMusBonus ? window.ajMusBonus() : { catch:0 };
+  const wx = window.ajW2CatchMul ? window.ajW2CatchMul(o.z || 1) : 1;
+  /* หัวใจของศึก: ยิ่งตีให้เลือดต่ำ ยิ่งจับติด */
+  const frac = (typeof LB !== "undefined" && LB && LB.boss)
+    ? Math.max(0, LB.boss.hp) / LB.boss.max : 1;
+  const weak = 0.45 + (1 - frac) * 1.75;
+  const st = (typeof LB !== "undefined" && LB && LB.boss && LB.boss.st) ? 1.25 : 1;
+  return Math.max(0.02, Math.min(0.96,
+    (base + mb.catch) * b.mul * (1 - gap) * weak * st * wx
+    * (o.alpha ? 0.42 : 1) * (o.god ? 0.16 : 1)));
+}
+function bag(){ const w = W2(); w.balls = w.balls || { jar:3, lamp:0, urn:0 }; return w.balls; }
+function bestBall(){
+  const b = bag();
+  return ["urn","lamp","jar"].find(k => (b[k] || 0) > 0) || null;
+}
+const BEMO = { jar:"🏺", lamp:"🪔", urn:"⚱️" };
+const BNAME = { jar:"ไหดินเผา", lamp:"โคมไฟ", urn:"ผอบทอง" };
+
+function inject(){
+  if(typeof LB === "undefined" || !LB || !PEND) return;
+  const mv = document.querySelector('#lbMask #lbMoves');
+  if(!mv) return;
+  let b = mv.querySelector('.ajcatchbtn');
+  if(!b){
+    b = document.createElement('button');
+    b.className = 'ajcatchbtn';
+    b.onclick = () => tryCatch(b);
+    mv.appendChild(b);
+  }
+  const k = bestBall();
+  const p = k ? Math.round(odds(PEND, k) * 100) : 0;
+  const frac = LB.boss ? Math.max(0, LB.boss.hp) / LB.boss.max : 1;
+  b.innerHTML = k
+    ? `${BEMO[k]} จับด้วย${BNAME[k]} · ${p}%
+       <small>เลือดศัตรูเหลือ ${Math.round(frac * 100)}% · ตีให้อ่อนแรงก่อนจะจับติดง่ายขึ้น
+       · เหลือ ${bag()[k]} ใบ</small>`
+    : `🏺 ไม่มีภาชนะเหลือ<small>ซื้อได้ที่ร้านบนแผนที่ดินแดนฟาโรห์</small>`;
+  b.disabled = !k || LB.busy || LB.over;
+}
+function tryCatch(btn){
+  if(typeof LB === "undefined" || !LB || LB.over || LB.busy || !PEND) return;
+  const k = bestBall();
+  if(!k) return;
+  bag()[k]--;
+  const p = odds(PEND, k);
+  const ok = Math.random() < p;
+  LB.log.push(`${BEMO[k]} โยน${BNAME[k]}...`);
+  save();
+  if(ok){
+    PEND.caught = true;
+    LB.log.push(`✨ จับ ${PEND.sp.name} ได้แล้ว!`);
+    if(typeof sfx === "function") sfx("win");
+    LB.boss.hp = 0;                        /* ปิดศึกแบบชนะ แล้วไปมอบตัวให้ */
+    lbEnd(true);
+    return;
+  }
+  LB.log.push("หลุดออกมา! เสียหนึ่งตาให้มัน");
+  if(typeof sfx === "function") sfx("hurt");
+  if(btn) btn.disabled = true;
+  try{ lbFoeTurn(true); }catch(e){ try{ lbDraw(); }catch(e2){} }
+  setTimeout(inject, 500);
+}
+/* คอยแปะปุ่มให้ตลอดศึก */
+setInterval(() => { try{ if(PEND) inject(); }catch(e){} }, 350);
+
+/* ---------- สรุปศึกตอนเปิดออโต้ ---------- */
+function summary(o, R, after){
+  const sp = o.sp;
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajsum';
+  const left = R && R.boss ? Math.max(0, R.boss.hp) : 0;
+  const max = R && R.boss ? R.boss.max : 1;
+  d.innerHTML = `<div class="in">
+    <h3>${R && R.win ? "⚔️ ชนะ" : "💤 แพ้"} · ${sp.name} ป่า</h3>
+    <div class="ajsumrow">
+      <img src="${ART[sp.id]}" alt="">
+      <div><b>${o.alpha ? "👑 " : ""}${sp.name} Lv.${o.lv}</b>
+        <span>${[sp.el, sp.el2].filter(Boolean).join(" + ")} · ${
+          starStr(sp.rarity).slice(0, sp.rarity)}</span>
+        <span>เลือดที่เหลือ ${left}/${max}</span>
+        <div class="ajsumhp"><i style="width:${left / max * 100}%"></i></div></div></div>
+    <p class="sub">${(R && R.log || []).slice(-4).map(x => x.t || x).join("<br>")}</p>
+    <div class="ajhfoot"><button class="ajbb keep cls">${
+      R && R.win ? "ไปขั้นตอนจับ" : "เดินต่อ"}</button></div></div>`;
+  document.body.appendChild(d);
+  d.querySelector('.cls').onclick = () => { d.remove(); after(); };
+}
+
+window.ajW2SetFoe = o => { PEND = o; };
+window.ajW2ClearFoe = () => { PEND = null; };
+window.ajW2Caught = () => !!(PEND && PEND.caught);
+window.ajW2Summary = summary;
 })();
 </script>
 </body>

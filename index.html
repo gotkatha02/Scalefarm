@@ -4836,16 +4836,19 @@ function synthMyth(){
   if(awaySet().has(a.id) || awaySet().has(b.id)){
     alert("ตัวที่ออกลาดตระเวนอยู่ใช้สังเคราะห์ไม่ได้ รอให้กลับก่อน"); return;
   }
-  if(!confirm(`สังเคราะห์ ${SP[a.sid].name} + ${SP[b.sid].name} เป็นตุ้ยนุ้ยอมตะ?\n\n` +
-    `ตำนานทั้งสองตัวจะหายไปถาวร พร้อมวัสดุและผงตุ้ยนุ้ยทั้งหมดที่ใช้\n` +
-    `สิ่งที่ได้คือตัวเดียว 6 ดาว พลังรวมสูงกว่าตำนานราวเท่าตัว และมีสองธาตุ` +
+  const kSide = S.myKeep === "B" ? b : a, oSide = kSide === a ? b : a;
+  if(!confirm(`สังเคราะห์เป็นตุ้ยนุ้ยอมตะ?\n\n` +
+    `✧ ตัวที่จะกลายเป็นอมตะ: ${SP[kSide.sid].name} ${starStr(kSide.stars).slice(0, kSide.stars)}\n` +
+    `🧪 ตัวที่ใช้เป็นวัตถุดิบ: ${SP[oSide.sid].name} (หายไปถาวร)\n\n` +
+    `ได้ตัวเดียว 6 ดาว ธาตุ ${SP[kSide.sid].el}${
+      SP[oSide.sid].el !== SP[kSide.sid].el ? " / " + SP[oSide.sid].el : ""} พลังรวมสูงกว่าตำนานปกติ` +
     (locked.length ? `\n\n⚠️ มีตัวที่ล็อกกุญแจอยู่ ${locked.length} ตัว (${
       locked.map(x => SP[x.sid].name).join(" · ")}) — จะถูกใช้ไปด้วย` : ""))) return;
 
   MATS.forEach(m => { S.mats[m.id] = matOf(m.id) - MYTH_COST[m.id]; });
   S.dust -= MYTH_DUST;
 
-  const keep = Math.random() < 0.5 ? a : b, other = keep === a ? b : a;
+  const keep = (S.myKeep === "B" ? b : a), other = keep === a ? b : a;
   const ids = new Set([a.id, b.id]);
   S.creatures = S.creatures.filter(c => !ids.has(c.id));
   S.team    = (S.team || []).filter(id => !ids.has(id));
@@ -4892,8 +4895,10 @@ function renderMyth(){
     ? `<button class="brslot ${(S.myPick || 'A') === side ? 'on' : ''}" data-myslot="${side}">
          <span class="sl">${side === 'A' ? 'ตำนานที่หนึ่ง' : 'ตำนานที่สอง'}</span>
          <img src="${ART[c.sid]}" alt="" style="${shinyFilter(c)}">
-         <b>${SP[c.sid].name}</b><small>${starStr(c.stars)} · ธาตุ${SP[c.sid].el}${
-           c.lock ? " · 🔒" : ""}${awaySet().has(c.id) ? " · 🧭" : ""}</small></button>`
+         <b>${((S.myKeep || 'A') === side ? "✧ " : "🧪 ") + SP[c.sid].name}</b>
+         <small>${starStr(c.stars)} · ธาตุ${SP[c.sid].el}${
+           c.lock ? " · 🔒" : ""}${awaySet().has(c.id) ? " · 🧭" : ""}<br>${
+           (S.myKeep || 'A') === side ? "จะกลายเป็นอมตะ" : "ใช้เป็นวัตถุดิบ"}</small></button>`
     : `<button class="brslot ${(S.myPick || 'A') === side ? 'on' : ''}" data-myslot="${side}">
          <span class="sl">${side === 'A' ? 'ตำนานที่หนึ่ง' : 'ตำนานที่สอง'}</span>
          <span class="ph">แตะเลือก</span></button>`;
@@ -4913,8 +4918,16 @@ function renderMyth(){
     <div class="brpair">${slot(a, "A")}<span class="brx">✧</span>${slot(b, "B")}</div>
     ${a && b ? `<div class="brpred">
       <h4>ตัวที่จะได้</h4>
-      <div class="pl"><span>สายพันธุ์</span><b>${SP[a.sid].name} หรือ ${SP[b.sid].name} อย่างละครึ่ง</b></div>
-      <div class="pl"><span>ธาตุ</span><b>ได้สองธาตุจากทั้งคู่</b></div>
+      <div class="pl"><span>เลือกตัวที่จะเป็นอมตะ</span><b>
+        <button class="dtab" data-mykeep="A" aria-pressed="${(S.myKeep || 'A') === 'A'}">${
+          (S.myKeep || 'A') === 'A' ? '✧ ' : ''}${SP[a.sid].name}</button>
+        <button class="dtab" data-mykeep="B" aria-pressed="${S.myKeep === 'B'}">${
+          S.myKeep === 'B' ? '✧ ' : ''}${SP[b.sid].name}</button></b></div>
+      <div class="pl"><span>สายพันธุ์ที่ได้</span><b>${
+        SP[(S.myKeep === 'B' ? b : a).sid].name} · อีกตัวเป็นวัตถุดิบ</b></div>
+      <div class="pl"><span>ธาตุ</span><b>${SP[(S.myKeep === 'B' ? b : a).sid].el}${
+        SP[(S.myKeep === 'B' ? a : b).sid].el !== SP[(S.myKeep === 'B' ? b : a).sid].el
+          ? " / " + SP[(S.myKeep === 'B' ? a : b).sid].el : ""}</b></div>
       <div class="pl"><span>ดาว</span><b>${starStr(MYTH_STARS)} ทันที · ปลุกพลังต่อได้ถึง 7 ดาว</b></div>
       <div class="pl"><span>พลังรวม</span><b>สูงกว่าตำนานปกติราว ${Math.round((MYTH_POWER/LEGEND_POWER-1)*100)}%</b></div>
       ${same ? `<div class="pl"><span>⚠️</span><b>ต้องเป็นคนละสายพันธุ์</b></div>` : ''}
@@ -4922,7 +4935,8 @@ function renderMyth(){
     <div class="foot" style="margin:0 0 12px">
       <button class="btn sun" id="btnMyth" ${canMyth() && !same ? '' : 'disabled'}>
         ${!a || !b ? "ยังเลือกไม่ครบ" : same ? "ต้องคนละสายพันธุ์"
-          : lack.length ? "วัสดุยังไม่พอ" : "✧ สังเคราะห์เป็นอมตะ"}</button>
+          : lack.length ? "วัสดุยังไม่พอ"
+          : `✧ สังเคราะห์ ${SP[(S.myKeep === 'B' ? b : a).sid].name} เป็นอมตะ`}</button>
     </div>
     ${lack.length ? `<p class="note" style="margin:0 0 10px">ยังขาด ${lack.join(" · ")}</p>` : ''}
     <div class="team">${pool.length ? pool.map(c => {
@@ -4933,6 +4947,9 @@ function renderMyth(){
     }).join('') : `<p class="empty" style="grid-column:1/-1">ยังไม่มีตัวตำนานที่ว่างอยู่ · ตีบอสลุ้นไข่บอสก่อน</p>`}</div>
     <p class="note">วัสดุหาได้จาก — ${MATS.map(m => `${m.emoji} ${m.from}`).join(" · ")}</p>`;
 
+  box.querySelectorAll('[data-mykeep]').forEach(el =>
+    el.onclick = ev => { ev.stopPropagation(); S.myKeep = el.dataset.mykeep;
+      sfx("tap"); save(); renderMyth(); });
   box.querySelectorAll('[data-myslot]').forEach(el =>
     el.onclick = () => { S.myPick = el.dataset.myslot; sfx("tap"); renderMyth(); });
   box.querySelectorAll('[data-my]').forEach(el => el.onclick = () => {
@@ -4940,6 +4957,7 @@ function renderMyth(){
     const other = side === "A" ? S.myB : S.myA;
     if(other === id){ if(side === "A") S.myB = S.myA; else S.myA = S.myB; }
     if(side === "A"){ S.myA = id; S.myPick = "B"; } else { S.myB = id; S.myPick = "A"; }
+    if(!S.myKeep) S.myKeep = "A";
     sfx("tap"); renderMyth();
   });
   const mb = $('#btnMyth'); if(mb) mb.onclick = synthMyth;
@@ -12038,7 +12056,7 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
       x:w.x, y:w.y, hx:w.x, hy:w.y,
       en:0, ult:ajUltOf(c), pas:ajPassives(c), hits:0, healT:0,
       st:null, stT:0, dot:0, stg:{ atk:0, def:0, spa:0, spd:0, spe:0 },
-      role:roleOf(c),
+      role:roleOf(c), awk3:((c.awk || 0) >= 3),
       item:opt.noItem ? null : (typeof battleItem === "function" ? battleItem(c) : null),
       dmgMul:opt.dmgMul || 1, critAdd:opt.critAdd || 0,
       cd:0.4 + Math.random()*0.5, lunge:0, flash:0, dead:false, ranged:isRanged(x.r),
@@ -12113,8 +12131,10 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
     if(a.item === "specs" && spec) mu *= 1.25;
     if(a.ally && typeof shVal === "function")
       mu *= (1 + shVal("power") + (typeof colPower === "function" ? colPower() : 0));
+    let gc = guardCut(d);
+    if(a.awk3 && a.role && a.role.id === "mage") gc = 1;      /* ✦ เวทย์ทะลุการกันแถวหน้า */
     let dmg = Math.max(3, Math.round((A * 0.62 * (pw / 60) - D * 0.22) * mu
-      * (0.88 + Math.random() * 0.24) / (d.row ? d.row.def : 1) * guardCut(d)));
+      * (0.88 + Math.random() * 0.24) / (d.row ? d.row.def : 1) * gc));
     const crit = Math.random() < 0.09 + a.b.spe / 2600 + (a.critAdd || 0);
     if(crit) dmg = Math.round(dmg * (typeof CRIT_MUL !== "undefined" ? CRIT_MUL : 1.5));
     d.hp -= dmg;
@@ -12123,11 +12143,27 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
     pops.push({ x:d.x, y:d.y, t:0, s:"−" + dmg, c:crit ? "#ffd35a" : (a.ally ? "#fff" : "#ff9a8a"),
                 big:crit || !!o.big });
     if(mu >= 1.4 && Math.random() < .5) rings.push({ x:d.x, y:d.y, t:0, c:elColor(o.el || a.el) });
+    if(d.awk3 && d.role && d.role.id === "tank" && d.hp > 0){   /* ✦ แท็งก์สะท้อนดาเมจ */
+      const back = Math.max(1, Math.round(dmg * 0.15));
+      a.hp -= back;
+      pops.push({ x:a.x, y:a.y, t:0, s:"−" + back, c:"#9fd4ff" });
+    }
     if(d.hp <= 0 && d.item === "sash" && !d.usedSash){ d.usedSash = true; d.hp = 1; }
     if(d.hp <= 0 && !d.dead){
       d.dead = true; d.fade = 1;
       say(`${d.name} หมดแรง`);
       sfx("hurt");
+      if(a.awk3 && a.role && a.role.id === "atk") a.cd = 0;     /* ✦ โจมตี: ฆ่าได้แล้วตีต่อ */
+      if(d.awk3 && d.role && d.role.id === "sup" && !d.gaveLast){
+        d.gaveLast = true;                                      /* ✦ ซัพ: ล้มแล้วฟื้นทีมครั้งเดียว */
+        (d.ally ? allies : foes).forEach(x => {
+          if(x === d || x.hp <= 0) return;
+          const g = Math.round(x.max * 0.25);
+          x.hp = Math.min(x.max, x.hp + g);
+          pops.push({ x:x.x, y:x.y, t:0, s:"+" + g, c:"#8ef07a" });
+        });
+        say(`✦ ${d.name} ล้มลงแล้วส่งพลังให้ทีม`);
+      }
     }
     return dmg;
   }
@@ -12775,6 +12811,7 @@ if(typeof oldRelease === "function")
     return oldRelease.apply(this, arguments);
   };
 
+window.ajOldBattleGo = oldBattleGo;
 window.ajEnsureTeam = ensureTeam;
 window.ajModeCfg = modeCfg;
 /* =====================================================================
@@ -12971,7 +13008,7 @@ const oldMakeBaby = window.makeBaby;
 if(typeof oldMakeBaby === "function")
   window.makeBaby = function(){
     const c = oldMakeBaby.apply(this, arguments);
-    try{ ajFeedEgg(c); }catch(e){}
+    if(!window.__ajNoTonic) try{ ajFeedEgg(c); }catch(e){}
     ajGrowNow(c);
     try{ ajNoteBirth(c); }catch(e){}
     return c;
@@ -13009,6 +13046,7 @@ function ajHatchResult(list, tries){
   }
   if(document.querySelector('.ajhatch')) return;
   S.seenAdult = S.seenAdult || {};
+  const lbl = window.__ajBirthLabel; window.__ajBirthLabel = null;
   const isNew = {};
   list.forEach(c => { isNew[c.id] = !S.seenAdult[c.sid]; S.seenAdult[c.sid] = 1; });
   /* ตัวดีเด่นล็อกไว้ให้ก่อนเลย */
@@ -13046,7 +13084,7 @@ function ajHatchResult(list, tries){
   const d = document.createElement('div');
   d.className = 'ajsheet ajhatch';
   d.innerHTML = `<div class="in">
-    <h3>🐣 ผลการฟัก ${list.length} ตัว</h3>
+    <h3>${lbl || "🐣 ผลการฟัก"} ${list.length} ตัว</h3>
     <p class="sub">แตะ 🔒 เก็บตัวที่ชอบไว้ · ปุ่มล่างขาย/ปล่อยทีเดียวทุกตัวที่ไม่ล็อก<br>
       ไชนี่ ✨ · ตำนาน · อมตะ · มีพรสวรรค์ · 5★ ระบบล็อกไว้ให้แล้ว</p>
     <div class="ajbrow">
@@ -13178,7 +13216,9 @@ if(typeof oldPack === "function")
     const s = oldPack.apply(this, arguments);
     const cfg = ajNurCfg();
     const extra = NUR_FOODS.map(id => bagOf(id)).concat([cfg.on ? 1 : 0, cfg.lim || 10]).join(".");
-    return s + "|" + extra;
+    let w2 = "";
+    try{ w2 = S.w2d ? JSON.stringify(S.w2d).replace(/\|/g, "") : ""; }catch(e){ w2 = ""; }
+    return s + "|" + extra + "|" + w2;
   };
 const oldUnpack = window.unpackSave;
 if(typeof oldUnpack === "function")
@@ -13192,6 +13232,8 @@ if(typeof oldUnpack === "function")
         NUR_FOODS.forEach((id, i) => S2.bag[id] = v[i] || 0);
         S2.ajNur = { on:v[4] !== 0, lim:v[5] || 10 };
       }
+      const w2seg = String(txt).split("|")[12];
+      if(w2seg && S2){ try{ S2.w2d = JSON.parse(w2seg); }catch(e){} }
     }catch(e){}
     return S2;
   };
@@ -13299,10 +13341,29 @@ function ajNestBar(){
       <button class="ajbb" data-ajlast="1" ${ajLastHatchList().length ? "" : "disabled"}>
         📋 ดูผลการฟักล่าสุด${ajLastHatchList().length ? ` (${ajLastHatchList().length} ตัว)` : ""}</button>
     </div>
+    <div class="ajbrow">
+      <button class="ajbb" data-ajrush="1">⏩ เร่งทั้งหมด</button>
+      <button class="ajbb ajw" data-ajtoss="1">🗑 ทิ้งทั้งหมด</button>
+      <span class="ajbnum" id="ajNestSum"></span>
+    </div>
     <div class="ajbrow">${[1, 3, 5, 10].map(n =>
       `<button class="ajbb" data-ajh="${n}" ${rdy && room ? "" : "disabled"}>×${n}</button>`).join('')}
       <button class="ajbb" data-ajh="all" ${rdy && room ? "" : "disabled"}>ทั้งหมด (${rdy})</button>
     </div>`;
+  /* สรุปไข่ในรัง + ปุ่มเร่ง/ทิ้งทั้งหมด */
+  const eggs = S.eggs || [];
+  const warm = eggs.filter(e => e.inc && !eggReady(e));
+  const cost = warm.reduce((a, e) => a + rushCost(e), 0);
+  const junk = eggs.filter(e => !ajEggSpecial(e));
+  const gain = junk.reduce((a, e) => a + ajTossGain(e), 0);
+  const sum = bar.querySelector('#ajNestSum');
+  if(sum) sum.innerHTML = `กำลังอุ่น ${warm.length} ฟอง · เร่งหมดใช้ 💠 ${cost.toLocaleString()}<br>` +
+    `ทิ้งได้ ${junk.length} ฟอง (ได้ 💠 ${gain.toLocaleString()}) · ไข่พิเศษ ${
+      eggs.length - junk.length} ฟองจะไม่ถูกทิ้ง`;
+  const rb = bar.querySelector('[data-ajrush]');
+  if(rb){ rb.disabled = !warm.length; rb.onclick = ajRushAll; }
+  const tb = bar.querySelector('[data-ajtoss]');
+  if(tb){ tb.disabled = !junk.length; tb.onclick = ajTossAll; }
   const lastB = bar.querySelector('[data-ajlast]');
   if(lastB) lastB.onclick = () => ajLastHatchSheet();
   bar.querySelectorAll('[data-ajh]').forEach(b => b.onclick = () => {
@@ -13311,6 +13372,52 @@ function ajNestBar(){
   });
   ajNurBar(bar);
 }
+/* ---- เร่งไข่ทั้งรัง / ทิ้งไข่ธรรมดาทั้งรัง ---- */
+function ajEggSpecial(e){
+  if(!e) return false;
+  return !!(e.boss || e.bossId || e.collab || e.lgEgg || e.bred
+    || (e.rar || 0) >= 4 || (e.starPull || 0) >= 1 || e.tal || e.mvEgg);
+}
+function ajTossGain(e){
+  return Math.round(30 + ((e.rar || 1) * 40) + ((e.starPull || 0) * 60)
+    + (e.boss || e.lgEgg ? 220 : 0));
+}
+function ajRushAll(){
+  const warm = (S.eggs || []).filter(e => e.inc && !eggReady(e))
+    .sort((a, b) => rushCost(a) - rushCost(b));            /* ถูกก่อน เผื่อผงไม่พอ */
+  if(!warm.length){ alert("ไม่มีไข่ที่กำลังอุ่นอยู่"); return; }
+  const total = warm.reduce((a, e) => a + rushCost(e), 0);
+  const have = S.dust || 0;
+  const fit = [];
+  let spend = 0;
+  warm.forEach(e => { const c = rushCost(e); if(spend + c <= have){ spend += c; fit.push(e); } });
+  if(!fit.length){ alert(`ผงตุ้ยนุ้ยไม่พอเร่งแม้ฟองเดียว — ฟองที่ถูกสุดใช้ 💠 ${
+    rushCost(warm[0]).toLocaleString()}`); return; }
+  if(!confirm(`เร่งไข่ ${fit.length}/${warm.length} ฟองให้พร้อมแตกทันที?\n\n` +
+    `ใช้ 💠 ${spend.toLocaleString()} จากที่มี 💠 ${have.toLocaleString()}` +
+    (fit.length < warm.length
+      ? `\n\nผงไม่พอเร่งทั้งรัง (ต้อง 💠 ${total.toLocaleString()}) จะเร่งฟองที่ถูกที่สุดก่อน`
+      : ""))) return;
+  fit.forEach(e => { e.inc = Date.now() - hatchMs(e); });
+  S.dust = have - spend;
+  logf(`⏩ เร่งไข่ ${fit.length} ฟองพร้อมแตกทันที — 💠 ${spend.toLocaleString()}`, "good");
+  sfx("buy"); save(); render();
+}
+function ajTossAll(){
+  const eggs = S.eggs || [];
+  const junk = eggs.filter(e => !ajEggSpecial(e));
+  const keep = eggs.length - junk.length;
+  if(!junk.length){ alert("ไม่มีไข่ธรรมดาให้ทิ้ง — ในรังเหลือแต่ไข่พิเศษ"); return; }
+  const gain = junk.reduce((a, e) => a + ajTossGain(e), 0);
+  if(!confirm(`ทิ้งไข่ธรรมดา ${junk.length} ฟอง?\n\nได้ผงตุ้ยนุ้ย 💠 ${gain.toLocaleString()}\n` +
+    (keep ? `ไข่พิเศษ ${keep} ฟอง (ไข่บอส ตำนาน ล้ำค่า สายเลือด ดาวมงคล) จะไม่ถูกทิ้ง\n` : "") +
+    `\nไข่ที่ทิ้งจะหายไปถาวร`)) return;
+  S.eggs = eggs.filter(e => ajEggSpecial(e));
+  S.dust = (S.dust || 0) + gain;
+  logf(`🗑 ทิ้งไข่ธรรมดา ${junk.length} ฟอง — ได้ 💠 ${gain.toLocaleString()}`, "");
+  sfx("coin"); save(); render();
+}
+
 /* ---- แผงยาบำรุงไข่ ---- */
 function ajNurBar(after){
   const tab = document.getElementById('tab-nest');
@@ -13565,7 +13672,12 @@ function ajRoleCard(c){
     <b>${r.emoji} ${r.name} <small>· สายประจำสายพันธุ์${SP[c.sid].name}</small></b>
     <span>${r.note}<br>ในสนาม: ${r.perk}</span>
     <span><u>ท่าที่เรียนได้</u> ${pool}</span>
-    <span><u>ไม้ตายที่เรียนได้</u> ${ults || "—"}</span></div>`;
+    <span><u>ไม้ตายที่เรียนได้</u> ${ults || "—"}</span>
+    <span><u>✦ สกิลปลุกพลัง (ระดับ 3)</u> ${
+      { tank:"สะท้อนดาเมจที่รับ 15% กลับไปหาคนตี",
+        atk:"ฆ่าศัตรูได้แล้วตีต่อทันทีไม่ต้องรอคูลดาวน์",
+        mage:"ดาเมจทะลุการกันของแถวหน้า",
+        sup:"ตอนล้มลงส่งพลังฟื้นทีมทั้งหมด 25% หนึ่งครั้ง" }[r.id]}</span></div>`;
 }
 
 /* ตัวช่วยเรื่องทุ่ง (มีสำรองเผื่อเวอร์ชันเกมไม่มีฟังก์ชันนี้) */
@@ -13816,6 +13928,8 @@ window.ajDupSheet = ajDupSheet;
 window.ajDupScan = ajDupScan;
 window.ajDupAuto = ajDupAuto;
 window.ajBreedMany = ajBreedMany;
+window.ajRushAll = ajRushAll;
+window.ajTossAll = ajTossAll;
 window.ajHatchMany = ajHatchMany;
 window.ajGrowNow = ajGrowNow;
 window.ajScene = ajScene;
@@ -13997,7 +14111,12 @@ function shHall(){
       }).join('')}</div>`
       : `<p class="sub">ยังไม่มีไชนี่เลย — ฟักไข่ต่อไป โอกาสอยู่ที่ 1%<br>
          ตัวไชนี่จะขึ้นการ์ดพื้นม่วงในหน้าสรุปผลการฟัก หาไม่ยาก</p>`}
-      <div class="ajhfoot"><button class="ajbb keep cls">ปิด</button></div>`;
+      <div class="ajhfoot">
+        <button class="ajbb ajw" data-shyard="1">🌾 ทุ่งโชว์ (เดินไปเดินมา)</button>
+        <button class="ajbb keep cls">ปิด</button>
+      </div>`;
+    const yb = body.querySelector('[data-shyard]');
+    if(yb) yb.onclick = () => { if(window.ajShinyYard) window.ajShinyYard(); };
     body.querySelectorAll('[data-sh]').forEach(b => b.onclick = () => {
       sortBy = b.dataset.sh; sfx("tap"); draw();
     });
@@ -14191,6 +14310,13 @@ function add(){
     b.onclick = () => window.ajShinyHall();
     bar.appendChild(b);
   }
+  if(!document.getElementById('ajBmYd') && window.ajShinyYard){
+    const b3 = document.createElement('button');
+    b3.className = 'dtab big'; b3.id = 'ajBmYd';
+    b3.textContent = '🌾 ทุ่งโชว์ไชนี่';
+    b3.onclick = () => window.ajShinyYard();
+    bar.appendChild(b3);
+  }
   if(!document.getElementById('ajBmW2') && window.ajW2Sheet){
     const b2 = document.createElement('button');
     b2.className = 'dtab big'; b2.id = 'ajBmW2';
@@ -14208,6 +14334,1709 @@ add();
 const oldR = window.render;
 if(typeof oldR === "function")
   window.render = function(){ const r = oldR.apply(this, arguments); try{ add(); }catch(e){} return r; };
+})();
+</script>
+<style id="ajYdCss">
+.ajyard{align-items:stretch}
+.ajyard .in{max-height:100%;height:100%;border-radius:0;padding:0;display:flex;flex-direction:column;
+  overflow:hidden;background:#0e1c14}
+.ajydfield{position:relative;flex:1;min-height:0;overflow:hidden}
+.ajydfield svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ajydbar{position:absolute;left:0;right:0;top:0;display:flex;gap:6px;align-items:center;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;z-index:5;
+  background:linear-gradient(180deg,rgba(8,20,12,.72),rgba(8,20,12,0))}
+.ajydbar b{flex:1;font-size:14px;color:#fff;text-shadow:0 1px 3px #000}
+.ajydbtn{font-family:inherit;font-size:12px;font-weight:800;padding:7px 11px;border-radius:11px;
+  border:1px solid rgba(255,255,255,.45);background:rgba(18,34,24,.8);color:#fff}
+.ajydbtn.on{background:#3f8b3c;border-color:#a8f096}
+.ajwk{position:absolute;left:0;top:0;width:64px;height:78px;will-change:transform;
+  transform-origin:50% 100%}
+.ajwk img{position:absolute;left:0;bottom:12px;width:64px;height:64px;object-fit:contain;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.ajwk .sh{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);
+  width:38px;height:12px;border-radius:50%;background:rgba(0,0,0,.32)}
+.ajwk .nm{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);white-space:nowrap;
+  font-size:9.5px;font-weight:800;color:#fff;background:rgba(90,50,130,.85);
+  border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:0 6px;line-height:15px}
+.ajwk .sp{position:absolute;left:-2px;top:2px;font-size:12px;animation:ajTw 1.8s infinite}
+@keyframes ajTw{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+.ajydempty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  text-align:center;color:#dfe9d8;font-size:13px;padding:30px;line-height:1.6}
+</style>
+<script id="ajYdJs">
+/* ======= 🌾 ทุ่งโชว์ไชนี่ — เห็นตัวเดินไปเดินมาจริง ======= */
+(function(){
+const CR = () => (typeof S !== "undefined" && S && S.creatures) || [];
+const MAXW = 24;
+let onlyPen = false;
+
+function yardScene(){
+  let s = 20250810;
+  const R = () => { s = (s * 48271) % 2147483647; return s / 2147483647; };
+  const rr = (a,b) => a + R() * (b - a);
+  const bush = (x,y,r,t) => {
+    const P = [["#2F6B44","#245538","#43905A"],["#3C8250","#2C6540","#5FAE6A"],
+               ["#4A9758","#357648","#7CC478"]][t % 3];
+    return `<g><ellipse cx="${x+r*.2}" cy="${y+r*.5}" rx="${r}" ry="${r*.26}" fill="#12331F" opacity=".35"/>
+      <circle cx="${x-r*.5}" cy="${y}" r="${r*.58}" fill="${P[1]}"/>
+      <circle cx="${x+r*.5}" cy="${y}" r="${r*.55}" fill="${P[1]}"/>
+      <circle cx="${x}" cy="${y-r*.4}" r="${r*.74}" fill="${P[0]}"/>
+      <circle cx="${x-r*.2}" cy="${y-r*.6}" r="${r*.4}" fill="${P[2]}" opacity=".9"/></g>`;
+  };
+  let far = "", near = "", flowers = "", tufts = "";
+  for(let i = 0; i < 14; i++) far += bush(rr(-20,420), rr(70,150), rr(26,44), i);
+  for(let i = 0; i < 5; i++) near += bush(rr(-10,410), rr(600,660), rr(46,64), i+1);
+  for(let i = 0; i < 70; i++){
+    const x = rr(0,400), y = rr(170,600);
+    tufts += `<path d="M${x} ${y} q2 -8 4.5 -.5 M${x+4} ${y+.5} q2.5 -10 5.5 -.6"
+      stroke="#3F7C4A" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/>`;
+  }
+  for(let i = 0; i < 30; i++)
+    flowers += `<circle cx="${rr(6,394)}" cy="${rr(180,590)}" r="${rr(1.6,3)}"
+      fill="${["#FFE9A8","#F7C3D8","#FFF6DC","#CFEBA0"][i%4]}" opacity=".9"/>`;
+  return `<svg viewBox="0 0 400 680" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="ydSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8ED0E8"/><stop offset="1" stop-color="#DCEFC8"/></linearGradient>
+      <linearGradient id="ydGrass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4E9155"/><stop offset=".5" stop-color="#67B061"/>
+        <stop offset="1" stop-color="#48874F"/></linearGradient>
+      <radialGradient id="ydVig" cx=".5" cy=".5" r=".78">
+        <stop offset=".55" stop-color="#000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#06180D" stop-opacity=".5"/></radialGradient>
+      <radialGradient id="ydSun" cx=".5" cy=".2" r=".5">
+        <stop offset="0" stop-color="#FFF8D8" stop-opacity=".5"/>
+        <stop offset="1" stop-color="#FFF8D8" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect width="400" height="680" fill="url(#ydGrass)"/>
+    <rect width="400" height="150" fill="url(#ydSky)"/>
+    <path d="M-10 150 q60 -34 130 -12 q64 20 118 -8 q66 -32 172 -2 L410 150 Z" fill="#3B7A47"/>
+    <ellipse cx="120" cy="230" rx="180" ry="70" fill="#74B96B" opacity=".35"/>
+    <ellipse cx="300" cy="470" rx="180" ry="90" fill="#3F8049" opacity=".35"/>
+    <path d="M250 300 q60 -20 110 8 q34 22 4 44 q-58 30 -112 2 q-26 -30 -2 -54 Z"
+      fill="#7FD3E4" opacity=".9"/>
+    <path d="M250 300 q60 -20 110 8 q34 22 4 44 q-58 30 -112 2 q-26 -30 -2 -54 Z"
+      fill="none" stroke="#E8F6E0" stroke-width="2.5" opacity=".6"/>
+    ${far}${tufts}${flowers}
+    <g opacity=".95">
+      <rect x="20" y="560" width="7" height="52" rx="3" fill="#8A6039"/>
+      <rect x="86" y="560" width="7" height="52" rx="3" fill="#8A6039"/>
+      <rect x="14" y="574" width="86" height="7" rx="3" fill="#A87B4C"/>
+      <rect x="14" y="592" width="86" height="7" rx="3" fill="#A87B4C"/>
+    </g>
+    ${near}
+    <rect width="400" height="680" fill="url(#ydSun)"/>
+    <rect width="400" height="680" fill="url(#ydVig)"/>
+  </svg>`;
+}
+
+function yard(){
+  if(document.querySelector('.ajyard')) return;
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajyard';
+  d.innerHTML = `<div class="in">
+    <div class="ajydfield" id="ajYdF">
+      ${yardScene()}
+      <div class="ajydbar">
+        <b id="ajYdT">🌾 ทุ่งโชว์ไชนี่</b>
+        <button class="ajydbtn" id="ajYdFilt"></button>
+        <button class="ajydbtn" id="ajYdX">✕ ปิด</button>
+      </div>
+    </div></div>`;
+  document.body.appendChild(d);
+  const field = d.querySelector('#ajYdF');
+  let walkers = [], raf = 0, last = performance.now(), W = 0, H = 0;
+
+  function pick(){
+    let l = CR().filter(c => c.shiny && c.stage === "adult");
+    if(onlyPen) l = l.filter(c => !c.box);
+    return l.sort((a,b) => b.id - a.id).slice(0, MAXW);
+  }
+  function build(){
+    walkers.forEach(w => w.el.remove());
+    walkers = [];
+    const list = pick();
+    const old = field.querySelector('.ajydempty');
+    if(old) old.remove();
+    d.querySelector('#ajYdT').textContent = `🌾 ทุ่งโชว์ไชนี่ · ${list.length} ตัว`;
+    d.querySelector('#ajYdFilt').textContent = onlyPen ? "เฉพาะในทุ่ง" : "รวมในตู้ฝาก";
+    d.querySelector('#ajYdFilt').classList.toggle('on', onlyPen);
+    if(!list.length){
+      const e = document.createElement('div');
+      e.className = 'ajydempty';
+      e.innerHTML = onlyPen
+        ? "ไชนี่ที่อยู่ในทุ่งยังไม่มี<br>กดปุ่มมุมขวาเพื่อรวมตัวที่อยู่ในตู้ฝากด้วย"
+        : "ยังไม่มีไชนี่เลย<br>ฟักไข่ต่อไป โอกาสอยู่ที่ 1% ต่อฟอง";
+      field.appendChild(e);
+      return;
+    }
+    W = field.clientWidth || 380; H = field.clientHeight || 600;
+    const top = H * 0.30, bot = H - 90;
+    list.forEach((c, i) => {
+      const el = document.createElement('div');
+      el.className = 'ajwk';
+      el.innerHTML = `<span class="sh"></span>
+        <img src="${ART[c.sid]}" style="${shinyFilter(c)}" alt="">
+        <span class="sp">✨</span>
+        <span class="nm">${SP[c.sid].name}</span>`;
+      el.onclick = () => { if(window.ajShinyCard) window.ajShinyCard(c); };
+      field.appendChild(el);
+      const w = { c, el, img:el.querySelector('img'),
+        x:20 + Math.random() * (W - 100), y:top + Math.random() * (bot - top),
+        tx:0, ty:0, wait:Math.random() * 2, sp:14 + Math.random() * 16, dir:1 };
+      w.tx = w.x; w.ty = w.y;
+      walkers.push(w);
+    });
+  }
+  function newTarget(w){
+    const top = H * 0.30, bot = H - 90;
+    w.tx = 14 + Math.random() * (W - 92);
+    w.ty = top + Math.random() * (bot - top);
+    w.wait = 0.6 + Math.random() * 2.6;
+  }
+  function step(now){
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
+    last = now;
+    walkers.forEach(w => {
+      const dx = w.tx - w.x, dy = w.ty - w.y, dist = Math.hypot(dx, dy);
+      if(dist < 4){
+        w.wait -= dt;
+        if(w.wait <= 0) newTarget(w);
+      } else {
+        const k = Math.min(1, w.sp * dt / dist);
+        w.x += dx * k; w.y += dy * k;
+        if(Math.abs(dx) > 1.5) w.dir = dx > 0 ? 1 : -1;
+      }
+      const depth = 0.72 + ((w.y - H * 0.30) / Math.max(1, H * 0.7 - 90)) * 0.5;
+      const bob = dist < 4 ? Math.sin(now / 520 + w.x) * 1.4 : Math.sin(now / 150 + w.x) * 3;
+      w.el.style.transform =
+        `translate3d(${w.x.toFixed(1)}px,${(w.y + bob).toFixed(1)}px,0) scale(${depth.toFixed(3)})`;
+      w.el.style.zIndex = String(Math.round(w.y));
+      w.img.style.transform = w.dir < 0 ? "scaleX(-1)" : "scaleX(1)";
+    });
+    raf = requestAnimationFrame(step);
+  }
+  function close(){
+    cancelAnimationFrame(raf);
+    window.removeEventListener('resize', onRz);
+    d.remove();
+  }
+  const onRz = () => { build(); };
+  d.querySelector('#ajYdX').onclick = close;
+  d.querySelector('#ajYdFilt').onclick = () => { onlyPen = !onlyPen; if(sfx) sfx("tap"); build(); };
+  window.addEventListener('resize', onRz);
+  setTimeout(() => { build(); raf = requestAnimationFrame(step); }, 30);
+}
+window.ajShinyYard = yard;
+})();
+</script>
+<style id="ajExCss">
+.ajz{align-items:stretch}
+.ajz .in{max-height:100%;height:100%;border-radius:0;padding:0;display:flex;flex-direction:column;
+  overflow:hidden;background:#1a1208}
+.ajzhead{padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;
+  background:linear-gradient(180deg,#3a2a10,#241806);color:#f6e6c2;
+  display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.ajzhead b{flex:1;font-size:16px}
+.ajzhead .ank{font-size:13px;font-weight:800;color:#ffe08a;
+  background:rgba(0,0,0,.3);border:1px solid #7a5c20;border-radius:999px;padding:3px 10px}
+.ajzscroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 16px}
+.ajzc{position:relative;margin-bottom:10px;border-radius:15px;overflow:hidden;
+  border:2px solid #6a4f22;background:linear-gradient(180deg,#f6ead0,#e8d7ab);color:#3a2a10}
+.ajzc.lock{filter:grayscale(.75) brightness(.82)}
+.ajzc .band{padding:8px 11px;background:linear-gradient(180deg,#c79b47,#a97c2c);color:#2b1d06}
+.ajzc .band b{font-size:15px;display:block}
+.ajzc .band span{font-size:11px;opacity:.9}
+.ajzc .body{padding:9px 11px}
+.ajzc p{margin:0 0 6px;font-size:11.5px;color:#5f4a24;line-height:1.5}
+.ajzbar{height:9px;border-radius:99px;background:#d6c294;overflow:hidden;margin:5px 0 7px}
+.ajzbar i{display:block;height:100%;background:linear-gradient(90deg,#e0a827,#c07f19)}
+.ajzrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ajzbtn{font-family:inherit;font-size:12.5px;font-weight:800;padding:9px 14px;border-radius:12px;
+  border:2px solid #8a6a2a;background:#fffaf0;color:#3a2a10;cursor:pointer}
+.ajzbtn.go{background:linear-gradient(180deg,#e8b24c,#c8871f);border-color:#7a5410;color:#2b1d06}
+.ajzbtn:disabled{opacity:.5}
+.ajzmini{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.ajzmini img{width:34px;height:34px;object-fit:contain;background:rgba(255,255,255,.5);
+  border-radius:8px;border:1px solid #c7ad78}
+.ajzmini img.miss{filter:brightness(0) opacity(.28)}
+/* ---- หน้าสำรวจ ---- */
+.ajex .in{background:#0f1a10}
+.ajexf{position:relative;flex:1;min-height:0;overflow:hidden}
+.ajexf svg{position:absolute;inset:0;width:100%;height:100%}
+.ajexbar{position:absolute;left:0;right:0;top:0;z-index:6;display:flex;gap:6px;align-items:center;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;
+  background:linear-gradient(180deg,rgba(10,16,10,.75),rgba(10,16,10,0))}
+.ajexbar b{flex:1;font-size:13.5px;color:#fff;text-shadow:0 1px 3px #000}
+.ajexhint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;
+  font-size:12px;font-weight:700;color:#fff;background:rgba(12,22,14,.8);
+  border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:6px 14px;white-space:nowrap}
+.ajwild{position:absolute;left:0;top:0;width:64px;height:78px;transform-origin:50% 100%;
+  will-change:transform}
+.ajwild img{position:absolute;left:0;bottom:12px;width:64px;height:64px;object-fit:contain;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+.ajwild .sh{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:38px;height:12px;
+  border-radius:50%;background:rgba(0,0,0,.3)}
+.ajwild .tag{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);white-space:nowrap;
+  font-size:9px;font-weight:800;color:#2b1d06;background:#e8c268;border-radius:999px;padding:0 5px;
+  line-height:14px;border:1px solid rgba(0,0,0,.25)}
+.ajwild.alpha .tag{background:#ffd76a;color:#5a3c00}
+.ajwild.alpha:before{content:"";position:absolute;left:50%;bottom:4px;transform:translateX(-50%);
+  width:56px;height:20px;border-radius:50%;border:2px solid #ffd76a;
+  box-shadow:0 0 12px #ffd76a;opacity:.9}
+.ajme{position:absolute;left:0;top:0;width:66px;height:80px;z-index:50;transform-origin:50% 100%}
+.ajme img{position:absolute;left:0;bottom:12px;width:66px;height:66px;object-fit:contain;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5))}
+.ajme .sh{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:40px;height:13px;
+  border-radius:50%;background:rgba(0,0,0,.34)}
+.ajmark{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;
+  border:2px solid #fff;opacity:.9;animation:ajMk .6s forwards}
+@keyframes ajMk{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+</style>
+<script id="ajExJs">
+/* =====================================================================
+   🏺 โลกที่ 2 · แผนที่โซน + เดินสำรวจ + เจอตัวป่า
+   ===================================================================== */
+(function(){
+const CR = () => (typeof S !== "undefined" && S && S.creatures) || [];
+const ZN = () => window.ZONES_W2 || [];
+const SPW = () => window.SPECIES_W2 || [];
+
+const EN_MAX = 20, EN_MIN = 6;            /* แรงสำรวจเต็ม 20 · ฟื้น 1 หน่วยทุก 6 นาที */
+const MATS = { 1:"เศษหินสลัก", 2:"น้ำศักดิ์สิทธิ์", 3:"ใบปาปิรัส",
+               4:"เกล็ดทอง", 5:"ผ้าพันมัมมี่", 6:"เศษบัลลังก์" };
+
+function W2(){
+  if(!S.w2d) S.w2d = { zone:1, open:[1], dex:{}, ankh:0, mats:{}, en:EN_MAX, enAt:Date.now(), kill:{} };
+  const w = S.w2d;
+  w.open = w.open || [1]; w.dex = w.dex || {}; w.mats = w.mats || {}; w.kill = w.kill || {};
+  if(w.en == null) w.en = EN_MAX;
+  return w;
+}
+function energy(){
+  const w = W2(), now = Date.now();
+  const gain = Math.floor((now - (w.enAt || now)) / (EN_MIN * 60000));
+  if(gain > 0){ w.en = Math.min(EN_MAX, (w.en || 0) + gain); w.enAt = (w.enAt || now) + gain * EN_MIN * 60000; }
+  if(w.en >= EN_MAX) w.enAt = now;
+  return w.en;
+}
+function enNext(){
+  const w = W2();
+  if(w.en >= EN_MAX) return "";
+  const ms = EN_MIN * 60000 - (Date.now() - w.enAt);
+  return " · อีก " + Math.max(1, Math.ceil(ms / 60000)) + " นาที +1";
+}
+const zoneList = z => SPW().filter(s => s.zone === z);
+const seen = sid => (W2().dex[sid] || 0) > 0;
+const zoneSeen = z => zoneList(z).filter(s => seen(s.id)).length;
+const zoneNeed = z => Math.max(3, Math.ceil(zoneList(z).length * 0.6));   /* เกณฑ์ปลดเทพ */
+const openZone = z => W2().open.indexOf(z) >= 0;
+
+/* ---------- แผนที่โซน ---------- */
+function zoneMap(){
+  if(document.querySelector('.ajz')) return;
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajz';
+  d.innerHTML = `<div class="in">
+    <div class="ajzhead">
+      <b>🏺 ดินแดนฟาโรห์</b>
+      <span class="ank" id="ajZBall"></span>
+      <span class="ank" id="ajZEn"></span>
+      <span class="ank" id="ajZAnk"></span>
+      <button class="ajzbtn" id="ajZRit">𓂀</button>
+      <button class="ajzbtn" id="ajZMus">🏛</button>
+      <button class="ajzbtn" id="ajZPap">📜</button>
+      <button class="ajzbtn" id="ajZShop">🛒</button>
+      <button class="ajzbtn" id="ajZX">✕</button>
+    </div>
+    <div class="ajzscroll" id="ajZBody"></div>
+  </div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajZBody');
+  d.querySelector('#ajZX').onclick = () => d.remove();
+  d.querySelector('#ajZShop').onclick = () => { if(window.ajW2Shop) window.ajW2Shop(() => draw()); };
+  d.querySelector('#ajZPap').onclick = () => { if(window.ajW2Papyrus) window.ajW2Papyrus(); };
+  d.querySelector('#ajZRit').onclick = () => { if(window.ajRitual) window.ajRitual(); };
+  d.querySelector('#ajZMus').onclick = () => { if(window.ajMuseum) window.ajMuseum(); };
+
+  function draw(){
+    const w = W2();
+    d.querySelector('#ajZEn').textContent = `⚡ ${energy()}/${EN_MAX}${enNext()}`;
+    d.querySelector('#ajZAnk').textContent = `𓋹 ${w.ankh || 0}`;
+    const bl = window.ajW2Balls ? window.ajW2Balls() : {};
+    d.querySelector('#ajZBall').textContent =
+      `🏺${bl.jar || 0} 🪔${bl.lamp || 0} ⚱️${bl.urn || 0}`;
+    body.innerHTML = ZN().map(z => {
+      const list = zoneList(z.id), got = zoneSeen(z.id), need = zoneNeed(z.id);
+      const open = openZone(z.id);
+      const mat = w.mats[z.id] || 0;
+      return `<div class="ajzc ${open ? '' : 'lock'}">
+        <div class="band"><b>${z.emoji} โซน ${z.id} · ${z.name}</b>
+          <span>ธาตุหลัก ${z.els.join(" + ")} · พบแล้ว ${got}/${list.length} ตัว</span></div>
+        <div class="body">
+          <p>${z.note}</p>
+          <p style="color:#7a5f2c">${(() => {
+            const t = window.ajW2Time ? window.ajW2Time() : null;
+            const wx = window.ajW2Wx ? window.ajW2Wx(z.id) : null;
+            return t && wx ? `${t.label} · ${wx.emoji} ${wx.name} — ${wx.note}` : "";
+          })()}</p>
+          <div class="ajzbar"><i style="width:${list.length ? got / list.length * 100 : 0}%"></i></div>
+          <div class="ajzrow">
+            <button class="ajzbtn go" data-go="${z.id}" ${open ? '' : 'disabled'}>
+              ${open ? '🚶 ออกสำรวจ (⚡1)' : '🔒 ยังไม่เปิด'}</button>
+            <button class="ajzbtn" data-god="${z.id}" ${open && got >= need ? '' : 'disabled'}>
+              ${got >= need ? '👑 ท้าเทพประจำโซน' : `👑 ต้องพบ ${need} ตัวก่อน`}</button>
+            <span style="font-size:11px;color:#6b5326">${(() => {
+              const L = window.ajLureInfo ? window.ajLureInfo(z.id) : null;
+              return L ? L.emoji + " " + L.name + " · " : "";
+            })()}${MATS[z.id]} ×${mat}${
+              w.god && w.god[z.id] ? ` · 👑 ล้มแล้ว ${w.god[z.id]} ครั้ง` : ""}</span>
+          </div>
+          <div class="ajzmini">${list.slice(0, 14).map(s =>
+            `<img src="${ART[s.id]}" class="${seen(s.id) ? '' : 'miss'}" title="${
+              seen(s.id) ? s.name : 'ยังไม่พบ'}" alt="">`).join('')}</div>
+        </div></div>`;
+    }).join('');
+    body.querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
+      const z = +b.dataset.go;
+      if(energy() < 1){ alert("แรงสำรวจหมด — รอฟื้นหรือใช้ของเร่งในภายหลัง"); return; }
+      d.remove();
+      explore(z);
+    });
+    body.querySelectorAll('[data-god]').forEach(b => b.onclick = () => {
+      if(window.ajGodSheet) window.ajGodSheet(+b.dataset.god);
+    });
+  }
+  draw();
+}
+
+/* ---------- ฉากประจำโซน ---------- */
+function scene(z){
+  let s = 991 + z * 7717;
+  const R = () => { s = (s * 48271) % 2147483647; return s / 2147483647; };
+  const rr = (a,b) => a + R() * (b - a);
+  const P = {
+    1:{ sky:["#F3C77A","#F7E3B0"], g1:"#E6CB92", g2:"#CDAE71", rock:"#B9976A", acc:"#8C7040" },
+    2:{ sky:["#9BD9E8","#DCEFD0"], g1:"#8FC98A", g2:"#5E9E63", rock:"#A8B27E", acc:"#3E7A50" },
+    3:{ sky:["#D9A96E","#F0DCB0"], g1:"#C39A63", g2:"#9A7442", rock:"#8A6C44", acc:"#6A5230" },
+    4:{ sky:["#FFC98A","#FFE6B0"], g1:"#E8C170", g2:"#C4913C", rock:"#B07A2E", acc:"#7A4E12" },
+    5:{ sky:["#3A3352","#5A4A72"], g1:"#4A4260", g2:"#332C46", rock:"#5C5274", acc:"#7E68B8" },
+    6:{ sky:["#4A3A6A","#7A5EA0"], g1:"#6A5490", g2:"#463662", rock:"#8A6ED0", acc:"#FFD76A" }
+  }[z] || {};
+  let deco = "", tufts = "";
+  for(let i = 0; i < 12; i++){
+    const x = rr(-20,420), y = rr(80,160), h = rr(30,70);
+    deco += `<path d="M${x} ${y} L${x+h*.7} ${y-h} L${x+h*1.4} ${y} Z" fill="${P.rock}" opacity=".8"/>`;
+  }
+  for(let i = 0; i < 8; i++){
+    const x = rr(0,380), y = rr(190,600), w2 = rr(24,60);
+    deco += `<ellipse cx="${x}" cy="${y}" rx="${w2}" ry="${w2*.3}" fill="${P.acc}" opacity=".18"/>`;
+  }
+  for(let i = 0; i < 40; i++){
+    const x = rr(0,400), y = rr(180,620);
+    tufts += `<path d="M${x} ${y} q2 -7 4 -.5" stroke="${P.acc}" stroke-width="1.6"
+      fill="none" opacity=".5"/>`;
+  }
+  /* เสาโอเบลิสก์กับพิรามิดไกลๆ */
+  const land = z >= 5
+    ? `<path d="M40 150 L110 40 L180 150 Z" fill="${P.rock}" opacity=".55"/>
+       <rect x="300" y="60" width="18" height="92" fill="${P.rock}" opacity=".6"/>`
+    : `<path d="M230 152 L300 46 L370 152 Z" fill="${P.rock}" opacity=".65"/>
+       <path d="M300 46 L370 152 L336 152 Z" fill="#000" opacity=".12"/>
+       <rect x="60" y="72" width="16" height="80" fill="${P.rock}" opacity=".7"/>
+       <path d="M60 72 L68 54 L76 72 Z" fill="${P.acc}" opacity=".8"/>`;
+  return `<svg viewBox="0 0 400 680" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="exs${z}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${P.sky[0]}"/><stop offset="1" stop-color="${P.sky[1]}"/></linearGradient>
+      <linearGradient id="exg${z}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${P.g1}"/><stop offset="1" stop-color="${P.g2}"/></linearGradient>
+      <radialGradient id="exv${z}" cx=".5" cy=".5" r=".78">
+        <stop offset=".5" stop-color="#000" stop-opacity="0"/>
+        <stop offset="1" stop-color="#12100A" stop-opacity=".55"/></radialGradient>
+    </defs>
+    <rect width="400" height="680" fill="url(#exg${z})"/>
+    <rect width="400" height="160" fill="url(#exs${z})"/>
+    ${land}
+    <path d="M-10 160 q70 -26 140 -6 q66 18 120 -6 q64 -26 160 -2 L410 160 Z"
+      fill="${P.g1}" opacity=".9"/>
+    ${deco}${tufts}
+    <rect width="400" height="680" fill="url(#exv${z})"/>
+  </svg>`;
+}
+
+/* ---------- เดินสำรวจ ---------- */
+function explore(z){
+  if(document.querySelector('.ajex')) return;
+  const w = W2();
+  if(energy() < 1){ alert("แรงสำรวจหมด"); return; }
+  w.en -= 1; w.enAt = w.enAt || Date.now(); save();
+  const zone = ZN().find(x => x.id === z) || { id:z, name:"โซน " + z, emoji:"🏺" };
+  const pool = zoneList(z);
+  const lead = CR().filter(c => c.stage === "adult" && !c.box)
+    .sort((a,b) => (b.bs && b.bs.total || 0) - (a.bs && a.bs.total || 0))[0];
+
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajex';
+  d.innerHTML = `<div class="in"><div class="ajexf" id="ajExF">
+    ${scene(z)}
+    <div class="ajexbar">
+      <b id="ajExT">${zone.emoji} ${zone.name}</b>
+      <span class="ajwxb" id="ajExWx"></span>
+      <button class="ajydbtn" id="ajExX">✕ กลับ</button>
+    </div>
+    <div class="ajexhint" id="ajExH">แตะพื้นเพื่อเดิน · เดินชนตัวป่าเพื่อเข้าสู้</div>
+    <div class="ajlure" id="ajExL"></div>
+  </div></div>`;
+  document.body.appendChild(d);
+  const field = d.querySelector('#ajExF');
+  let W = 380, H = 620, raf = 0, last = performance.now(), busy = false, found = 0;
+  const wilds = [], relics = [], npcs = [];
+  const me = { x:170, y:430, tx:170, ty:430, dir:1, el:null };
+
+  function mk(cls, art, filt, tag, alpha){
+    const el = document.createElement('div');
+    el.className = cls + (alpha ? " alpha" : "");
+    el.innerHTML = `<span class="sh"></span><img src="${art}" style="${filt || ''}" alt="">` +
+      (tag ? `<span class="tag">${tag}</span>` : "");
+    field.appendChild(el);
+    return el;
+  }
+  function spawnRelic(){
+    if(field.querySelector('.ajrelic')) return;
+    const el = document.createElement('div');
+    el.className = 'ajrelic';
+    el.textContent = "✨";
+    const o = { relic:true, el, x:24 + Math.random() * (W - 100),
+      y:H * 0.36 + Math.random() * (H * 0.5) };
+    el.style.transform = `translate3d(${o.x}px,${o.y}px,0)`;
+    el.onclick = () => grab(o);
+    field.appendChild(el);
+    relics.push(o);
+  }
+  function grab(o){
+    if(!o.el || !o.el.isConnected) return;
+    o.el.remove();
+    const i = relics.indexOf(o); if(i >= 0) relics.splice(i, 1);
+    const got = window.ajAddRelic ? window.ajAddRelic(z) : null;
+    if(got){
+      const t = d.querySelector('#ajExH');
+      if(t) t.textContent = `🏛 ขุดได้ ${got.e} ${got.n}!`;
+      if(typeof sfx === "function") sfx("win");
+    }
+  }
+  function spawn(force){
+    if(!force && (!pool.length || wilds.length >= 4)) return;
+    const sp = force ? force.sp : (window.ajW2Pick ? window.ajW2Pick(pool, z)
+      : pool[Math.floor(Math.random() * pool.length)]);
+    if(!sp) return;
+    const alpha = force ? !!force.alpha
+      : Math.random() < (window.ajW2Alpha ? window.ajW2Alpha(z) : 0.03);
+    const lv = Math.max(3, Math.round((6 + z * 7) * (alpha ? 1.35 : 1) * (0.85 + Math.random() * 0.3)));
+    const el = mk("ajwild", ART[sp.id], "", (alpha ? "👑 " : "") + "Lv." + lv, alpha);
+    const o = { sp, lv, alpha, el,
+      x:force ? Math.max(14, Math.min(W - 90, me.x + (Math.random() - .5) * 80))
+              : 20 + Math.random() * (W - 100),
+      y:force ? Math.max(H * 0.34, Math.min(H - 80, me.y + (Math.random() - .5) * 70))
+              : H * 0.34 + Math.random() * (H * 0.55),
+      tx:0, ty:0, wait:Math.random() * 2,
+      spd:9 + Math.random() * 10, dir:1, flee:0 };
+    o.tx = o.x; o.ty = o.y;
+    wilds.push(o);
+  }
+  function target(o){
+    o.tx = 14 + Math.random() * (W - 92);
+    o.ty = H * 0.34 + Math.random() * (H * 0.55);
+    o.wait = 0.5 + Math.random() * 2.5;
+  }
+  function place(el, o, scale){
+    const dep = 0.72 + ((o.y - H * 0.32) / Math.max(1, H * 0.62)) * 0.5;
+    el.style.transform = `translate3d(${o.x.toFixed(1)}px,${o.y.toFixed(1)}px,0) scale(${(dep*(scale||1)).toFixed(3)})`;
+    el.style.zIndex = String(Math.round(o.y) + (scale ? 40 : 0));
+    const img = el.querySelector('img');
+    if(img) img.style.transform = o.dir < 0 ? "scaleX(-1)" : "scaleX(1)";
+  }
+  const meEl = mk("ajme", lead ? ART[lead.sid] : (ART[pool[0] && pool[0].id] || ""),
+    lead ? shinyFilter(lead) : "", null, false);
+
+  field.addEventListener('pointerdown', e => {
+    if(busy) return;
+    if(e.target.closest('.ajexbar')) return;
+    const r = field.getBoundingClientRect();
+    me.tx = Math.max(10, Math.min(W - 70, e.clientX - r.left - 33));
+    me.ty = Math.max(H * 0.32, Math.min(H - 70, e.clientY - r.top));
+    const m = document.createElement('div');
+    m.className = 'ajmark';
+    m.style.left = (me.tx + 33) + "px"; m.style.top = me.ty + "px";
+    field.appendChild(m);
+    setTimeout(() => m.remove(), 620);
+  });
+
+  function meet(o){
+    if(busy) return;
+    busy = true;
+    d.querySelector('#ajExH').textContent = `เจอ ${o.sp.name} ป่า!`;
+    setTimeout(() => wildFight(o, z, () => {
+      o.el.remove();
+      const i = wilds.indexOf(o); if(i >= 0) wilds.splice(i, 1);
+      busy = false;
+      found++;
+      d.querySelector('#ajExH').textContent = "แตะพื้นเพื่อเดินต่อ";
+    }), 220);
+  }
+  function step(now){
+    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
+    last = now;
+    W = field.clientWidth || W; H = field.clientHeight || H;
+    if(!busy){
+      const dx = me.tx - me.x, dy = me.ty - me.y, dist = Math.hypot(dx, dy);
+      if(dist > 3){
+        const k = Math.min(1, 105 * dt / dist);
+        me.x += dx * k; me.y += dy * k;
+        if(Math.abs(dx) > 1) me.dir = dx > 0 ? 1 : -1;
+      }
+    }
+    place(meEl, me, 1.06);
+    wilds.forEach(o => {
+      if(!busy){
+        const dd = Math.hypot(o.x - me.x, o.y - me.y);
+        if(dd < 42) return meet(o);
+        const dx = o.tx - o.x, dy = o.ty - o.y, dist = Math.hypot(dx, dy);
+        if(dist < 4){ o.wait -= dt; if(o.wait <= 0) target(o); }
+        else {
+          const k = Math.min(1, o.spd * dt / dist);
+          o.x += dx * k; o.y += dy * k;
+          if(Math.abs(dx) > 1) o.dir = dx > 0 ? 1 : -1;
+        }
+      }
+      place(o.el, o);
+    });
+    if(!busy) relics.forEach(o => {
+      if(Math.hypot(o.x - me.x, o.y - me.y) < 44) grab(o);
+    });
+    npcs.forEach(o => {
+      if(o.cool > 0) o.cool -= dt;
+      if(!busy){
+        if(o.cool <= 0 && Math.hypot(o.x - me.x, o.y - me.y) < 46) return hitNpc(o);
+        const dx = o.tx - o.x, dy = o.ty - o.y, dist = Math.hypot(dx, dy);
+        if(dist < 4){ o.wait -= dt; if(o.wait <= 0){
+          o.tx = 14 + Math.random() * (W - 80);
+          o.ty = H * 0.36 + Math.random() * (H * 0.5);
+          o.wait = 1 + Math.random() * 3; } }
+        else {
+          const k = Math.min(1, o.spd * dt / dist);
+          o.x += dx * k; o.y += dy * k;
+          if(Math.abs(dx) > 1) o.dir = dx > 0 ? 1 : -1;
+        }
+      }
+      place(o.el, o);
+    });
+    raf = requestAnimationFrame(step);
+  }
+  d.querySelector('#ajExX').onclick = () => {
+    cancelAnimationFrame(raf);
+    d.remove();
+    save(); render();
+    zoneMap();
+  };
+  const tw = window.ajW2Time ? window.ajW2Time() : { label:"", night:false };
+  const wx = window.ajW2Wx ? window.ajW2Wx(z) : { emoji:"", name:"", note:"" };
+  const wxb = d.querySelector('#ajExWx');
+  if(wxb) wxb.textContent = `${tw.label} · ${wx.emoji} ${wx.name}`;
+  if(tw.night){
+    const ov = document.createElement('div');
+    ov.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:2;" +
+      "background:linear-gradient(180deg,rgba(20,24,60,.52),rgba(10,12,34,.62))";
+    field.appendChild(ov);
+  }
+  d.querySelector('#ajExH').textContent = `${wx.emoji} ${wx.note} · แตะพื้นเพื่อเดิน`;
+  /* เล่าเรื่องบทแรกของโซนก่อนเริ่มเดิน */
+  if(window.ajW2Story && window.ajW2HasStory && !window.ajW2HasStory(z + "a"))
+    setTimeout(() => window.ajW2Story(z + "a"), 260);
+  /* ปุ่มวิธีล่อประจำโซน */
+  const L = window.ajLureInfo ? window.ajLureInfo(z) : null;
+  if(L){
+    const holder = d.querySelector('#ajExL');
+    const lb = document.createElement('button');
+    lb.className = 'ajlureb';
+    lb.innerHTML = `${L.emoji} ${L.name}<br><small style="font-weight:600;opacity:.85">⚡1 · ${L.note}</small>`;
+    lb.onclick = () => {
+      if(busy) return;
+      const got = window.ajLure ? window.ajLure(z) : null;
+      if(!got) return;
+      spawn(got);
+      const t = d.querySelector('#ajExH');
+      if(t) t.textContent = `${L.emoji} ${got.alpha ? "👑 ตัวเด่น" : got.sp.name}โผล่ขึ้นมา!`;
+      if(typeof sfx === "function") sfx("tap");
+    };
+    holder.appendChild(lb);
+  }
+  /* นักฝึกประจำโซนเดินอยู่ในสนาม */
+  if(window.ajTrainers){
+    window.ajTrainers(z).forEach((tr, i) => {
+      const el = document.createElement('div');
+      el.className = 'ajnpc' + (tr.rival ? ' rival' : '') +
+        (window.ajTrainerDone && window.ajTrainerDone(tr) ? ' done' : '');
+      el.innerHTML = `<span class="sh"></span><span class="av">${tr.emoji}</span>
+        <span class="tag">${tr.rival ? "⚔️ คู่ปรับ" : "⚔️ นักฝึก"}</span>`;
+      field.appendChild(el);
+      const o = { tr, el, x:30 + i * 108 + Math.random() * 30,
+        y:H * 0.38 + Math.random() * (H * 0.42), tx:0, ty:0, wait:Math.random() * 3,
+        spd:6 + Math.random() * 6, dir:1, cool:0 };
+      o.tx = o.x; o.ty = o.y;
+      el.onclick = () => hitNpc(o);
+      npcs.push(o);
+    });
+  }
+  function hitNpc(o){
+    if(busy || o.cool > 0) return;
+    busy = true;
+    o.cool = 6;
+    window.ajTrainerCard(o.tr, () => {
+      busy = false;
+      o.el.classList.toggle('done', !!(window.ajTrainerDone && window.ajTrainerDone(o.tr)));
+      const t = d.querySelector('#ajExH');
+      if(t) t.textContent = "แตะพื้นเพื่อเดินต่อ";
+    });
+  }
+  for(let i = 0; i < 3; i++) spawn();
+  setInterval2(() => { if(!busy) spawn(); }, 5200, d);
+  setInterval2(() => { if(!busy && Math.random() < 0.55) spawnRelic(); }, 11000, d);
+  setTimeout(() => { W = field.clientWidth || W; H = field.clientHeight || H;
+    raf = requestAnimationFrame(step); }, 30);
+}
+/* setInterval ที่หยุดเองเมื่อหน้าปิด */
+function setInterval2(fn, ms, holder){
+  const id = setInterval(() => { if(!holder.isConnected) return clearInterval(id); fn(); }, ms);
+  return id;
+}
+
+/* ---------- ศึกกับตัวป่า (ใช้ระบบเทิร์นเบสเดิม) ---------- */
+function wildFight(o, z, done){
+  const sp = o.sp, w = W2();
+  const team = (S.team || []).map(id => CR().find(c => c.id === id)).filter(Boolean);
+  const use = team.length ? team
+    : CR().filter(c => c.stage === "adult" && !c.box)
+        .sort((a,b) => (b.bs && b.bs.total || 0) - (a.bs && a.bs.total || 0)).slice(0, 3);
+  if(!use.length){ alert("ยังไม่มีตุ้ยนุ้ยตัวเต็มวัยไปสู้"); done(); return; }
+  const pw = Math.round((16 + o.lv * 4.4) * (o.alpha ? 1.5 : 1));
+  const hp = Math.round((260 + o.lv * 95) * (o.alpha ? 1.9 : 1));
+  const foe = { id:"w2_" + sp.id, name:(o.alpha ? "👑 " : "") + sp.name + " ป่า",
+                el:sp.el, el2:sp.el2 || null, hp, pw, art:ART[sp.id] };
+  const prevManual = S.manualBattle;
+  S.manualBattle = true;                      /* โลก 2 สู้แบบผลัดกันตี */
+  const go = window.ajOldBattleGo || window.battleGo;
+  go(use, foe, { maxRound:20, art:ART[sp.id] }, R => {
+    S.manualBattle = prevManual;
+    const first = !seen(sp.id);
+    w.dex[sp.id] = (w.dex[sp.id] || 0) + 1;
+    w.kill[sp.id] = (w.kill[sp.id] || 0) + (R && R.win ? 1 : 0);
+    let msg = [];
+    if(R && R.win){
+      const mb = window.ajMusBonus ? window.ajMusBonus() : { mats:1, ankh:1 };
+      const ank = Math.round(((o.alpha ? 6 : 2) + (first ? 8 : 0)) * mb.ankh);
+      const mt = Math.round((o.alpha ? 3 : 1) * mb.mats);
+      w.ankh = (w.ankh || 0) + ank;
+      w.mats[z] = (w.mats[z] || 0) + mt;
+      msg.push(`𓋹 +${ank}`, `${MATS[z]} +${mt}`);
+      if(first) msg.push("บันทึกสมุดภาพโลก 2 ตัวใหม่!");
+      const need = zoneNeed(z);
+      if(zoneSeen(z) >= need) msg.push(`👑 ท้าเทพประจำโซนได้แล้ว`);
+    } else msg.push("แพ้ — ยังบันทึกว่าพบตัวนี้แล้ว");
+    logf(`🏺 ${sp.name} ป่า Lv.${o.lv}${o.alpha ? " (ตัวเด่น)" : ""} — ${msg.join(" · ")}`,
+      R && R.win ? "good" : "");
+    save();
+    if(R && R.win && window.ajCapture) setTimeout(() => window.ajCapture(o, z, () => done()), 200);
+    else setTimeout(done, 120);
+  });
+}
+
+window.ajZoneMap = zoneMap;
+window.ajExplore = explore;
+window.ajW2State = W2;
+function mount(){
+  if(typeof S === "undefined" || !S) return setTimeout(mount, 900);
+  const bar = document.getElementById('bookMode');
+  if(!bar) return setTimeout(mount, 900);
+  if(document.getElementById('ajBmZone')) return;
+  const b = document.createElement('button');
+  b.className = 'dtab big'; b.id = 'ajBmZone';
+  b.textContent = '🏺 ดินแดนฟาโรห์';
+  b.onclick = () => zoneMap();
+  bar.insertBefore(b, bar.firstChild.nextSibling || null);
+}
+mount();
+})();
+</script>
+<style id="ajCapCss">
+.ajcapwrap{text-align:center;padding:4px 0 2px}
+.ajcapart{width:150px;height:150px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
+.ajcapart.throw{animation:ajThrow 1.5s ease-in-out}
+@keyframes ajThrow{
+  0%{transform:scale(1) rotate(0)} 18%{transform:scale(.72) rotate(-8deg);opacity:.85}
+  30%{transform:scale(.28) rotate(0);opacity:.15} 100%{transform:scale(.28);opacity:.15}}
+.ajjar{font-size:64px;line-height:1;display:inline-block}
+.ajjar.wob{animation:ajWob .55s ease-in-out}
+@keyframes ajWob{0%,100%{transform:rotate(0)}25%{transform:rotate(-16deg)}75%{transform:rotate(16deg)}}
+.ajcapmsg{font-size:15px;font-weight:800;color:#6a4fa8;min-height:24px;margin:6px 0 2px}
+.ajballrow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.ajball{flex:1 1 30%;min-width:96px;padding:8px 6px;border-radius:12px;border:2px solid #c2a172;
+  background:#fffaf0;font-family:inherit;cursor:pointer;color:#3a2a10}
+.ajball b{display:block;font-size:13px}
+.ajball span{display:block;font-size:10.5px;color:#7d6a4b}
+.ajball em{display:block;font-style:normal;font-size:14px;font-weight:800;color:#2f7a2c}
+.ajball:disabled{opacity:.45}
+.ajshopr{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px dashed #d8c49b}
+.ajshopr b{flex:0 0 auto;font-size:12.5px;min-width:118px}
+.ajshopr span{flex:1;font-size:10.5px;color:#7d6a4b;line-height:1.35}
+.ajgodc{margin:8px 0;padding:10px;border-radius:14px;text-align:center;
+  background:linear-gradient(180deg,#2b1f4a,#4a2f6a);color:#ffe08a;border:2px solid #a67ee0}
+.ajgodc img{width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.ajgodc b{display:block;font-size:16px;margin-top:2px}
+.ajgodc span{display:block;font-size:11.5px;color:#e6d6ff;line-height:1.5}
+</style>
+<script id="ajCapJs">
+/* =====================================================================
+   🏺 โลกที่ 2 (2) · ระบบจับตุ้ยนุ้ย + เทพผู้พิทักษ์ประจำโซน
+   ===================================================================== */
+(function(){
+const CR = () => (typeof S !== "undefined" && S && S.creatures) || [];
+const W2 = () => window.ajW2State ? window.ajW2State() : (S.w2d = S.w2d || {});
+const SPW = () => window.SPECIES_W2 || [];
+const ZN = () => window.ZONES_W2 || [];
+const MATS = { 1:"เศษหินสลัก", 2:"น้ำศักดิ์สิทธิ์", 3:"ใบปาปิรัส",
+               4:"เกล็ดทอง", 5:"ผ้าพันมัมมี่", 6:"เศษบัลลังก์" };
+
+const BALLS = [
+  { id:"jar",  emoji:"🏺", name:"ไหดินเผา",   mul:1.0, cost:6,  note:"ของพื้นฐาน หาง่ายสุด" },
+  { id:"lamp", emoji:"🪔", name:"โคมไฟทองเหลือง", mul:1.7, cost:18, note:"แสงล่อวิญญาณให้เชื่อง" },
+  { id:"urn",  emoji:"⚱️", name:"ผอบทอง",     mul:2.6, cost:45, note:"ใช้กับตัวเด่นกับเทพได้ผลดี" }
+];
+const ball = id => BALLS.find(b => b.id === id);
+function bag(){ const w = W2(); w.balls = w.balls || { jar:3, lamp:0, urn:0 }; return w.balls; }
+
+/* ---------- โอกาสจับ ---------- */
+function odds(o, bid){
+  const b = ball(bid);
+  const base = { 1:0.62, 2:0.44, 3:0.30 }[o.sp.rarity] || 0.4;
+  const mine = CR().filter(c => c.stage === "adult");
+  const avg = mine.length ? mine.reduce((a,c) => a + lvOf(c), 0) / mine.length : 5;
+  const gap = Math.max(-0.18, Math.min(0.38, (o.lv - avg) / 90));   /* เลเวลเราสูงกว่า = ง่ายขึ้น */
+  const wxm = (window.ajW2CatchMul && o.z) ? window.ajW2CatchMul(o.z) : 1;
+  const mb = window.ajMusBonus ? window.ajMusBonus() : { catch:0 };
+  let p = (base + mb.catch) * b.mul * (1 - gap) * (o.alpha ? 0.42 : 1)
+    * (o.god ? 0.16 : 1) * wxm;
+  return Math.max(0.03, Math.min(0.95, p));
+}
+
+/* ---------- หน้าจับ ---------- */
+function capture(o, z, done){
+  const sp = o.sp;
+  o.z = z;
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajcap';
+  d.innerHTML = `<div class="in">
+    <h3>${o.god ? "👑 ผูกวิญญาณเทพ" : "🏺 ผูกวิญญาณ"} · ${sp.name}</h3>
+    <div id="ajCapB"></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajCapB');
+  let busy = false;
+
+  function draw(msg){
+    const bg = bag();
+    body.innerHTML = `
+      <p class="sub">${sp.name} หมดแรงแล้ว — ผูกวิญญาณไว้ในภาชนะเพื่อพามันออกจากดินแดนนี้<br>
+        ${o.alpha ? "👑 ตัวเด่น จับยากกว่าปกติมาก · " : ""}Lv.${o.lv} · ${
+        [sp.el, sp.el2].filter(Boolean).join(" + ")}</p>
+      <div class="ajcapwrap">
+        <img class="ajcapart" id="ajCapArt" src="${ART[sp.id]}" alt="">
+        <div class="ajjar" id="ajCapJar" style="display:none">🏺</div>
+        <div class="ajcapmsg" id="ajCapMsg">${msg || ""}</div>
+      </div>
+      <div class="ajballrow">
+        ${BALLS.map(b => `<button class="ajball" data-cb="${b.id}"
+          ${(bg[b.id] || 0) > 0 ? "" : "disabled"}>
+          <b>${b.emoji} ${b.name}</b>
+          <span>มี ${bg[b.id] || 0} ใบ</span>
+          <em>${Math.round(odds(o, b.id) * 100)}%</em></button>`).join('')}
+      </div>
+      <div class="ajhfoot">
+        <button class="ajbb ajw" data-capshop="1">🛒 ซื้อภาชนะ (𓋹 ${W2().ankh || 0})</button>
+        <button class="ajbb keep" data-capskip="1">ปล่อยไป</button>
+      </div>`;
+    body.querySelectorAll('[data-cb]').forEach(b => b.onclick = () => throwBall(b.dataset.cb));
+    body.querySelector('[data-capshop]').onclick = () => shop(() => draw());
+    body.querySelector('[data-capskip]').onclick = () => { d.remove(); done(false); };
+  }
+  function throwBall(bid){
+    if(busy) return;
+    busy = true;
+    const bg = bag();
+    if((bg[bid] || 0) <= 0){ busy = false; return; }
+    bg[bid]--;
+    const b = ball(bid), p = odds(o, bid), ok = Math.random() < p;
+    const art = body.querySelector('#ajCapArt'), jar = body.querySelector('#ajCapJar');
+    const msg = body.querySelector('#ajCapMsg');
+    body.querySelectorAll('button').forEach(x => x.disabled = true);
+    art.classList.add('throw');
+    jar.textContent = b.emoji;
+    setTimeout(() => { jar.style.display = "inline-block"; art.style.display = "none"; }, 420);
+    let n = 0;
+    msg.textContent = "โยน" + b.name + "...";
+    const wob = setInterval(() => {
+      n++;
+      jar.classList.remove('wob'); void jar.offsetWidth; jar.classList.add('wob');
+      if(typeof sfx === "function") sfx("tap");
+      msg.textContent = "สั่น " + n + " ครั้ง...";
+      if(n >= 3){
+        clearInterval(wob);
+        setTimeout(() => finish(ok, b), 420);
+      }
+    }, 620);
+  }
+  function finish(ok, b){
+    save();
+    if(!ok){
+      body.querySelector('#ajCapMsg').textContent = "หลุดออกมาแล้ว!";
+      logf(`${b.emoji} ${b.name} หลุด — ${o.sp.name} หนีไป`, "");
+      setTimeout(() => { d.remove(); done(false); }, 700);
+      return;
+    }
+    body.querySelector('#ajCapMsg').textContent = "จับได้แล้ว!";
+    if(typeof sfx === "function") sfx("win");
+    setTimeout(() => { d.remove(); give(o, z); done(true); }, 650);
+  }
+  draw();
+}
+
+/* ---------- มอบตัวที่จับได้ ---------- */
+function give(o, z){
+  const sp = o.sp, w = W2();
+  let room = freePen();
+  const toBox = room < 0;
+  if(toBox && boxRoom() <= 0){
+    alert("ทุ่งกับตู้ฝากเต็มทั้งคู่ — ตัวนี้หลุดไปเพราะไม่มีที่เก็บ");
+    return;
+  }
+  window.__ajNoTonic = true;                       /* จับได้ไม่ต้องเปลืองยาบำรุงไข่ */
+  window.__ajBirthLabel = o.god ? "👑 ผูกวิญญาณเทพได้" : "🏺 จับได้";
+  let c = null;
+  try{
+    const egg = { sid:sp.id, el2:sp.el2 || null,
+      starPull:(o.alpha ? 1.1 : 0) + (o.god ? 2.2 : 0) };
+    if(o.alpha || o.god){                    /* ตัวเด่นกับเทพการันตีของดี */
+      const hi = {};
+      try{ BSTATS.forEach(x => hi[x.k] = Math.round(24 + Math.random() * 7)); }catch(e){}
+      egg.iv = hi;
+      try{ egg.tal = rollTalent(); }catch(e){}
+    }
+    c = makeBaby(egg, toBox ? 0 : room);
+  }catch(e){}
+  window.__ajNoTonic = false;
+  if(!c) return;
+  if(toBox){ c.box = true; }
+  c.lv = Math.max(1, o.lv);
+  c.xp = 0;
+  c.w2 = z;
+  if(o.alpha || o.god){ c.lock = true; }
+  c.bs = null;
+  try{ ensureBattle(c); }catch(e){}
+  w.own = (w.own || 0) + 1;
+  w.dex[sp.id] = (w.dex[sp.id] || 0) + 1;
+  logf(`🏺 จับ ${sp.name} Lv.${c.lv} ได้แล้ว${o.alpha ? " (ตัวเด่น)" : ""}${
+    toBox ? " · เก็บเข้าตู้ฝากเพราะทุ่งเต็ม" : ""}`, "good");
+  save(); render();
+}
+
+/* ---------- ร้านค้าโลก 2 ---------- */
+function shop(after){
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajshop2';
+  d.innerHTML = `<div class="in"><h3>🛒 ร้านค้าดินแดนฟาโรห์</h3><div id="ajS2B"></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajS2B');
+  function draw(){
+    const w = W2(), bg = bag();
+    body.innerHTML = `
+      <p class="sub">จ่ายด้วย 𓋹 ตราอังค์ ที่ได้จากการสำรวจกับล้มเทพ<br>
+        มีอยู่ <b>𓋹 ${w.ankh || 0}</b></p>
+      ${BALLS.map(b => `<div class="ajshopr">
+        <b>${b.emoji} ${b.name}</b>
+        <span>${b.note} · โอกาสจับ ×${b.mul} · มี ${bg[b.id] || 0} ใบ</span>
+        <button class="ajbb" data-buy="${b.id}" data-n="1"
+          ${(w.ankh || 0) >= b.cost ? "" : "disabled"}>𓋹${b.cost}</button>
+        <button class="ajbb" data-buy="${b.id}" data-n="5"
+          ${(w.ankh || 0) >= b.cost * 5 ? "" : "disabled"}>×5</button>
+      </div>`).join('')}
+      <div class="ajshopr"><b>⚡ เติมแรงสำรวจ</b>
+        <span>เต็มถัง 20 หน่วยทันที</span>
+        <button class="ajbb" data-en="1" ${(w.ankh || 0) >= 12 ? "" : "disabled"}>𓋹12</button></div>
+      <div class="ajhfoot"><button class="ajbb keep cls">ปิด</button></div>`;
+    body.querySelectorAll('[data-buy]').forEach(x => x.onclick = () => {
+      const b = ball(x.dataset.buy), n = +x.dataset.n, w2 = W2();
+      if((w2.ankh || 0) < b.cost * n) return;
+      w2.ankh -= b.cost * n;
+      bag()[b.id] = (bag()[b.id] || 0) + n;
+      logf(`ซื้อ ${b.emoji} ${b.name} ×${n} — 𓋹 ${b.cost * n}`, "");
+      if(typeof sfx === "function") sfx("buy");
+      save(); draw();
+    });
+    body.querySelector('[data-en]').onclick = () => {
+      const w2 = W2();
+      if((w2.ankh || 0) < 12) return;
+      w2.ankh -= 12; w2.en = 20; w2.enAt = Date.now();
+      logf("⚡ เติมแรงสำรวจเต็มถัง", "good");
+      if(typeof sfx === "function") sfx("buy");
+      save(); draw();
+    };
+    body.querySelector('.cls').onclick = () => { d.remove(); if(after) after(); };
+  }
+  draw();
+}
+
+/* ---------- เทพผู้พิทักษ์ประจำโซน ---------- */
+function guardian(z){
+  const list = SPW().filter(s => s.zone === z);
+  if(!list.length) return null;
+  const score = s => (s.rarity * 1000) + s.cap.pw + s.cap.sp + s.cap.en;
+  return list.slice().sort((a,b) => score(b) - score(a))[0];
+}
+function godSheet(z){
+  const g = guardian(z);
+  if(!g){ alert("โซนนี้ยังไม่มีเทพผู้พิทักษ์"); return; }
+  const w = W2(), zone = ZN().find(x => x.id === z) || { name:"โซน " + z, emoji:"🏺" };
+  const wins = (w.god && w.god[z]) || 0, pity = (w.pity && w.pity[z]) || 0;
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajgod';
+  d.innerHTML = `<div class="in">
+    <h3>👑 เทพผู้พิทักษ์ · ${zone.name}</h3>
+    <div class="ajgodc">
+      <img src="${ART[g.id]}" alt="">
+      <b>${g.name}</b>
+      <span>ผู้พิทักษ์ที่ฟาโรห์ผูกวิญญาณไว้กับดินแดน<br>
+        ${[g.el, g.el2].filter(Boolean).join(" + ")} · ล้มมาแล้ว ${wins} ครั้ง</span>
+    </div>
+    <p class="sub">ล้มได้ครั้งแรก <b>เปิดโซนถัดไป</b> · ล้มซ้ำได้ไม่จำกัด ไม่เสียแรงสำรวจ<br>
+      ทุกครั้งที่ชนะมีโอกาส <b>4%</b> ที่มันจะยอมให้ผูกวิญญาณ · ครบ 25 ครั้งได้แน่นอน
+      (ตอนนี้ ${pity}/25)</p>
+    <div class="ajhfoot">
+      <button class="ajbb ajw" id="ajGodGo">⚔️ ท้าสู้</button>
+      <button class="ajbb keep cls">ปิด</button>
+    </div></div>`;
+  document.body.appendChild(d);
+  d.querySelector('.cls').onclick = () => d.remove();
+  d.querySelector('#ajGodGo').onclick = () => { d.remove(); godFight(z); };
+}
+function godFight(z){
+  const g = guardian(z), w = W2();
+  const use = (S.team || []).map(id => CR().find(c => c.id === id)).filter(Boolean);
+  const team = use.length ? use
+    : CR().filter(c => c.stage === "adult" && !c.box)
+        .sort((a,b) => (b.bs && b.bs.total || 0) - (a.bs && a.bs.total || 0)).slice(0, 3);
+  if(!team.length){ alert("ยังไม่มีตุ้ยนุ้ยตัวเต็มวัยไปสู้"); return; }
+  const lv = 22 + z * 8;
+  const foe = { id:"w2god_" + z, name:"👑 " + g.name, el:g.el, el2:g.el2 || null,
+    hp:Math.round(3200 + z * 2500), pw:Math.round(52 + z * 24),
+    art:ART[g.id], phases:z >= 5 };
+  const prev = S.manualBattle;
+  S.manualBattle = true;
+  const go = window.ajOldBattleGo || window.battleGo;
+  go(team, foe, { maxRound:24, art:ART[g.id] }, R => {
+    S.manualBattle = prev;
+    w.god = w.god || {}; w.pity = w.pity || {};
+    if(!(R && R.win)){
+      logf(`👑 ${g.name} ยังไม่ยอมแพ้ — ลองอีกครั้งได้ไม่จำกัด`, "");
+      save(); render();
+      return;
+    }
+    const first = !w.god[z];
+    w.god[z] = (w.god[z] || 0) + 1;
+    const mb = window.ajMusBonus ? window.ajMusBonus() : { mats:1, ankh:1 };
+    const gA = Math.round(15 * mb.ankh), gM = Math.round(5 * mb.mats);
+    w.ankh = (w.ankh || 0) + gA;
+    w.mats[z] = (w.mats[z] || 0) + gM;
+    const out = [`𓋹 +${gA}`, `${MATS[z]} +${gM}`];
+    if(first && ZN().some(x => x.id === z + 1) && w.open.indexOf(z + 1) < 0){
+      w.open.push(z + 1);
+      out.push(`🔓 เปิดโซน ${z + 1}!`);
+    }
+    w.pity[z] = (w.pity[z] || 0) + 1;
+    const forced = w.pity[z] >= 25;
+    if(forced || Math.random() < 0.04){
+      w.pity[z] = 0;
+      out.push("👑 มันยอมให้ผูกวิญญาณ!");
+      logf(`👑 ${g.name} — ${out.join(" · ")}`, "good");
+      save();
+      give({ sp:g, lv, alpha:false, god:true }, z);
+      render();
+      afterGod(z, first);
+      return;
+    }
+    logf(`👑 ${g.name} — ${out.join(" · ")} · ยังไม่ยอมให้ผูกวิญญาณ (${w.pity[z]}/25)`, "good");
+    save(); render();
+    afterGod(z, first);
+  });
+}
+
+function afterGod(z, first){
+  if(!first || !window.ajW2Story) return;
+  setTimeout(() => window.ajW2Story(z + "b", () => {
+    if(z >= 6 && window.ajW2Ending) setTimeout(window.ajW2Ending, 300);
+  }), 900);
+}
+window.ajCapture = capture;
+window.ajW2Shop = shop;
+window.ajGodSheet = godSheet;
+window.ajGodFight = godFight;
+window.ajGuardian = guardian;
+window.ajW2Balls = bag;
+})();
+</script>
+<style id="ajStCss">
+.ajst .in{max-height:88%;background:linear-gradient(180deg,#f7ecd2,#e9d9b2);color:#3a2a10}
+.ajstart{position:relative;margin:-4px -14px 10px;height:132px;overflow:hidden;
+  background:linear-gradient(180deg,#c79b47,#8a6425)}
+.ajstart:after{content:"";position:absolute;inset:0;
+  background:radial-gradient(70% 90% at 50% 20%,rgba(255,240,190,.5),transparent 70%)}
+.ajstart span{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:13px;
+  font-weight:800;color:#2b1d06;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+.ajstart em{position:absolute;left:50%;top:14px;transform:translateX(-50%);font-style:normal;
+  font-size:52px;line-height:1}
+.ajstp{font-size:13.5px;line-height:1.85;color:#40301a;margin:0 0 9px;white-space:pre-line}
+.ajstq{margin:8px 0;padding:9px 11px;border-radius:12px;background:#fffaf0;border:1px solid #d8c49b}
+.ajstq b{display:block;font-size:13.5px;margin-bottom:2px}
+.ajstq span{display:block;font-size:11.5px;color:#6d5b3f;line-height:1.5}
+.ajscrollrow{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed #d8c49b}
+.ajscrollrow b{flex:0 0 96px;font-size:12.5px}
+.ajscrollrow span{flex:1;font-size:11px;color:#7d6a4b;line-height:1.4}
+.ajwxb{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;
+  background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.35);color:#fff}
+</style>
+<script id="ajStJs">
+/* =====================================================================
+   🏺 โลกที่ 2 (3) · เนื้อเรื่อง 6 บท · กลางวัน-กลางคืน · อากาศประจำโซน
+   ===================================================================== */
+(function(){
+const W2 = () => window.ajW2State ? window.ajW2State() : (S.w2d = S.w2d || {});
+const ZN = () => window.ZONES_W2 || [];
+
+/* ---------------- กลางวัน / กลางคืน ---------------- */
+const NIGHT_EL = ["รัตติกาล","วิญญาณ","พิษ","น้ำแข็ง","จิต"];
+const DAY_EL   = ["ไฟ","ประกาย","ลม","หิน","ดิน"];
+function w2time(){
+  const h = new Date().getHours();
+  const night = h < 6 || h >= 18;
+  return { night, h,
+    label: night ? "🌙 กลางคืน" : "☀️ กลางวัน",
+    boost: night ? NIGHT_EL : DAY_EL,
+    alphaAdd: night ? 0.02 : 0 };
+}
+
+/* ---------------- อากาศประจำโซน (เปลี่ยนทุก 30 นาที) ---------------- */
+const WX = [
+  { id:"clear", emoji:"☀️", name:"แดดจัด",     el:["ไฟ","ประกาย"], catch:1,    alpha:0,
+    note:"ตัวธาตุไฟกับประกายออกมาอาบแดด" },
+  { id:"sand",  emoji:"🌪", name:"พายุทราย",   el:["หิน","ดิน","ลม"], catch:.85, alpha:.02,
+    note:"มองแทบไม่เห็น จับยากขึ้นแต่เจอตัวเด่นบ่อยกว่า" },
+  { id:"calm",  emoji:"🍃", name:"ลมสงบ",      el:[],              catch:1.18, alpha:0,
+    note:"อากาศดี ตัวป่าเชื่องกว่าปกติ" },
+  { id:"haze",  emoji:"🌫", name:"ฟ้าหลัว",    el:["จิต","รัตติกาล"], catch:.95, alpha:.01,
+    note:"แดดกรองผ่านฝุ่น ตัวสายจิตชอบอากาศนี้" },
+  { id:"mist",  emoji:"👻", name:"หมอกวิญญาณ", el:["วิญญาณ","พิษ"],  catch:.9,  alpha:.03,
+    note:"หมอกจากใต้ดิน ของที่ไม่ตายสนิทออกเดิน" }
+];
+function w2wx(z){
+  const slot = Math.floor(Date.now() / 1800000) + z * 3;
+  const pool = z >= 5 ? WX : WX.slice(0, 4);
+  return pool[slot % pool.length];
+}
+/* ---------------- สุ่มตัวป่าตามเวลา + อากาศ ---------------- */
+function w2pick(pool, z){
+  if(!pool.length) return null;
+  const t = w2time(), wx = w2wx(z);
+  let total = 0;
+  const wt = pool.map(s => {
+    let k = { 1:3.2, 2:2, 3:1 }[s.rarity] || 2;            /* ตัวธรรมดาเจอบ่อยกว่า */
+    const els = [s.el, s.el2].filter(Boolean);
+    if(els.some(e => t.boost.indexOf(e) >= 0)) k *= 2.6;
+    if(els.some(e => wx.el.indexOf(e) >= 0)) k *= 2.2;
+    total += k;
+    return k;
+  });
+  let r = Math.random() * total;
+  for(let i = 0; i < pool.length; i++){ r -= wt[i]; if(r <= 0) return pool[i]; }
+  return pool[pool.length - 1];
+}
+function w2alpha(z){
+  const t = w2time(), wx = w2wx(z);
+  const mb = window.ajMusBonus ? window.ajMusBonus() : { alpha:0 };
+  return 0.03 + t.alphaAdd + wx.alpha + mb.alpha + (W2().bless === "keep" ? 0.03 : 0);
+}
+function w2catchMul(z){
+  return w2wx(z).catch * (W2().bless === "free" ? 1.12 : 1);
+}
+
+/* ---------------- เนื้อเรื่อง ---------------- */
+const STORY = {
+  "1a":{ t:"บทที่ 1 · ประตูที่ไม่มีใครออกมา", e:"🏜",
+    p:`ทรายที่นี่ไม่มีรอยเท้าของใครเลย ทั้งที่มีคาราวานทิ้งอยู่เต็มเนิน
+ของยังใหม่ น้ำในถังยังไม่ระเหย แต่ไม่มีศพ ไม่มีกระดูก ไม่มีอะไรเลย
+ตุ้ยนุ้ยตัวหนึ่งโผล่จากหลังกองสัมภาระ มองคุณเหมือนอยากบอกอะไร
+แล้ววิ่งหายไปทางทิศที่ลมพัดออก — ทิศที่ออกไปไม่ได้` },
+  "1b":{ t:"บทที่ 1 จบ · เสียงเตือนของผู้พิทักษ์", e:"👑",
+    p:`ผู้พิทักษ์องค์แรกล้มลงแล้วพูดขึ้นเป็นครั้งแรกในสามร้อยปี
+"กลับไปเถอะ ที่นี่ไม่มีใครแก่ ไม่มีใครตาย และไม่มีใครออกไปได้"
+"ข้าเคยเป็นผู้พิทักษ์ ไม่ใช่ผู้คุมขัง"
+ทางลงไปยังโอเอซิสเปิดออกเอง เหมือนดินแดนอยากให้คุณเห็นบางอย่าง` },
+  "2a":{ t:"บทที่ 2 · น้ำที่ดื่มแล้วไม่แก่", e:"🌴",
+    p:`ชาวบ้านที่โอเอซิสยิ้มรับคุณเหมือนรับแขกที่มาทุกวัน
+พวกเขาบอกว่าเพิ่งย้ายมาเมื่อฤดูก่อน แต่ต้นปาล์มที่ปลูกวันนั้น
+สูงคลุมทั้งบ่อไปแล้ว และไม่มีใครในหมู่บ้านจำชื่อพ่อแม่ตัวเองได้` },
+  "2b":{ t:"บทที่ 2 จบ · สามร้อยปีในหนึ่งฤดู", e:"👑",
+    p:`ผู้พิทักษ์แห่งน้ำบอกว่าพิธีนี้หยุดเวลาไว้ทั้งดินแดน
+คนที่นี่ไม่ได้เป็นอมตะ พวกเขาแค่ถูกกดปุ่มหยุดไว้กลางชีวิต
+"ฟาโรห์ไม่ได้ทำเพื่อตัวเอง" มันพูดเท่านั้นแล้วกลับลงบ่อ
+หุบผากษัตริย์เปิดทางขึ้นแล้ว` },
+  "3a":{ t:"บทที่ 3 · รูปสลักที่เล่าไม่จบ", e:"⛰",
+    p:`ผนังหุบผาสลักเรื่องของฟาโรห์องค์สุดท้ายไว้ทั้งชีวิต
+เป็นกษัตริย์ที่ยกเลิกการบูชายัญ เปิดยุ้งฉางในปีแล้ง
+แล้วรูปสุดท้ายก็ถูกสกัดทิ้ง เหลือแต่รอยสิ่วกับรอยมือที่ทุบมันเอง` },
+  "3b":{ t:"บทที่ 3 จบ · เขาทำเพื่อใครคนหนึ่ง", e:"👑",
+    p:`เครื่องกลในสุสานหลวงหยุดเดินพร้อมกับผู้พิทักษ์ที่ล้มลง
+มันชี้ไปที่รูปที่ถูกสกัด "พิธีนี้ไม่ได้ทำเพื่อทั้งดินแดน"
+"ทำเพื่อคนคนเดียว และดินแดนทั้งผืนถูกลากมาด้วย"
+วิหารเปลวสุริยะเปิดประตูรอคุณอยู่` },
+  "4a":{ t:"บทที่ 4 · วิหารที่แดดไม่เคยดับ", e:"🔥",
+    p:`เที่ยงวันที่นี่ยาวกว่าที่อื่น เพราะเวลาไม่เดิน
+บนแท่นบูชามีรอยนอนของสัตว์เล็กตัวหนึ่ง เก่าจนหินสึกเป็นรูปตัวมัน
+มีจานน้ำวางข้างๆ เต็มอยู่เสมอ ไม่มีใครรู้ว่าใครเติม` },
+  "4b":{ t:"บทที่ 4 จบ · ตุ้ยนุ้ยตัวแรกของเขา", e:"👑",
+    p:`ผู้พิทักษ์แห่งเปลวไฟยอมเล่าให้ฟังก่อนดับลง
+คนที่ฟาโรห์อยากช่วยไม่ใช่คน — เป็นตุ้ยนุ้ยตัวแรกที่เขาเลี้ยงมาตั้งแต่เด็ก
+มันตายก่อนเขาขึ้นครองราชย์หนึ่งวัน
+"เขาหยุดเวลาทั้งดินแดน เพื่อไม่ให้วันนั้นมาถึง"` },
+  "5a":{ t:"บทที่ 5 · ทางลงที่ไม่มีในแผนที่", e:"⚱️",
+    p:`ใต้พิรามิดไม่มีสมบัติ มีแต่ห้องเล็กๆ ห้องเดียว
+ในห้องมีเบาะฟาง จานน้ำ ของเล่นแกะจากไม้ วางเรียงอย่างคนที่ยังรอเจ้าของ
+และมีอะไรบางอย่างขยับอยู่ในมุมมืด` },
+  "5b":{ t:"บทที่ 5 จบ · มันยังอยู่", e:"👑",
+    p:`ตัวนั้นยังอยู่จริง ยังหายใจ ยังกระดิกหางเวลาได้ยินชื่อตัวเอง
+แต่มันไม่โต ไม่กิน ไม่นอน ไม่ตาย — ไม่ได้มีชีวิตอยู่ด้วย
+ผ้าพันที่ตัวมันไม่ใช่ผ้าห่อศพ เป็นเชือกที่ผูกมันไว้กับพิธี
+ห้องบัลลังก์อยู่ปลายทางเดินนี้ และมีคนรออยู่` },
+  "6a":{ t:"บทที่ 6 · ฟาโรห์องค์สุดท้าย", e:"👑",
+    p:`เขานั่งอยู่บนบัลลังก์ในท่าเดิมมาสามร้อยปี
+"ข้ารู้ว่าเจ้าจะมา ทุกคนที่มาถึงห้องนี้มาด้วยเหตุเดียวกัน"
+"ข้าหยุดพิธีเองไม่ได้ มือข้าขยับไม่ได้แล้ว"
+"ถ้าเจ้าอยากให้เวลาที่นี่เดินต่อ — เจ้าต้องล้มข้าเอง"` },
+  "6b":{ t:"บทที่ 6 จบ · เวลาที่หยุดไว้", e:"🕰",
+    p:`พิธีคลายออกช้าๆ เหมือนเชือกที่ถูกปล่อยทีละเกลียว
+ฟาโรห์มองมือตัวเองที่ขยับได้อีกครั้ง แล้วหันไปทางทางเดินใต้พิรามิด
+"ข้าจะไปหามันก่อน แล้วเราจะไปด้วยกัน"
+เขาเหลืออีกอย่างให้คุณตัดสินใจแทน` }
+};
+function story(key, after){
+  const w = W2();
+  w.story = w.story || { seen:[] };
+  const st = STORY[key];
+  if(!st){ if(after) after(); return; }
+  if(w.story.seen.indexOf(key) < 0) w.story.seen.push(key);
+  save();
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajst';
+  d.innerHTML = `<div class="in">
+    <div class="ajstart"><em>${st.e}</em><span>📜 ม้วนปาปิรัส</span></div>
+    <h3>${st.t}</h3>
+    <p class="ajstp">${st.p}</p>
+    <div class="ajhfoot">
+      <button class="ajbb keep" id="ajStOk">อ่านจบแล้ว</button>
+    </div></div>`;
+  document.body.appendChild(d);
+  const close = () => { d.remove(); if(after) after(); };
+  d.querySelector('#ajStOk').onclick = close;
+}
+/* ตอนจบ: เลือกทางของดินแดน */
+function ending(){
+  const w = W2();
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajst';
+  d.innerHTML = `<div class="in">
+    <div class="ajstart"><em>🕰</em><span>📜 บทสรุปของดินแดน</span></div>
+    <h3>เลือกทางให้ดินแดนฟาโรห์</h3>
+    <p class="ajstp">พิธีอยู่ในมือคุณแล้ว เลือกได้ทางเดียว แต่เปลี่ยนใจภายหลังได้ที่ม้วนปาปิรัส</p>
+    <div class="ajstq"><b>🕊 ปล่อยให้เวลาเดินต่อ</b>
+      <span>ทุกอย่างกลับเป็นปกติ ตุ้ยนุ้ยออกจากดินแดนได้ ฟาโรห์กับตัวของเขาไปสงบ<br>
+        <b>ผลถาวร:</b> โอกาสจับสูงขึ้น 12% ทุกภาชนะ · 𓋹 +200</span></div>
+    <div class="ajstq"><b>👑 รับพิธีต่อจากเขา</b>
+      <span>ดินแดนคงอยู่ต่อ คุณกลายเป็นผู้เฝ้าคนใหม่<br>
+        <b>ผลถาวร:</b> เจอตัวเด่นบ่อยขึ้น 3% · 𓋹 +200</span></div>
+    <div class="ajhfoot">
+      <button class="ajbb ajw" data-end="free">🕊 ปล่อยไป</button>
+      <button class="ajbb ajw" data-end="keep">👑 รับพิธีต่อ</button>
+    </div></div>`;
+  document.body.appendChild(d);
+  d.querySelectorAll('[data-end]').forEach(b => b.onclick = () => {
+    const k = b.dataset.end;
+    if(!w.bless) w.ankh = (w.ankh || 0) + 200;
+    w.bless = k;
+    logf(k === "free" ? "🕊 ดินแดนฟาโรห์กลับมามีเวลาเดินอีกครั้ง"
+                      : "👑 คุณรับพิธีต่อจากฟาโรห์องค์สุดท้าย", "good");
+    save(); render();
+    d.remove();
+  });
+}
+/* หน้าอ่านย้อน */
+function papyrus(){
+  const w = W2();
+  w.story = w.story || { seen:[] };
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajst';
+  const keys = Object.keys(STORY);
+  d.innerHTML = `<div class="in">
+    <div class="ajstart"><em>📜</em><span>บันทึกม้วนปาปิรัส</span></div>
+    <h3>เรื่องเล่าดินแดนฟาโรห์ ${w.story.seen.length}/${keys.length} บท</h3>
+    <div class="ajhscroll" id="ajPapB"></div>
+    <div class="ajhfoot">
+      ${w.bless ? `<button class="ajbb ajw" id="ajPapEnd">🔄 เปลี่ยนทางที่เลือก (${
+        w.bless === "free" ? "🕊 ปล่อยไป" : "👑 รับพิธี"})</button>` : ""}
+      <button class="ajbb keep cls">ปิด</button></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajPapB');
+  body.innerHTML = keys.map(k => {
+    const got = w.story.seen.indexOf(k) >= 0, st = STORY[k];
+    return `<div class="ajscrollrow"><b>${got ? st.e + " " + k : "🔒 " + k}</b>
+      <span>${got ? st.t : "ยังไม่ได้อ่าน — เดินเนื้อเรื่องต่อในโซนนั้น"}</span>
+      ${got ? `<button class="ajbb" data-read="${k}">อ่าน</button>` : ""}</div>`;
+  }).join('');
+  body.querySelectorAll('[data-read]').forEach(b => b.onclick = () => story(b.dataset.read));
+  const e = d.querySelector('#ajPapEnd');
+  if(e) e.onclick = () => { d.remove(); ending(); };
+  d.querySelector('.cls').onclick = () => d.remove();
+}
+
+window.ajW2Time = w2time;
+window.ajW2Wx = w2wx;
+window.ajW2Pick = w2pick;
+window.ajW2Alpha = w2alpha;
+window.ajW2CatchMul = w2catchMul;
+window.ajW2Story = story;
+window.ajW2Papyrus = papyrus;
+window.ajW2Ending = ending;
+window.ajW2HasStory = k => (W2().story && W2().story.seen || []).indexOf(k) >= 0;
+})();
+</script>
+<style id="ajRitCss">
+.ajritc{display:flex;gap:9px;align-items:center;padding:8px 0;border-top:1px dashed #d8c49b}
+.ajritc img{width:52px;height:52px;object-fit:contain;background:#f2e7cd;border-radius:10px;flex:0 0 auto}
+.ajritc div{flex:1;min-width:0}
+.ajritc b{display:block;font-size:13px}
+.ajritc span{display:block;font-size:10.5px;color:#6d5b3f;line-height:1.4}
+.ajritc .lv{font-weight:800;color:#7A4BA8}
+.ajmusg{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:7px;margin:6px 0 10px}
+.ajmusc{background:#fffaf0;border:2px solid #ddc9a0;border-radius:12px;padding:6px 4px;text-align:center}
+.ajmusc.got{border-color:#c79b47;background:linear-gradient(180deg,#fff6e0,#f6e6c0)}
+.ajmusc em{display:block;font-size:26px;font-style:normal;line-height:1.1;
+  filter:grayscale(1) opacity(.28)}
+.ajmusc.got em{filter:none}
+.ajmusc b{display:block;font-size:10.5px;line-height:1.3;margin-top:2px}
+.ajmusc span{display:block;font-size:9.5px;color:#8a7550}
+.ajmusset{margin:6px 0;padding:8px 10px;border-radius:12px;font-size:11.5px;line-height:1.5;
+  background:#f6f1e2;border:1px solid #ddc9a0;color:#5f4a24}
+.ajmusset.done{background:linear-gradient(180deg,#eef8e6,#dff0d2);border-color:#a8cf94;color:#2f5b2c}
+.ajrelic{position:absolute;left:0;top:0;width:44px;height:44px;z-index:30;
+  display:flex;align-items:center;justify-content:center;font-size:26px;
+  filter:drop-shadow(0 0 8px #ffe08a);animation:ajRelic 1.6s infinite}
+@keyframes ajRelic{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.1)}}
+</style>
+<script id="ajRitJs">
+/* =====================================================================
+   🏺 โลกที่ 2 (4) · 𓂀 พิธีปลุกจากสุสาน + 🏛 พิพิธภัณฑ์ฟาโรห์
+   ===================================================================== */
+(function(){
+const CR = () => (typeof S !== "undefined" && S && S.creatures) || [];
+const W2 = () => window.ajW2State ? window.ajW2State() : (S.w2d = S.w2d || {});
+const SPW = () => window.SPECIES_W2 || [];
+const MATS = { 1:"เศษหินสลัก", 2:"น้ำศักดิ์สิทธิ์", 3:"ใบปาปิรัส",
+               4:"เกล็ดทอง", 5:"ผ้าพันมัมมี่", 6:"เศษบัลลังก์" };
+const MAX = (typeof AWAKE_MAX !== "undefined" ? AWAKE_MAX : 3);
+const COST = [ { dup:1, mat:8 }, { dup:2, mat:20 }, { dup:3, mat:40 } ];
+
+const w2sp = sid => SPW().find(s => s.id === sid);
+const isW2 = c => !!w2sp(c.sid);
+const zoneOf = c => { const s = w2sp(c.sid); return (s && s.zone) || 1; };
+const awkOf = c => (c && c.awk) || 0;
+const ritOpen = () => { const w = W2(); return !!(w.god && w.god[1]); };
+
+/* ตัวซ้ำที่เอามาหลอมได้: สายพันธุ์เดียวกัน ไม่ล็อก ไม่อยู่ในทีม พลังต่ำกว่า */
+function fodder(c){
+  const inTeam = id => [].concat(S.team || [], S.dgTeam || [], S.twTeam || [],
+    S.gateTeam || [], (S.ab && S.ab.team) || []).indexOf(id) >= 0;
+  const away = typeof awaySet === "function" ? awaySet() : new Set();
+  return CR().filter(x => x !== c && x.sid === c.sid && x.stage === "adult"
+    && !x.lock && !x.shiny && !inTeam(x.id) && !away.has(x.id));
+}
+function ritual(){
+  const w = W2();
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajrit';
+  d.innerHTML = `<div class="in"><h3>𓂀 พิธีปลุกจากสุสาน</h3><div id="ajRitB"></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajRitB');
+
+  function draw(){
+    if(!ritOpen()){
+      body.innerHTML = `<p class="sub">พิธีนี้ยังปิดอยู่ — ต้องล้ม 👑 เทพผู้พิทักษ์โซน 1 ให้ได้ก่อน
+        จึงจะเรียนวิธีคลายเชือกที่ผูกวิญญาณไว้</p>
+        <div class="ajhfoot"><button class="ajbb keep cls">ปิด</button></div>`;
+      body.querySelector('.cls').onclick = () => d.remove();
+      return;
+    }
+    const list = CR().filter(c => c.stage === "adult" && isW2(c) && awkOf(c) < MAX)
+      .sort((a,b) => awkOf(b) - awkOf(a) || (b.bs && b.bs.total || 0) - (a.bs && a.bs.total || 0));
+    body.innerHTML = `
+      <p class="sub">ใช้ <b>ตัวซ้ำสายพันธุ์เดียวกัน</b> กับ <b>วัสดุประจำโซนของมัน</b>
+        คลายเชือกที่ผูกวิญญาณ — ทุกระดับดันค่าพลัง <b>+9%</b> และครบ ${MAX} ระดับ
+        จะปลดสกิลปลุกพลังตามสายของมัน<br>
+        ใช้ได้กับตุ้ยนุ้ยที่จับจากโลก 2 เท่านั้น (ตัวตำนานโลก 1 ใช้พิธีหลอมของเดิม)</p>
+      <div class="ajbrow" style="margin-bottom:6px">
+        ${[1,2,3,4,5,6].map(z => `<span class="ajbb" style="pointer-events:none">${
+          MATS[z]} ${w.mats[z] || 0}</span>`).join('')}
+      </div>
+      ${list.length ? list.map(c => {
+        const lv = awkOf(c), cost = COST[lv], z = zoneOf(c);
+        const dup = fodder(c).length, mat = w.mats[z] || 0;
+        const ok = dup >= cost.dup && mat >= cost.mat;
+        const r = window.ajRole ? window.ajRole(SP[c.sid]) : null;
+        return `<div class="ajritc">
+          <img src="${ART[c.sid]}" style="${shinyFilter(c)}" alt="">
+          <div><b>${SP[c.sid].name} <span class="lv">✦ ${lv}/${MAX}</span></b>
+            <span>Lv.${lvOf(c)} · ${starStr(c.stars).slice(0, c.stars)} · พลังรวม ${
+              (c.bs && c.bs.total) || 0}${r ? " · " + r.emoji + " " + r.name.replace("สาย","") : ""}</span>
+            <span>ต้องใช้ ตัวซ้ำ ${dup}/${cost.dup} · ${MATS[z]} ${mat}/${cost.mat}</span></div>
+          <button class="ajbb ${ok ? 'ajw' : ''}" data-rit="${c.id}" ${ok ? '' : 'disabled'}>
+            ${lv + 1 === MAX ? "ปลดสกิล" : "ปลุก"}</button>
+        </div>`;
+      }).join('') : `<p class="sub">ยังไม่มีตุ้ยนุ้ยจากโลก 2 ที่ปลุกได้ — ไปจับมาก่อน</p>`}
+      <div class="ajhfoot"><button class="ajbb keep cls">ปิด</button></div>`;
+    body.querySelectorAll('[data-rit]').forEach(b => b.onclick = () => doRit(+b.dataset.rit));
+    body.querySelector('.cls').onclick = () => d.remove();
+  }
+  function doRit(id){
+    const c = CR().find(x => x.id === id);
+    if(!c) return;
+    const lv = awkOf(c), cost = COST[lv], z = zoneOf(c), w2 = W2();
+    const fod = fodder(c);
+    if(fod.length < cost.dup || (w2.mats[z] || 0) < cost.mat) return;
+    const eat = fod.sort((a,b) => (a.bs && a.bs.total || 0) - (b.bs && b.bs.total || 0))
+      .slice(0, cost.dup);
+    if(!confirm(`ปลุก ${SP[c.sid].name} เป็นระดับ ${lv + 1}/${MAX}?\n\n` +
+      `จะใช้ตัวซ้ำ ${cost.dup} ตัว (หายไปถาวร) และ ${MATS[z]} ${cost.mat} ชิ้น\n` +
+      `ผล: ค่าพลัง +9%${lv + 1 === MAX ? " และปลดสกิลปลุกพลังตามสาย" : ""}`)) return;
+    eat.forEach(x => { const i = CR().indexOf(x); if(i >= 0) S.creatures.splice(i, 1); });
+    w2.mats[z] = (w2.mats[z] || 0) - cost.mat;
+    c.awk = lv + 1;
+    c.bs = null;
+    try{ ensureBattle(c); }catch(e){}
+    logf(`𓂀 ปลุก ${SP[c.sid].name} เป็นระดับ ${c.awk}/${MAX}` +
+      (c.awk >= MAX ? " · ปลดสกิลปลุกพลังแล้ว!" : ""), "good");
+    if(typeof sfx === "function") sfx(c.awk >= MAX ? "legend" : "buy");
+    save(); render(); draw();
+  }
+  draw();
+}
+
+/* =====================  🏛 พิพิธภัณฑ์  ===================== */
+const RELICS = [
+  { id:"r11", z:1, e:"🏺", n:"ไหคาราวาน",   d:"ไหน้ำจากคาราวานที่ไม่มีใครกลับมา" },
+  { id:"r12", z:1, e:"🧭", n:"เข็มทิศทราย", d:"เข็มชี้ไปทางที่ออกไปไม่ได้" },
+  { id:"r21", z:2, e:"🫙", n:"ขันตักน้ำ",   d:"ขันของหมู่บ้านที่ไม่มีใครแก่" },
+  { id:"r22", z:2, e:"🌿", n:"ใบปาล์มแห้ง", d:"ใบจากต้นที่โตในหนึ่งฤดูสามร้อยปี" },
+  { id:"r31", z:3, e:"🪶", n:"สิ่วช่างสลัก", d:"สิ่วที่ใช้สกัดรูปสุดท้ายทิ้ง" },
+  { id:"r32", z:3, e:"⚙️", n:"เฟืองโบราณ",  d:"เฟืองจากเครื่องกลที่ยังเดินอยู่" },
+  { id:"r41", z:4, e:"🕯", n:"ตะเกียงบูชา", d:"ไฟในตะเกียงยังไม่เคยดับ" },
+  { id:"r42", z:4, e:"🥣", n:"จานน้ำบนแท่น", d:"จานที่เต็มอยู่เสมอ ไม่รู้ใครเติม" },
+  { id:"r51", z:5, e:"🧵", n:"ผ้าพันเส้นแรก", d:"เชือกที่ผูกวิญญาณไว้กับพิธี" },
+  { id:"r52", z:5, e:"🧸", n:"ของเล่นไม้",  d:"แกะจากไม้ด้วยมือคนที่เป็นกษัตริย์" },
+  { id:"r61", z:6, e:"👑", n:"มงกุฎรอยร้าว", d:"ร้าวตั้งแต่วันที่เขาตัดสินใจ" },
+  { id:"r62", z:6, e:"⏳", n:"นาฬิกาทรายหยุด", d:"ทรายค้างอยู่กลางเม็ด" }
+];
+const SETS = [
+  { z:1, name:"ชุดทางเข้า",  bonus:"โอกาสจับ +6%",        key:"catch", val:.06 },
+  { z:2, name:"ชุดโอเอซิส",  bonus:"วัสดุที่ได้ ×2",       key:"mats",  val:1 },
+  { z:3, name:"ชุดหุบผา",    bonus:"𓋹 ที่ได้ +50%",       key:"ankh",  val:.5 },
+  { z:4, name:"ชุดวิหาร",    bonus:"เจอตัวเด่น +2%",       key:"alpha", val:.02 },
+  { z:5, name:"ชุดสุสาน",    bonus:"โอกาสจับ +6%",        key:"catch", val:.06 },
+  { z:6, name:"ชุดบัลลังก์",  bonus:"𓋹 ที่ได้ +50% · ตัวเด่น +2%", key:"both", val:1 }
+];
+function relics(){ const w = W2(); w.relic = w.relic || {}; return w.relic; }
+function setDone(z){
+  const r = relics();
+  return RELICS.filter(x => x.z === z).every(x => (r[x.id] || 0) > 0);
+}
+function musBonus(){
+  const b = { catch:0, mats:1, ankh:1, alpha:0 };
+  SETS.forEach(s => {
+    if(!setDone(s.z)) return;
+    if(s.key === "catch") b.catch += s.val;
+    else if(s.key === "mats") b.mats += s.val;
+    else if(s.key === "ankh") b.ankh += s.val;
+    else if(s.key === "alpha") b.alpha += s.val;
+    else if(s.key === "both"){ b.ankh += .5; b.alpha += .02; }
+  });
+  return b;
+}
+function addRelic(z){
+  const pool = RELICS.filter(x => x.z === z);
+  if(!pool.length) return null;
+  const r = relics();
+  const missing = pool.filter(x => !(r[x.id] > 0));
+  const pickd = (missing.length ? missing : pool)[Math.floor(Math.random() *
+    (missing.length ? missing.length : pool.length))];
+  r[pickd.id] = (r[pickd.id] || 0) + 1;
+  const done = setDone(z);
+  logf(`🏛 ขุดได้ ${pickd.e} ${pickd.n}` + (done ? ` · ครบชุด${z} แล้ว!` : ""), "good");
+  save();
+  return pickd;
+}
+function museum(){
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajmus';
+  d.innerHTML = `<div class="in"><h3>🏛 พิพิธภัณฑ์ฟาโรห์</h3><div id="ajMusB"></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajMusB');
+  const r = relics();
+  const got = RELICS.filter(x => (r[x.id] || 0) > 0).length;
+  const b = musBonus();
+  body.innerHTML = `
+    <p class="sub">ของโบราณขุดได้ระหว่างเดินสำรวจ — เดินไปเหยียบจุดเรืองแสงในโซน<br>
+      เก็บได้ <b>${got}/${RELICS.length}</b> ชิ้น · ครบชุดของโซนไหนได้ผลถาวรของชุดนั้น</p>
+    <div class="ajmusset ${got ? 'done' : ''}">รวมผลที่ได้ตอนนี้ —
+      โอกาสจับ +${Math.round(b.catch * 100)}% · วัสดุ ×${b.mats} · 𓋹 ×${b.ankh.toFixed(1)}
+      · ตัวเด่น +${Math.round(b.alpha * 100)}%</div>
+    ${[1,2,3,4,5,6].map(z => `
+      <div class="ajmusset ${setDone(z) ? 'done' : ''}">
+        ${setDone(z) ? "✅" : "⬜"} <b>${SETS[z-1].name}</b> — ${SETS[z-1].bonus}</div>
+      <div class="ajmusg">${RELICS.filter(x => x.z === z).map(x => {
+        const n = r[x.id] || 0;
+        return `<div class="ajmusc ${n ? 'got' : ''}"><em>${x.e}</em>
+          <b>${n ? x.n : "???"}</b>
+          <span>${n ? (n > 1 ? "×" + n : x.d.slice(0, 22)) : "ยังไม่ได้ขุด"}</span></div>`;
+      }).join('')}</div>`).join('')}
+    <div class="ajhfoot"><button class="ajbb keep cls">ปิด</button></div>`;
+  body.querySelector('.cls').onclick = () => d.remove();
+}
+
+window.ajRitual = ritual;
+window.ajMuseum = museum;
+window.ajMusBonus = musBonus;
+window.ajAddRelic = addRelic;
+window.ajRitOpen = ritOpen;
+window.ajAwkOf = awkOf;
+})();
+</script>
+<style id="ajTrCss">
+.ajnpc{position:absolute;left:0;top:0;width:58px;height:74px;z-index:40;transform-origin:50% 100%}
+.ajnpc .av{position:absolute;left:0;bottom:12px;width:58px;height:58px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:30px;
+  background:linear-gradient(180deg,#f6e6c2,#d9b877);border:3px solid #8a6a2a;
+  box-shadow:0 3px 6px rgba(0,0,0,.4)}
+.ajnpc.rival .av{background:linear-gradient(180deg,#e8d0ff,#a97fd6);border-color:#5b3f86}
+.ajnpc .sh{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:38px;height:12px;
+  border-radius:50%;background:rgba(0,0,0,.32)}
+.ajnpc .tag{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);white-space:nowrap;
+  font-size:9px;font-weight:800;color:#2b1d06;background:#f0d894;border-radius:999px;padding:0 6px;
+  line-height:14px;border:1px solid rgba(0,0,0,.25)}
+.ajnpc.done .av{filter:grayscale(1) opacity(.55)}
+.ajlure{position:absolute;right:8px;bottom:56px;z-index:7;display:flex;flex-direction:column;gap:6px}
+.ajlureb{font-family:inherit;font-size:12px;font-weight:800;padding:9px 12px;border-radius:12px;
+  border:2px solid rgba(255,255,255,.5);background:rgba(22,34,24,.85);color:#ffe9a8}
+.ajlureb:disabled{opacity:.45}
+.ajtrc{display:flex;gap:9px;align-items:center;padding:8px 0;border-top:1px dashed #d8c49b}
+.ajtrc .av{width:46px;height:46px;border-radius:50%;flex:0 0 auto;display:flex;
+  align-items:center;justify-content:center;font-size:24px;
+  background:linear-gradient(180deg,#f6e6c2,#d9b877);border:2px solid #8a6a2a}
+.ajtrc div{flex:1;min-width:0}
+.ajtrc b{display:block;font-size:13px}
+.ajtrc span{display:block;font-size:10.5px;color:#6d5b3f;line-height:1.4}
+</style>
+<script id="ajTrJs">
+/* =====================================================================
+   🏺 โลกที่ 2 (5) · นักฝึกคู่แข่ง + วิธีล่อเฉพาะโซน
+   ===================================================================== */
+(function(){
+const CR = () => (typeof S !== "undefined" && S && S.creatures) || [];
+const W2 = () => window.ajW2State ? window.ajW2State() : (S.w2d = S.w2d || {});
+const SPW = () => window.SPECIES_W2 || [];
+const MATS = { 1:"เศษหินสลัก", 2:"น้ำศักดิ์สิทธิ์", 3:"ใบปาปิรัส",
+               4:"เกล็ดทอง", 5:"ผ้าพันมัมมี่", 6:"เศษบัลลังก์" };
+const today = () => new Date().toISOString().slice(0, 10);
+
+/* ---------------- นักฝึกประจำโซน ---------------- */
+const NAMES = {
+  1:[["🧕","ซาฮารา คนนำทาง","เดินทะเลทรายมาสามสิบปี ยังไม่เคยหลง"],
+     ["🧔","ราเมส คนขุดบ่อ","ขุดบ่อเจอสุสานมาแล้วเจ็ดแห่ง"]],
+  2:[["👩‍🌾","เนเฟอร์ คนเฝ้าบ่อ","ดื่มน้ำที่นี่มาสามร้อยปีและไม่รู้ตัว"],
+     ["🧑‍🎤","อาเมน นักดนตรี","เป่าปี่ให้ตุ้ยนุ้ยฟังทุกเย็น"]],
+  3:[["🧑‍🔧","เคเปอร์ ช่างเครื่องกล","ซ่อมเครื่องกลในสุสานหลวงเป็นงานประจำ"],
+     ["🧑‍🎨","เมริต ช่างสลักหิน","รู้ว่ารูปสุดท้ายถูกสกัดทิ้งเพราะอะไร"]],
+  4:[["🧑‍🚀","โฮเรม นักบวชแดด","ยืนกลางแดดเที่ยงได้ทั้งวัน"],
+     ["👩‍⚖️","อิซิส ผู้รักษาวิหาร","ถือกุญแจประตูวิหารมาแต่กำเนิด"]],
+  5:[["🧟","เซเบก คนเฝ้าสุสาน","เพื่อนที่ดีที่สุดของเขาคือมัมมี่"],
+     ["🧑‍🚒","ทุตโม นักล่าสมบัติ","เข้าไปแล้วออกมาได้ทุกครั้ง แต่มือเปล่า"]],
+  6:[["🤴","อังค์เซน ราชองครักษ์","ยืนเฝ้าประตูบัลลังก์คนเดียวมาตลอด"],
+     ["👸","เมริตาเมน พระธิดา","จำวันที่พิธีเริ่มได้อยู่คนเดียว"]]
+};
+const RIVAL = ["🧑‍🦱","เมนเคเร คู่ปรับ",
+  "เจอกันครั้งแรกที่ทางเข้า และตามคุณมาทุกโซน เขาบอกว่าเขาก็หาอะไรอยู่เหมือนกัน"];
+
+function trainers(z){
+  const pool = SPW().filter(s => s.zone === z);
+  const pickN = (n, seed) => {
+    const out = [];
+    for(let i = 0; i < n && pool.length; i++)
+      out.push(pool[(seed * 7 + i * 13 + z * 3) % pool.length]);
+    return out;
+  };
+  const list = (NAMES[z] || []).map((t, i) => ({
+    id:`t${z}_${i}`, emoji:t[0], name:t[1], line:t[2], zone:z, rival:false,
+    lv:8 + z * 7 + i * 3,
+    team:pickN(2 + (i % 2), i + 1)
+  }));
+  list.push({ id:`rv${z}`, emoji:RIVAL[0], name:RIVAL[1], line:RIVAL[2], zone:z, rival:true,
+    lv:14 + z * 8, team:pickN(3, z + 5) });
+  return list;
+}
+const trDone = tr => (W2().tr || {})[tr.id] === today();
+function myTeam(){
+  const t = (S.team || []).map(id => CR().find(c => c.id === id)).filter(Boolean);
+  return t.length ? t : CR().filter(c => c.stage === "adult" && !c.box)
+    .sort((a,b) => (b.bs && b.bs.total || 0) - (a.bs && a.bs.total || 0)).slice(0, 3);
+}
+
+/* สู้กับนักฝึก: ไล่ทีละตัวในทีมของเขา เลือดฝ่ายเราไหลต่อกันทั้งศึก */
+function trainerFight(tr, done){
+  const team = myTeam();
+  if(!team.length){ alert("ยังไม่มีตุ้ยนุ้ยตัวเต็มวัยไปสู้"); done(false); return; }
+  const w = W2(), prev = S.manualBattle;
+  const go = window.ajOldBattleGo || window.battleGo;
+  let hpFrac = {}, i = 0;
+  const n = tr.team.length;
+  const next = () => {
+    if(i >= n){ finish(true); return; }
+    const sp = tr.team[i++];
+    const lv = tr.lv + (i - 1) * 2;
+    const foe = { id:`${tr.id}_${i}`, name:`${tr.name} · ${sp.name} (${i}/${n})`,
+      el:sp.el, el2:sp.el2 || null,
+      hp:Math.round((240 + lv * 88) * (tr.rival ? 1.35 : 1)),
+      pw:Math.round((15 + lv * 4.2) * (tr.rival ? 1.25 : 1)),
+      art:ART[sp.id] };
+    S.manualBattle = true;
+    go(team, foe, { maxRound:20, hpFrac, art:ART[sp.id] }, R => {
+      hpFrac = (R && R.hpFrac) || hpFrac;
+      if(!(R && R.win)){ finish(false); return; }
+      setTimeout(next, 260);
+    });
+  };
+  function finish(win){
+    S.manualBattle = prev;
+    if(!win){
+      logf(`⚔️ แพ้ ${tr.name} — ลองใหม่ได้พรุ่งนี้ หรือเดินหนีก่อนก็ได้`, "");
+      save(); render(); done(false);
+      return;
+    }
+    w.tr = w.tr || {};
+    const first = !w.trWin || !w.trWin[tr.id];
+    w.trWin = w.trWin || {};
+    w.trWin[tr.id] = (w.trWin[tr.id] || 0) + 1;
+    w.tr[tr.id] = today();
+    const mb = window.ajMusBonus ? window.ajMusBonus() : { mats:1, ankh:1 };
+    const ank = Math.round(((tr.rival ? 22 : 10) + (first ? 15 : 0)) * mb.ankh);
+    const mt = Math.round((tr.rival ? 4 : 2) * mb.mats);
+    const coin = (tr.rival ? 9000 : 3500) + tr.lv * 120;
+    w.ankh = (w.ankh || 0) + ank;
+    w.mats[tr.zone] = (w.mats[tr.zone] || 0) + mt;
+    S.coins = (S.coins || 0) + coin;
+    const out = [`𓋹 +${ank}`, `${MATS[tr.zone]} +${mt}`, `🪙 +${coin.toLocaleString()}`];
+    if(tr.rival && window.ajAddRelic && Math.random() < 0.5){
+      const rel = window.ajAddRelic(tr.zone);
+      if(rel) out.push(`${rel.e} ${rel.n}`);
+    }
+    logf(`⚔️ ชนะ ${tr.name} — ${out.join(" · ")}`, "good");
+    save(); render(); done(true);
+  }
+  next();
+}
+function trainerCard(tr, onFight){
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajtr';
+  const w = W2();
+  const wins = (w.trWin || {})[tr.id] || 0;
+  d.innerHTML = `<div class="in">
+    <h3>${tr.emoji} ${tr.name}</h3>
+    <p class="sub">${tr.line}</p>
+    <div class="ajtrc"><span class="av">${tr.emoji}</span>
+      <div><b>ทีม ${tr.team.length} ตัว · Lv.${tr.lv} ขึ้นไป</b>
+        <span>${tr.team.map(s => s.name).join(" · ")}</span>
+        <span>ชนะมาแล้ว ${wins} ครั้ง${tr.rival ? " · คู่ปรับ ทีมแข็งกว่าปกติ" : ""}</span></div></div>
+    <p class="sub">สู้ไล่ทีละตัว <b>เลือดฝ่ายเราไม่ฟื้นระหว่างศึก</b> ชนะครบทั้งทีมถึงได้รางวัล
+      · ชนะได้วันละครั้งต่อคน</p>
+    <div class="ajhfoot">
+      <button class="ajbb ajw" id="ajTrGo" ${trDone(tr) ? "disabled" : ""}>
+        ${trDone(tr) ? "วันนี้สู้แล้ว" : "⚔️ ท้าสู้"}</button>
+      <button class="ajbb keep cls">เดินเลี่ยง</button>
+    </div></div>`;
+  document.body.appendChild(d);
+  d.querySelector('.cls').onclick = () => { d.remove(); onFight(false); };
+  d.querySelector('#ajTrGo').onclick = () => {
+    d.remove();
+    trainerFight(tr, ok => onFight(ok));
+  };
+}
+
+/* ---------------- วิธีล่อเฉพาะโซน ---------------- */
+const LURE = {
+  1:{ emoji:"🪏", name:"ขุดเนินทราย", els:["หิน","ดิน"], note:"ตัวที่ซ่อนใต้ทรายโผล่ขึ้นมา", when:null },
+  2:{ emoji:"🎣", name:"ตกปลาที่บ่อ", els:["น้ำ","พืช"], note:"หย่อนเบ็ดลงบ่อโอเอซิส", when:null },
+  3:{ emoji:"🔍", name:"ส่องรูปสลัก", els:["เหล็ก","ดิน","หิน"], note:"เคาะผนังเรียกเครื่องกลโบราณ", when:null },
+  4:{ emoji:"🕯", name:"จุดตะเกียงรอ", els:["ไฟ","ประกาย"], note:"ใช้ได้เฉพาะกลางวัน", when:"day" },
+  5:{ emoji:"🪔", name:"ล่อด้วยธูป", els:["วิญญาณ","พิษ","รัตติกาล"], note:"ใช้ได้เฉพาะกลางคืน", when:"night" },
+  6:{ emoji:"📯", name:"เป่าแตรเรียก", els:["มังกร","วิญญาณ","จิต"], note:"เสียงดังไปถึงบัลลังก์", when:null }
+};
+function lureOk(z){
+  const L = LURE[z];
+  if(!L) return { ok:false, why:"โซนนี้ไม่มีวิธีล่อ" };
+  const t = window.ajW2Time ? window.ajW2Time() : { night:false };
+  if(L.when === "day" && t.night) return { ok:false, why:"ต้องรอกลางวัน" };
+  if(L.when === "night" && !t.night) return { ok:false, why:"ต้องรอกลางคืน" };
+  const w = W2();
+  if((w.en || 0) < 1) return { ok:false, why:"แรงสำรวจไม่พอ" };
+  return { ok:true };
+}
+function lure(z){
+  const L = LURE[z], chk = lureOk(z);
+  if(!chk.ok){ alert(L.emoji + " " + L.name + " — " + chk.why); return null; }
+  const w = W2();
+  w.en = Math.max(0, (w.en || 0) - 1);
+  save();
+  const pool = SPW().filter(s => s.zone === z);
+  const match = pool.filter(s => [s.el, s.el2].filter(Boolean)
+    .some(e => L.els.indexOf(e) >= 0));
+  const use = match.length ? match : pool;
+  /* ล่อแล้วมีลุ้นตัวเรร์สูงกับตัวเด่นมากกว่าเดินเจอเอง */
+  const rare = use.filter(s => s.rarity >= 3);
+  const sp = (rare.length && Math.random() < 0.45)
+    ? rare[Math.floor(Math.random() * rare.length)]
+    : use[Math.floor(Math.random() * use.length)];
+  const alpha = Math.random() < ((window.ajW2Alpha ? window.ajW2Alpha(z) : 0.03) * 2.2);
+  return { sp, alpha, lure:true };
+}
+
+window.ajTrainers = trainers;
+window.ajTrainerCard = trainerCard;
+window.ajTrainerDone = trDone;
+window.ajLure = lure;
+window.ajLureInfo = z => LURE[z];
+window.ajLureOk = lureOk;
 })();
 </script>
 </body>

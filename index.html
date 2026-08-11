@@ -9007,7 +9007,7 @@ function gateFight(){
   });
 }
 /* ---- 🌟 เทพเจ้าปฐมกาล ---- */
-const GOD_HP = 600000, GOD_PW = 1250;
+const GOD_HP = 240000, GOD_PW = 640;      // ลดลงจาก 600000/1250 ให้สู้ไหวขึ้นมาก
 function godFight(){
   if(!godReady()){ alert("ต้องล้มผู้พิทักษ์ครบสามตัวก่อน"); return; }
   const team = (S.gateTeam || []).map(id => S.creatures.find(c => c.id === id)).filter(Boolean);
@@ -11858,7 +11858,9 @@ function ajFoes(foe, opt){
    4) เครื่องต่อสู้เรียลไทม์
    ===================================================================== */
 const elStatus = el => (typeof EL_MOVE !== "undefined" && EL_MOVE[el] && EL_MOVE[el].st) || null;
-const AJT = { max:90, hps:2.8 };   // เวลาต่อศึก (วินาที) · ตัวคูณเลือดชดเชยที่ตีได้ถี่กว่าระบบเทิร์น                                  // เวลาต่อศึก (วินาที)
+const AJT = { max:90, hps:2.8, sudden:100, cap:480 };
+/* ไม่มีนับถอยหลังแล้ว: หลัง sudden วินาที ดาเมจทั้งสองฝ่ายจะแรงขึ้นเรื่อยๆ
+   ศึกจึงจบเองโดยไม่ต้องตัดจบเพราะหมดเวลา (cap เป็นแค่กันค้างเท่านั้น) */   // เวลาต่อศึก (วินาที) · ตัวคูณเลือดชดเชยที่ตีได้ถี่กว่าระบบเทิร์น                                  // เวลาต่อศึก (วินาที)
 /* =====================================================================
    ฉากต่อสู้ SVG — ลานทรายกลางป่าสน มองมุมเฉียงแบบ AFK Journey
    ===================================================================== */
@@ -12018,7 +12020,7 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
         <div class="ajbossbar"><b id="ajBn"></b>
           <div class="bar"><i id="ajBh" style="width:100%"></i></div></div>
       </div>
-      <div class="ajclock" id="ajClk">${AJT.max}s</div>
+      <div class="ajclock" id="ajClk">0s</div>
       <div class="ajtip" id="ajTip">พลังงานเต็มแล้ว — แตะรูปที่เรืองแสงเพื่อปล่อยไม้ตาย 💫</div>
       <div class="ajult" id="ajUb"></div>
       <div class="ajtools">
@@ -12428,7 +12430,7 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
   }
 
   /* ---- ลูปหลัก ---- */
-  let last = performance.now(), left = AJT.max, done = false, slow = 0, raf = 0;
+  let last = performance.now(), left = AJT.max, used = 0, done = false, slow = 0, raf = 0;
   resize();
   window.addEventListener('resize', resize);
   function step(now){
@@ -12438,7 +12440,16 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
     const mult = AJ.spd * (slow > 0 ? 0.35 : 1);
     if(slow > 0) slow -= dt;
     const d = dt * mult;
+    used += d;
     left -= d;
+    /* ยิ่งยืดยิ่งเจ็บทั้งสองฝ่าย ศึกจะจบเองไม่ต้องมีนาฬิกาบังคับ */
+    if(used > AJT.sudden){
+      const k = 1 + (used - AJT.sudden) / 60;
+      units.forEach(u => {
+        if(u.dmgBase == null) u.dmgBase = u.dmgMul || 1;
+        u.dmgMul = u.dmgBase * k;
+      });
+    }
 
     units.forEach(u => {
       if(u.dead){ u.fade = Math.max(0, (u.fade || 0) - d * 1.6); return; }
@@ -12560,12 +12571,16 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
     const foeHp = foes.reduce((a, u) => a + Math.max(0, u.hp), 0);
     q('ajBn').textContent = `${bossU.name} · ศัตรูเหลือ ${alive(foes).length}/${foes.length}`;
     q('ajBh').style.width = (foeHp / foeMaxTotal * 100) + '%';
-    q('ajClk').textContent = Math.max(0, Math.ceil(left)) + "s";
+    q('ajClk').textContent = Math.floor(used) + "s" + (used > AJT.sudden ? " ⚡" : "");
     dockDraw();
 
     if(!alive(foes).length){ finish(true); return; }
     if(!alive(allies).length){ finish(false); return; }
-    if(left <= 0){ finish(false, true); return; }
+    if(used >= AJT.cap){                       /* กันค้างเท่านั้น ตัดสินตามเลือดที่เหลือ */
+      const fa = allies.reduce((a, u) => a + Math.max(0, u.hp) / u.max, 0) / (allies.length || 1);
+      const ff = foes.reduce((a, u) => a + Math.max(0, u.hp) / u.max, 0) / (foes.length || 1);
+      finish(fa >= ff, true); return;
+    }
     raf = requestAnimationFrame(step);
   }
   raf = requestAnimationFrame(step);
@@ -12579,7 +12594,7 @@ function ajBattle(list, foesRaw, foe, opt, resolve){
     const dealt = clamp2(1 - foeHp / foeMaxTotal, 0, 1);
     const xpBase = Math.max(4, Math.round(foe.pw * 0.9 + foe.hp * 0.02));
     const xp = Math.max(4, Math.round(xpBase * (win ? 1 : 0.35 + dealt * 0.4)));
-    if(timeout) say("⏱ หมดเวลา — ตัดสินตามดาเมจที่ทำได้");
+    if(timeout) say("ศึกยืดเยื้อมาก — ตัดสินตามเลือดที่เหลือของสองฝ่าย");
     allies.forEach(u => {
       const up = typeof giveXp === "function" ? giveXp(u.c, xp) : 0;
       if(up){ u.c.bs = null; ensureBattle(u.c);
@@ -12634,6 +12649,8 @@ window.battleGo = function(team, foe, opt, resolve){
     foe = Object.assign({}, foe, {
       hp:Math.max(30, Math.round(foe.hp * dif.hp)),
       pw:Math.max(5, Math.round(foe.pw * dif.pw)) });
+  if(opt.maxRound) opt = Object.assign({}, opt, { maxRound:opt.maxRound * 4 });
+  else opt = Object.assign({}, opt, { maxRound:80 });      /* เลิกบังคับจำนวนรอบ */
   const batching = typeof inBatch === "function" && inBatch();
   if(!team || !team.length || batching)          /* ตีรัวหลายรอบ = คิดผลให้เลย ไม่ต้องเปิดฉาก */
     return oldBattleGo(team, foe, opt, resolve);

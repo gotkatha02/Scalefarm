@@ -16780,5 +16780,131 @@ setInterval(flush, 700);
 window.ajFlushViews = flush;
 })();
 </script>
+<style id="ajRsCss">
+.ajrs .in{background:linear-gradient(180deg,#fff6e6,#f2e4c6);color:#3a2a10}
+.ajrsrow{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed #d8c49b}
+.ajrsrow b{flex:0 0 auto;font-size:12.5px;min-width:120px}
+.ajrsrow span{flex:1;font-size:10.5px;color:#7d6a4b;line-height:1.4}
+.ajrsbox{width:100%;min-height:90px;font-family:ui-monospace,monospace;font-size:10px;
+  border:1px solid #c2a172;border-radius:10px;padding:7px;background:#fffdf6;color:#3a2a10}
+</style>
+<script id="ajRsJs">
+/* =====================================================================
+   💾 กู้คืนเซฟ — เซฟถูกเก็บใน localStorage ซึ่งผูกกับ "ที่อยู่ของไฟล์"
+      เปิดไฟล์จากที่ใหม่ (โฟลเดอร์อื่น/ชื่ออื่น) เบราว์เซอร์จะมองเป็นเว็บอีกอันหนึ่ง
+      หน้านี้ช่วยไล่หาเซฟที่ยังค้างอยู่ในเครื่อง และย้ายมาให้ไฟล์ปัจจุบัน
+   ===================================================================== */
+(function(){
+const KEY = "scale-farm-v3";
+function scan(){
+  const out = [];
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      const v = localStorage.getItem(k) || "";
+      if(v.length < 40) continue;
+      let o = null;
+      try{ o = JSON.parse(v); }catch(e){ continue; }
+      if(!o || typeof o !== "object" || !Array.isArray(o.creatures)) continue;
+      out.push({ k, n:o.creatures.length, coins:Math.round(o.coins || 0),
+        when:o.lastTick || 0, size:v.length, cur:k === KEY });
+    }
+  }catch(e){}
+  return out.sort((a, b) => b.when - a.when);
+}
+function fmt(t){
+  if(!t) return "ไม่รู้เวลา";
+  const d = new Date(t);
+  return d.toLocaleDateString() + " " + d.toLocaleTimeString().slice(0, 5);
+}
+function sheet(){
+  if(document.querySelector('.ajrs')) return;
+  const found = scan();
+  const d = document.createElement('div');
+  d.className = 'ajsheet ajrs';
+  d.innerHTML = `<div class="in">
+    <h3>💾 กู้คืนเซฟเก่า</h3>
+    <p class="sub">เซฟถูกเก็บไว้ในเครื่อง โดยผูกกับ<b>ที่อยู่ของไฟล์</b>
+      ถ้าย้ายไฟล์ เปลี่ยนชื่อไฟล์ หรือเปิดจากแอปอื่น เบราว์เซอร์จะมองว่าเป็นเกมคนละอัน
+      แล้วขึ้นเป็นเซฟใหม่ — ตัวเก่ายังอยู่ ไม่ได้หาย</p>
+    <div id="ajRsB"></div></div>`;
+  document.body.appendChild(d);
+  const body = d.querySelector('#ajRsB');
+
+  body.innerHTML = `
+    ${found.length ? `<p class="sub" style="color:#2f5b2c;font-weight:800">
+        เจอเซฟในเครื่องนี้ ${found.length} อัน</p>
+      ${found.map((f, i) => `<div class="ajrsrow">
+        <b>${f.cur ? "▶ ที่ใช้อยู่" : "เซฟที่ " + (i + 1)}</b>
+        <span>ตุ้ยนุ้ย ${f.n} ตัว · 🪙 ${f.coins.toLocaleString()}<br>
+          เล่นล่าสุด ${fmt(f.when)} · ${Math.round(f.size / 1024)} KB</span>
+        ${f.cur ? "" : `<button class="ajbb ajw" data-rs="${f.k}">ใช้เซฟนี้</button>`}
+      </div>`).join('')}`
+      : `<p class="sub">ไม่เจอเซฟอื่นในเครื่องนี้เลย<br>
+         ถ้าเคยเล่นในแอปอื่น (เช่นเปิดจากแอปไฟล์ แล้วมาเปิดใน Safari)
+         เซฟจะอยู่ในแอปนั้น ต้องไปเอา<b>รหัสเซฟ</b>จากที่นั่นมาวางด้านล่าง</p>`}
+    <div class="ajrsrow" style="display:block">
+      <b>วางรหัสเซฟที่นี่</b>
+      <p class="sub" style="margin:4px 0">ในเกมเครื่องเดิม เปิด 📖 สมุดภาพ → คู่มือ → คัดลอกรหัสเซฟ
+        แล้วส่งมาวางในช่องนี้</p>
+      <textarea class="ajrsbox" id="ajRsIn" placeholder="SF2z..."></textarea>
+      <div class="ajbrow" style="margin-top:6px">
+        <button class="ajbb ajw" id="ajRsLoad">📥 กู้คืนจากรหัส</button>
+        <button class="ajbb" id="ajRsCopy">📋 คัดลอกรหัสของเซฟปัจจุบัน</button>
+      </div>
+    </div>
+    <div class="ajhfoot"><button class="ajbb keep cls">ปิด</button></div>`;
+
+  body.querySelectorAll('[data-rs]').forEach(b => b.onclick = () => {
+    const k = b.dataset.rs;
+    if(!confirm("ย้ายเซฟนี้มาเป็นเซฟที่ใช้อยู่?\n\n" +
+      "เซฟปัจจุบันจะถูกสำรองไว้เป็นชื่ออื่นก่อน ไม่หาย")) return;
+    try{
+      const cur = localStorage.getItem(KEY);
+      if(cur) localStorage.setItem(KEY + "-backup-" + Date.now(), cur);
+      localStorage.setItem(KEY, localStorage.getItem(k));
+      alert("ย้ายเซฟเรียบร้อย — กำลังโหลดเกมใหม่");
+      location.reload();
+    }catch(e){ alert("ย้ายไม่ได้: " + e.message); }
+  });
+  body.querySelector('#ajRsLoad').onclick = () => {
+    const t = (body.querySelector('#ajRsIn').value || "").trim();
+    if(!t){ alert("ยังไม่ได้วางรหัส"); return; }
+    if(typeof window.importCode === "function"){ window.importCode(t); return; }
+    if(typeof window.loadCode === "function"){ window.loadCode(t); return; }
+    const box = document.getElementById('impCode') || document.getElementById('codeIn');
+    if(box){ box.value = t;
+      const btn = document.getElementById('btnImport') || document.getElementById('btnLoadCode');
+      if(btn){ btn.click(); return; }
+    }
+    alert("หาช่องกู้คืนรหัสในเกมไม่เจอ — ลองไปที่ 📖 สมุดภาพ → คู่มือ แล้ววางรหัสในช่องกู้คืนที่นั่น");
+  };
+  body.querySelector('#ajRsCopy').onclick = () => {
+    const btn = [...document.querySelectorAll('button')]
+      .find(b => /คัดลอกรหัส|รหัสเซฟ/.test(b.textContent || ""));
+    if(btn){ btn.click(); alert("คัดลอกแล้ว (ถ้าเกมแจ้งว่าคัดลอกสำเร็จ)"); return; }
+    try{
+      const j = localStorage.getItem(KEY) || "";
+      body.querySelector('#ajRsIn').value = j;
+      alert("ใส่ข้อมูลเซฟดิบลงในช่องให้แล้ว คัดลอกจากช่องนั้นเก็บไว้ได้");
+    }catch(e){ alert("อ่านเซฟไม่ได้"); }
+  };
+  body.querySelector('.cls').onclick = () => d.remove();
+}
+window.ajRescue = sheet;
+/* ปุ่มในแท็บสมุดภาพ */
+function mount(){
+  const bar = document.getElementById('bookMode');
+  if(!bar) return setTimeout(mount, 900);
+  if(document.getElementById('ajBmRs')) return;
+  const b = document.createElement('button');
+  b.className = 'dtab big'; b.id = 'ajBmRs';
+  b.textContent = '💾 กู้คืนเซฟ';
+  b.onclick = sheet;
+  bar.appendChild(b);
+}
+mount();
+})();
+</script>
 </body>
 </html>

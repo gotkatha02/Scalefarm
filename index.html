@@ -16715,5 +16715,70 @@ window.ajW2Caught = () => !!(PEND && PEND.caught);
 window.ajW2Summary = summary;
 })();
 </script>
+<script id="ajLazyJs">
+/* =====================================================================
+   ⚡ แก้อาการค้างหน้าโหลด: เกมวาดลิสต์ทั้ง 21 หน้าพร้อมกันทุกครั้งที่ render()
+      ทั้งที่ผู้เล่นเห็นแค่หน้าเดียว → เปลี่ยนเป็นวาดเฉพาะหน้าที่เปิดอยู่
+      หน้าอื่นค้างธงไว้ แล้ววาดตอนเปิดจริง
+   ===================================================================== */
+(function(){
+/* หน้าไหนอยู่ในลิ้นชักไหน — ถ้าลิ้นชักไม่ได้เปิด ก็ไม่ต้องวาด */
+const OWNER = {
+  renderShop:"tab-shop", renderTradeEgg:"tab-shop", renderDust:"tab-shop",
+  renderBreed:"tab-breed", renderMyth:"tab-breed",
+  renderBoss:"tab-boss", renderTower:"tab-boss", renderAbyss:"tab-boss",
+  renderGate:"tab-boss", renderDungeon:"tab-boss",
+  renderTrip:"tab-trip",
+  renderDex:"tab-book", renderManage:"tab-book", renderStats:"tab-book",
+  renderGuide:"tab-book", renderQuests:"tab-book", renderBook:"tab-book",
+  renderBoxView:"tab-book"
+};
+const dirty = {};
+function open(id){
+  const t = document.getElementById(id);
+  if(!t) return true;                              /* หาไม่เจอ ก็วาดไปตามเดิม */
+  if(t.classList.contains('open')) return true;
+  /* เผื่อเกมใช้วิธีอื่นในการเปิดลิ้นชัก */
+  return t.offsetParent !== null && getComputedStyle(t).display !== "none";
+}
+Object.keys(OWNER).forEach(fn => {
+  const orig = window[fn];
+  if(typeof orig !== "function") return;
+  const HEAVY = { renderDex:1, renderManage:1, renderBreed:1, renderTrip:1,
+                  renderBoxView:1, renderBook:1, renderMyth:1 };
+  let at = 0;
+  window[fn] = function(){
+    if(!open(OWNER[fn])){ dirty[fn] = true; return; }   /* ยังไม่เห็น ไม่ต้องวาด */
+    const now = Date.now();
+    if(HEAVY[fn] && now - at < 900){                    /* หน้าใหญ่ ไม่ต้องวาดรัวๆ */
+      dirty[fn] = true;
+      return;
+    }
+    at = now;
+    dirty[fn] = false;
+    return orig.apply(this, arguments);
+  };
+  window["__aj_" + fn] = orig;
+});
+/* พอเปิดลิ้นชักจริง ค่อยวาดหน้าที่ค้างไว้ */
+function flush(){
+  Object.keys(dirty).forEach(fn => {
+    if(!dirty[fn]) return;
+    if(!open(OWNER[fn])) return;
+    dirty[fn] = false;
+    try{ window["__aj_" + fn].call(window); }catch(e){}      /* เรียกตัวจริง ข้ามการหน่วง */
+  });
+}
+document.addEventListener('click', () => { setTimeout(flush, 30); setTimeout(flush, 260); }, true);
+setInterval(flush, 700);
+/* เปิดแท็บด้วยโค้ด (เช่นปุ่มในโมดูล) ก็ต้อง flush ให้ด้วย */
+["openTab","switchTab","setBookMode","setShopMode","setBossMode"].forEach(n => {
+  const o = window[n];
+  if(typeof o !== "function") return;
+  window[n] = function(){ const r = o.apply(this, arguments); setTimeout(flush, 20); return r; };
+});
+window.ajFlushViews = flush;
+})();
+</script>
 </body>
 </html>
